@@ -24,21 +24,14 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
   const [gameDate, setGameDate] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
-  const extractEntities = (text: string): string[] => {
-    const entityRegex = /#(\w+)/g;
-    const matches = text.match(entityRegex);
-    return matches ? matches.map(match => match.slice(1).toLowerCase()) : [];
-  };
 
   const handleSubmit = () => {
     if (content.trim().length === 0) return;
     
-    const contentEntities = extractEntities(content);
-    const allEntities = [...new Set([...contentEntities, ...tags])];
     const thought: Thought = {
       id: Date.now().toString(),
       content: content.trim(),
-      entities: allEntities,
+      entities: tags,
       timestamp: new Date(),
       gameDate: gameDate || undefined,
     };
@@ -55,30 +48,6 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
     }
   };
 
-  const renderContentWithEntities = (text: string) => {
-    const parts = text.split(/(#\w+)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('#')) {
-        const entityType = part.slice(1).toLowerCase();
-        const entityClass = getEntityClass(entityType);
-        return (
-          <Badge key={index} variant="outline" className={`entity-tag ${entityClass} mx-1`}>
-            {part}
-          </Badge>
-        );
-      }
-      return part;
-    });
-  };
-
-  const getEntityClass = (entityType: string): string => {
-    if (entityType.includes('player') || entityType.includes('pc')) return 'entity-player';
-    if (entityType.includes('npc') || entityType.includes('character')) return 'entity-npc';
-    if (entityType.includes('location') || entityType.includes('place') || entityType.includes('city')) return 'entity-location';
-    if (entityType.includes('item') || entityType.includes('weapon') || entityType.includes('artifact')) return 'entity-item';
-    if (entityType.includes('guild') || entityType.includes('organization') || entityType.includes('faction')) return 'entity-organization';
-    return 'entity-npc'; // default
-  };
 
   const characterCount = content.length;
   const isOverLimit = characterCount > 500;
@@ -97,7 +66,7 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Record your thoughts... You can also add #tags inline or use the tag input below."
+              placeholder="Record your thoughts about your D&D session..."
               className="min-h-[120px] bg-input border-border text-foreground placeholder:text-muted-foreground resize-none fantasy-scrollbar"
               maxLength={600}
             />
@@ -106,14 +75,6 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
             </div>
           </div>
 
-          {content && (
-            <div className="p-3 bg-muted/30 border border-border">
-              <div className="text-sm text-muted-foreground mb-2">Preview:</div>
-              <div className="text-sm text-foreground">
-                {renderContentWithEntities(content)}
-              </div>
-            </div>
-          )}
 
           <div className="space-y-3">
             <div>
@@ -148,7 +109,7 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
 
         <div className="text-xs text-muted-foreground">
           <strong>Tip:</strong> Add tags to track entities like players, NPCs, locations, items, and organizations.
-          You can use #tags inline or the dedicated tag input. Press Ctrl+Enter to submit quickly.
+          Press Ctrl+Enter to submit quickly.
         </div>
       </div>
     </Card>

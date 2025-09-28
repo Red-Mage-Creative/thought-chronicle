@@ -31,26 +31,6 @@ export const ThoughtsList = ({ thoughts, onEntityClick }: ThoughtsListProps) => 
     return 'entity-npc'; // default
   };
 
-  const renderContentWithEntities = (text: string) => {
-    const parts = text.split(/(#\w+)/g);
-    return parts.map((part, index) => {
-      if (part.startsWith('#')) {
-        const entityType = part.slice(1).toLowerCase();
-        const entityClass = getEntityClass(entityType);
-        return (
-          <Badge 
-            key={index} 
-            variant="outline" 
-            className={`entity-tag ${entityClass} mx-1 cursor-pointer hover:opacity-80`}
-            onClick={() => onEntityClick?.(entityType)}
-          >
-            {part}
-          </Badge>
-        );
-      }
-      return part;
-    });
-  };
 
   const filteredThoughts = thoughts.filter(thought => {
     const matchesSearch = thought.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -135,7 +115,7 @@ export const ThoughtsList = ({ thoughts, onEntityClick }: ThoughtsListProps) => 
                   </div>
 
                   <div className="text-foreground text-sm leading-relaxed">
-                    {renderContentWithEntities(thought.content)}
+                    {thought.content}
                   </div>
 
                   {thought.entities.length > 0 && (
