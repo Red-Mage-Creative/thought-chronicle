@@ -22,7 +22,7 @@ export const Navigation = () => {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-md ${
+              `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-md ${
                 isActive 
                   ? "bg-primary text-primary-foreground" 
                   : "text-foreground hover:bg-muted"

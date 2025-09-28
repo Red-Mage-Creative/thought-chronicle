@@ -84,8 +84,8 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
   const isOverLimit = characterCount > 500;
 
   return (
-    <Card className="p-6 bg-card border-border">
-      <div className="space-y-4">
+    <Card className="bg-card border-border">
+      <div className="space-y-4 p-6">
         <div className="flex items-center gap-2 text-foreground">
           <Hash className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-semibold">Record your Thoughts</h2>
