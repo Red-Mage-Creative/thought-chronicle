@@ -42,7 +42,7 @@ const App = () => {
           <div className="min-h-screen bg-background">
             {/* Header */}
             <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-              <div className="container mx-auto px-4 py-4">
+              <div className="container py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Sword className="h-8 w-8 text-primary" />
@@ -92,7 +92,7 @@ const App = () => {
 
             {/* Enhanced Footer */}
             <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-              <div className="container mx-auto px-4 py-3">
+              <div className="container py-3">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
                     <span className="text-xs">💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>

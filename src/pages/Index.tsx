@@ -18,7 +18,7 @@ const Index = ({ thoughts, onThoughtAdded }: IndexProps) => {
   const existingEntities = Array.from(new Set(thoughts.flatMap(t => t.entities)));
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container py-6">
       <div className="max-w-2xl mx-auto">
         <StatsCard thoughts={thoughts} />
       </div>
