@@ -96,7 +96,7 @@ const App = () => {
             <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
               <div className="container py-6">
                 <div className="max-w-2xl mx-auto">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex justify-between text-sm text-muted-foreground">
                     <div className="text-xs">
                       <div className="font-medium">D&D Chronicle</div>
                       <div className="font-medium">Version 1.0</div>
