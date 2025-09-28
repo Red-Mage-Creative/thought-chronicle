@@ -45,11 +45,11 @@ const App = () => {
               <div className="container py-8">
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Sword className="h-10 w-10 text-primary" />
+                    <div className="flex items-center gap-3">
+                      <Sword className="h-6 w-6 text-primary" />
                       <div>
-                        <h1 className="text-3xl font-bold text-foreground">D&D Chronicle</h1>
-                        <p className="text-base text-muted-foreground">Fantasy Adventure Note-Taking</p>
+                        <h1 className="text-xl font-bold text-foreground">D&D Chronicle</h1>
+                        <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
                       </div>
                     </div>
                     <Navigation />
@@ -97,13 +97,12 @@ const App = () => {
               <div className="container py-6">
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs">💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>
+                    <div className="text-xs">
+                      <div className="font-medium">D&D Chronicle v1.0</div>
+                      <div className="italic">"Every adventure begins with a single thought"</div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span>D&D Chronicle v1.0</span>
-                      <span>•</span>
-                      <span>"Every adventure begins with a single thought"</span>
+                    <div className="text-xs">
+                      <span>💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>
                     </div>
                   </div>
                 </div>

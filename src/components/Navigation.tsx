@@ -16,13 +16,15 @@ export const Navigation = () => {
   return (
     <>
       {/* Desktop Navigation - Horizontal */}
-      <nav className="hidden md:flex items-center space-x-6">
-        {navItems.map(({ to, icon: Icon, label }) => (
+      <nav className="hidden md:flex items-center">
+        {navItems.map(({ to, icon: Icon, label }, index) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-md ${
+              `flex items-center gap-2 py-2 px-3 text-sm font-medium transition-colors ${
+                index > 0 ? "border-l border-border" : ""
+              } ${
                 isActive 
                   ? "bg-primary text-primary-foreground" 
                   : "text-foreground hover:bg-muted"
