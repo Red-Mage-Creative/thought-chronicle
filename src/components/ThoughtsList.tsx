@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Calendar, Clock, Hash, Loader2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Calendar, Clock, Hash, Loader2, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useThoughtsSearch } from "@/hooks/useBuildshipData";
+import { useLocalThoughts } from "@/hooks/useOfflineData";
+import { syncService } from "@/services/syncService";
+import { toast } from "sonner";
 
 interface Thought {
   id: string;
@@ -21,8 +23,9 @@ interface ThoughtsListProps {
 export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: thoughts = [], isLoading, error } = useThoughtsSearch(searchTerm);
+  const { thoughts: localThoughts } = useLocalThoughts();
 
   const getEntityClass = (entityType: string): string => {
     if (entityType.includes('player') || entityType.includes('pc')) return 'entity-player';
@@ -33,13 +36,44 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
     return 'entity-npc'; // default
   };
 
-  // Filter by selected entity locally (since server search handles the main query)
-  const filteredThoughts = thoughts.filter(thought => {
-    const matchesEntity = !selectedEntity || thought.entities.includes(selectedEntity);
-    return matchesEntity;
-  }).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  // Filter local thoughts based on search and selected entity
+  const filteredThoughts = useMemo(() => {
+    let filtered = localThoughts;
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(thought => 
+        thought.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        thought.entities.some(entity => entity.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    // Apply entity filter
+    if (selectedEntity) {
+      filtered = filtered.filter(thought => thought.entities.includes(selectedEntity));
+    }
+    
+    return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }, [localThoughts, searchTerm, selectedEntity]);
 
-  const allEntities = Array.from(new Set(thoughts.flatMap(t => t.entities)));
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await syncService.refreshFromServer();
+      if (result.success) {
+        toast.success("Archives updated successfully");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("Failed to refresh chronicles");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Get unique entities from all local thoughts for filter buttons
+  const uniqueEntities = Array.from(new Set(localThoughts.flatMap(t => t.entities)));
 
   return (
     <Card className="p-6 bg-card border-border h-full">
@@ -50,14 +84,25 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
         </div>
 
         <div className="space-y-3">
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search thoughts and entities..."
-            className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-          />
+          <div className="flex gap-2">
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search thoughts and entities..."
+              className="bg-input border-border text-foreground placeholder:text-muted-foreground flex-1"
+            />
+            <Button 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              variant="outline"
+              size="icon"
+              title="Refresh Archives"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
 
-          {allEntities.length > 0 && (
+          {uniqueEntities.length > 0 && (
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground">Filter by entity:</div>
               <div className="flex flex-wrap gap-2">
@@ -69,7 +114,7 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
                 >
                   All
                 </Button>
-                {allEntities.slice(0, 8).map(entity => (
+                {uniqueEntities.slice(0, 8).map(entity => (
                   <Button
                     key={entity}
                     variant={selectedEntity === entity ? "default" : "outline"}
@@ -86,22 +131,13 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
         </div>
 
         <div className="space-y-3 max-h-[500px] overflow-y-auto fantasy-scrollbar">
-          {error ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Error loading thoughts</p>
-              <p className="text-xs mt-1">{error.message}</p>
-            </div>
-          ) : isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin" />
-              <p>Loading thoughts...</p>
-            </div>
-          ) : filteredThoughts.length === 0 ? (
+          {filteredThoughts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No thoughts found</p>
-              <p className="text-xs mt-1">Try adjusting your search</p>
+              <p className="text-xs mt-1">
+                {searchTerm || selectedEntity ? "Try adjusting your search" : "Start adding thoughts to see them here"}
+              </p>
             </div>
           ) : (
             filteredThoughts.map(thought => (

@@ -6,10 +6,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Sword } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
+import { SyncBanner } from "@/components/SyncBanner";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
 import HistoryPage from "./pages/HistoryPage";
 import NotFound from "./pages/NotFound";
+import { useLocalThoughts, useOfflineSync } from "./hooks/useOfflineData";
+import { syncService } from "./services/syncService";
+import { toast } from "sonner";
 
 interface Thought {
   id: string;
@@ -22,9 +26,11 @@ interface Thought {
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
   const [defaultTags, setDefaultTags] = useState<string[]>([]);
+  
+  const { thoughts, addThought } = useLocalThoughts();
+  const { refreshSyncStatus } = useOfflineSync();
 
   // Load default tags from localStorage on mount
   useEffect(() => {
@@ -34,8 +40,15 @@ const App = () => {
     }
   }, []);
 
-  const handleThoughtAdded = (thought: Thought) => {
-    setThoughts(prev => [thought, ...prev]);
+  const handleThoughtAdded = (newThought: Thought) => {
+    addThought({
+      id: newThought.id,
+      content: newThought.content,
+      entities: newThought.entities,
+      timestamp: newThought.timestamp,
+      gameDate: newThought.gameDate
+    });
+    refreshSyncStatus();
   };
 
   const handleDefaultTagsChange = (newDefaultTags: string[]) => {
@@ -45,6 +58,16 @@ const App = () => {
 
   const handleEntityClick = (entity: string) => {
     setSelectedEntity(entity);
+  };
+
+  const handleSync = async () => {
+    const result = await syncService.syncToServer();
+    if (result.success) {
+      toast.success(result.message);
+      refreshSyncStatus();
+    } else {
+      toast.error(result.message);
+    }
   };
 
   return (
@@ -71,6 +94,9 @@ const App = () => {
                 </div>
               </div>
             </header>
+
+            {/* Sync Banner */}
+            <SyncBanner onSync={handleSync} />
 
             {/* Main Layout */}
             <main className="flex-1 container py-8">

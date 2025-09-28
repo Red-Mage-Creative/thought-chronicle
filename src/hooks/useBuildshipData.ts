@@ -2,7 +2,7 @@ import { useQuery, useQueries } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { searchThoughts, searchEntities, getEntityMetrics, BuildshipThought, BuildshipEntity } from '@/services/buildshipApi';
 
-// Debounced search hook for thoughts
+// Manual refresh only - no automatic search
 export const useThoughtsSearch = (searchTerm: string) => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
@@ -17,12 +17,13 @@ export const useThoughtsSearch = (searchTerm: string) => {
   return useQuery({
     queryKey: ['thoughts', debouncedSearchTerm],
     queryFn: () => searchThoughts(debouncedSearchTerm),
-    staleTime: 1000 * 60 * 2, // 2 minutes for thoughts (more dynamic)
-    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    gcTime: Infinity, // Never garbage collect
+    enabled: false, // Manual refresh only
   });
 };
 
-// Enhanced entities hook with smart caching and metrics calculation
+// Manual refresh only - no automatic search  
 export const useEntitiesSearch = (searchTerm: string) => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
@@ -40,15 +41,16 @@ export const useEntitiesSearch = (searchTerm: string) => {
       {
         queryKey: ['entities', debouncedSearchTerm],
         queryFn: () => searchEntities(debouncedSearchTerm),
-        staleTime: 1000 * 60 * 15, // 15 minutes for entities (more stable)
-        gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+        staleTime: 24 * 60 * 60 * 1000, // 24 hours
+        gcTime: Infinity, // Never garbage collect
+        enabled: false, // Manual refresh only
       },
       {
         queryKey: ['thoughts', ''], // Get all thoughts for entity metrics
         queryFn: () => searchThoughts(''),
-        staleTime: 1000 * 60 * 5, // 5 minutes for thoughts data
-        gcTime: 1000 * 60 * 15,
-        enabled: !!debouncedSearchTerm || debouncedSearchTerm === '', // Always enabled for metrics
+        staleTime: 24 * 60 * 60 * 1000, // 24 hours
+        gcTime: Infinity, // Never garbage collect
+        enabled: false, // Manual refresh only
       }
     ]
   });
@@ -63,7 +65,7 @@ export const useEntitiesSearch = (searchTerm: string) => {
       return getEntityMetrics(entitiesQuery.data, thoughtsQuery.data);
     },
     enabled: !!entitiesQuery.data && !!thoughtsQuery.data,
-    staleTime: 1000 * 60 * 10, // 10 minutes for calculated metrics
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
   });
 
   return {
@@ -71,5 +73,9 @@ export const useEntitiesSearch = (searchTerm: string) => {
     isLoading: entitiesQuery.isLoading || thoughtsQuery.isLoading || entitiesWithMetrics.isLoading,
     error: entitiesQuery.error || thoughtsQuery.error || entitiesWithMetrics.error,
     isSuccess: entitiesWithMetrics.isSuccess,
+    refetch: () => {
+      entitiesQuery.refetch();
+      thoughtsQuery.refetch();
+    }
   };
 };

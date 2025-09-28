@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { Search, Users, MapPin, Package, Building, User, Loader2 } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Users, MapPin, Package, Building, User, RefreshCw } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useEntitiesSearch } from "@/hooks/useBuildshipData";
+import { useLocalEntities, useLocalThoughts } from "@/hooks/useOfflineData";
+import { syncService } from "@/services/syncService";
+import { toast } from "sonner";
 
 interface EntityDashboardProps {
   onEntityClick?: (entity: string) => void;
@@ -13,8 +15,10 @@ interface EntityDashboardProps {
 export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { data: entities = [], isLoading, error } = useEntitiesSearch(searchTerm);
+  const { entities: localEntities } = useLocalEntities();
+  const { thoughts: localThoughts } = useLocalThoughts();
 
   const categorizeEntity = (entity: string): string => {
     if (entity.includes('player') || entity.includes('pc')) return 'player';
@@ -47,14 +51,68 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
     }
   };
 
-  const filteredEntities = entities
-    .filter(entity => {
-      const matchesType = !selectedType || entity.type === selectedType;
-      return matchesType;
-    })
-    .sort((a, b) => b.count - a.count);
+  // Calculate entity metrics from local thoughts
+  const entitiesWithMetrics = useMemo(() => {
+    // Get unique entities from thoughts if no server entities exist
+    const allEntityNames = localEntities.length > 0 
+      ? localEntities.map(e => e.name)
+      : Array.from(new Set(localThoughts.flatMap(t => t.entities)));
+    
+    return allEntityNames.map(entityName => {
+      const mentioningThoughts = localThoughts.filter(thought => 
+        thought.entities.includes(entityName)
+      );
+      
+      const entityType = categorizeEntity(entityName);
+      
+      return {
+        name: entityName,
+        type: entityType,
+        count: mentioningThoughts.length,
+        lastMentioned: mentioningThoughts.length > 0 
+          ? new Date(Math.max(...mentioningThoughts.map(t => t.timestamp.getTime())))
+          : new Date()
+      };
+    });
+  }, [localEntities, localThoughts]);
 
-  const entityTypes = ['player', 'npc', 'location', 'item', 'organization'];
+  // Filter entities based on search and selected type
+  const filteredEntities = useMemo(() => {
+    let filtered = entitiesWithMetrics;
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(entity => 
+        entity.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Apply type filter
+    if (selectedType) {
+      filtered = filtered.filter(entity => entity.type === selectedType);
+    }
+    
+    return filtered.sort((a, b) => b.count - a.count);
+  }, [entitiesWithMetrics, searchTerm, selectedType]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      const result = await syncService.refreshFromServer();
+      if (result.success) {
+        toast.success("Registry updated successfully");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("Failed to refresh entity registry");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Get unique entity types for filter buttons
+  const entityTypes = Array.from(new Set(entitiesWithMetrics.map(entity => entity.type)));
 
   return (
     <Card className="p-6 bg-card border-border h-full">
@@ -65,12 +123,23 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
         </div>
 
         <div className="space-y-3">
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search entities..."
-            className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-          />
+          <div className="flex gap-2">
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search entities..."
+              className="bg-input border-border text-foreground placeholder:text-muted-foreground flex-1"
+            />
+            <Button 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              variant="outline"
+              size="icon"
+              title="Refresh Registry"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
 
           <div className="flex flex-wrap gap-2">
             <Button
@@ -97,22 +166,13 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
         </div>
 
         <div className="space-y-2 max-h-[400px] overflow-y-auto fantasy-scrollbar">
-          {error ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Error loading entities</p>
-              <p className="text-xs mt-1">{error.message}</p>
-            </div>
-          ) : isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin" />
-              <p>Loading entities...</p>
-            </div>
-          ) : filteredEntities.length === 0 ? (
+          {filteredEntities.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No entities found</p>
-              <p className="text-xs mt-1">Try adjusting your search</p>
+              <p className="text-xs mt-1">
+                {searchTerm || selectedType ? "Try adjusting your search" : "Add some thoughts with entities to see them here"}
+              </p>
             </div>
           ) : (
             filteredEntities.map((entity) => (
