@@ -98,8 +98,12 @@ const App = () => {
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="text-xs">
-                      <div className="font-medium">D&D Chronicle v1.0</div>
+                      <div className="font-medium">D&D Chronicle</div>
+                      <div className="font-medium">Version 1.0</div>
+                      <br />
                       <div className="italic">"Every adventure begins with a single thought"</div>
+                      <br />
+                      <div className="text-xs">Built with Lovable.</div>
                     </div>
                     <div className="text-xs">
                       <span>💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>
