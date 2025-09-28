@@ -15,7 +15,7 @@ interface HistoryPageProps {
 
 const HistoryPage = ({ thoughts, onEntityClick }: HistoryPageProps) => {
   return (
-    <div className="p-6">
+    <div className="container mx-auto px-4 py-6">
       <ThoughtsList thoughts={thoughts} onEntityClick={onEntityClick} />
     </div>
   );

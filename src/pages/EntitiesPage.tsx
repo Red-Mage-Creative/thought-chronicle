@@ -15,7 +15,7 @@ interface EntitiesPageProps {
 
 const EntitiesPage = ({ thoughts, onEntityClick }: EntitiesPageProps) => {
   return (
-    <div className="p-6">
+    <div className="container mx-auto px-4 py-6">
       <EntityDashboard thoughts={thoughts} onEntityClick={onEntityClick} />
     </div>
   );
