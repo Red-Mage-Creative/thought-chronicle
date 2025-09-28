@@ -39,17 +39,17 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-background">
+          <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
             <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-              <div className="container py-4">
+              <div className="container py-8">
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Sword className="h-8 w-8 text-primary" />
+                    <div className="flex items-center gap-4">
+                      <Sword className="h-10 w-10 text-primary" />
                       <div>
-                        <h1 className="text-2xl font-bold text-foreground">D&D Chronicle</h1>
-                        <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
+                        <h1 className="text-3xl font-bold text-foreground">D&D Chronicle</h1>
+                        <p className="text-base text-muted-foreground">Fantasy Adventure Note-Taking</p>
                       </div>
                     </div>
                     <Navigation />
@@ -94,7 +94,7 @@ const App = () => {
 
             {/* Enhanced Footer */}
             <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-              <div className="container py-3">
+              <div className="container py-6">
                 <div className="max-w-2xl mx-auto">
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-4">
