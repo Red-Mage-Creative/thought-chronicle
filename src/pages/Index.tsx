@@ -19,16 +19,11 @@ const Index = ({ thoughts, onThoughtAdded }: IndexProps) => {
 
   return (
     <div className="container py-6">
-      <div className="max-w-2xl mx-auto">
-        <StatsCard thoughts={thoughts} />
-      </div>
-      
-      <div className="max-w-2xl mx-auto mb-6">
-        <ChatWindow 
-          onThoughtAdded={onThoughtAdded} 
-          existingEntities={existingEntities}
-        />
-      </div>
+      <StatsCard thoughts={thoughts} />
+      <ChatWindow 
+        onThoughtAdded={onThoughtAdded} 
+        existingEntities={existingEntities}
+      />
     </div>
   );
 };
