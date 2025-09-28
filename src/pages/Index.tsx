@@ -23,7 +23,6 @@ const Index = ({ thoughts, onThoughtAdded }: IndexProps) => {
         <StatsCard thoughts={thoughts} />
         
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Record your Thoughts</h2>
           <ChatWindow 
             onThoughtAdded={onThoughtAdded} 
             existingEntities={existingEntities}

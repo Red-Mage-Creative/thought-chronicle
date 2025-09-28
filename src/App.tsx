@@ -43,20 +43,21 @@ const App = () => {
             {/* Header */}
             <header className="border-b border-border bg-card/50 backdrop-blur-sm">
               <div className="container mx-auto px-4 py-4">
-                <div className="flex items-center gap-3">
-                  <Sword className="h-8 w-8 text-primary" />
-                  <div>
-                    <h1 className="text-2xl font-bold text-foreground">D&D Chronicle</h1>
-                    <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Sword className="h-8 w-8 text-primary" />
+                    <div>
+                      <h1 className="text-2xl font-bold text-foreground">D&D Chronicle</h1>
+                      <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
+                    </div>
                   </div>
+                  <Navigation />
                 </div>
               </div>
             </header>
 
             {/* Main Layout */}
-            <div className="flex">
-              <Navigation />
-              <main className="flex-1">
+            <main className="flex-1">
                 <Routes>
                   <Route 
                     path="/" 
@@ -88,7 +89,6 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
-            </div>
 
             {/* Enhanced Footer */}
             <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
