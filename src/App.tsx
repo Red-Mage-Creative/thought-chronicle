@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,9 +24,23 @@ const queryClient = new QueryClient();
 const App = () => {
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+  const [defaultTags, setDefaultTags] = useState<string[]>([]);
+
+  // Load default tags from localStorage on mount
+  useEffect(() => {
+    const savedDefaultTags = localStorage.getItem('chronicle-default-tags');
+    if (savedDefaultTags) {
+      setDefaultTags(JSON.parse(savedDefaultTags));
+    }
+  }, []);
 
   const handleThoughtAdded = (thought: Thought) => {
     setThoughts(prev => [thought, ...prev]);
+  };
+
+  const handleDefaultTagsChange = (newDefaultTags: string[]) => {
+    setDefaultTags(newDefaultTags);
+    localStorage.setItem('chronicle-default-tags', JSON.stringify(newDefaultTags));
   };
 
   const handleEntityClick = (entity: string) => {
@@ -68,6 +82,8 @@ const App = () => {
                       <Index 
                         thoughts={thoughts} 
                         onThoughtAdded={handleThoughtAdded} 
+                        defaultTags={defaultTags}
+                        onDefaultTagsChange={handleDefaultTagsChange}
                       />
                     } 
                   />

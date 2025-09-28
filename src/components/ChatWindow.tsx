@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TagInput } from "@/components/TagInput";
+import { Settings } from "@/components/Settings";
 
 interface Thought {
   id: string;
@@ -17,9 +18,11 @@ interface Thought {
 interface ChatWindowProps {
   onThoughtAdded?: (thought: Thought) => void;
   existingEntities?: string[];
+  defaultTags: string[];
+  onDefaultTagsChange: (tags: string[]) => void;
 }
 
-export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindowProps) => {
+export const ChatWindow = ({ onThoughtAdded, existingEntities = [], defaultTags, onDefaultTagsChange }: ChatWindowProps) => {
   const [content, setContent] = useState("");
   const [gameDate, setGameDate] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -28,10 +31,13 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
   const handleSubmit = () => {
     if (content.trim().length === 0) return;
     
+    // Combine manual tags with default tags
+    const allTags = [...new Set([...defaultTags, ...tags])];
+    
     const thought: Thought = {
       id: Date.now().toString(),
       content: content.trim(),
-      entities: tags,
+      entities: allTags,
       timestamp: new Date(),
       gameDate: gameDate || undefined,
     };
@@ -55,9 +61,16 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
   return (
     <Card className="bg-card border-border max-w-2xl mx-auto">
       <div className="space-y-4 p-6">
-        <div className="flex items-center gap-2 text-foreground">
-          <Hash className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Record your Thoughts</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-foreground">
+            <Hash className="h-5 w-5 text-primary" />
+            <h2 className="text-xl font-semibold">Record your Thoughts</h2>
+          </div>
+          <Settings 
+            defaultTags={defaultTags}
+            onDefaultTagsChange={onDefaultTagsChange}
+            existingEntities={existingEntities}
+          />
         </div>
         
         <div className="space-y-3">
@@ -78,13 +91,23 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindow
 
           <div className="space-y-3">
             <div>
-              <label className="text-sm font-medium text-foreground mb-2 block">Tags</label>
+              <label className="text-sm font-medium text-foreground mb-2 block">Additional Tags</label>
               <TagInput
                 tags={tags}
                 onTagsChange={setTags}
                 existingEntities={existingEntities}
-                placeholder="Add entity tags (e.g., player-thara, location-waterdeep)..."
+                placeholder="Add additional entity tags..."
               />
+              {defaultTags.length > 0 && (
+                <div className="mt-2 p-2 bg-muted/20 border border-border rounded text-xs">
+                  <span className="text-muted-foreground">Default tags will be added automatically: </span>
+                  {defaultTags.map(tag => (
+                    <Badge key={tag} variant="outline" className="ml-1 text-xs">
+                      #{tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

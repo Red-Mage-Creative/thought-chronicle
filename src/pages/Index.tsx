@@ -12,9 +12,11 @@ interface Thought {
 interface IndexProps {
   thoughts: Thought[];
   onThoughtAdded: (thought: Thought) => void;
+  defaultTags: string[];
+  onDefaultTagsChange: (tags: string[]) => void;
 }
 
-const Index = ({ thoughts, onThoughtAdded }: IndexProps) => {
+const Index = ({ thoughts, onThoughtAdded, defaultTags, onDefaultTagsChange }: IndexProps) => {
   const existingEntities = Array.from(new Set(thoughts.flatMap(t => t.entities)));
 
   return (
@@ -23,6 +25,8 @@ const Index = ({ thoughts, onThoughtAdded }: IndexProps) => {
       <ChatWindow 
         onThoughtAdded={onThoughtAdded} 
         existingEntities={existingEntities}
+        defaultTags={defaultTags}
+        onDefaultTagsChange={onDefaultTagsChange}
       />
     </>
   );
