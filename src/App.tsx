@@ -43,15 +43,12 @@ const App = () => {
             {/* Header */}
             <header className="border-b border-border bg-card/50 backdrop-blur-sm">
               <div className="container mx-auto px-4 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Sword className="h-8 w-8 text-primary" />
-                    <div>
-                      <h1 className="text-2xl font-bold text-foreground">D&D Chronicle</h1>
-                      <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <Sword className="h-8 w-8 text-primary" />
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground">D&D Chronicle</h1>
+                    <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
                   </div>
-                  <Navigation />
                 </div>
               </div>
             </header>
@@ -93,16 +90,17 @@ const App = () => {
               </main>
             </div>
 
-            {/* Stats Footer */}
+            {/* Enhanced Footer */}
             <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-              <div className="container mx-auto px-4 py-4">
+              <div className="container mx-auto px-4 py-3">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex gap-6">
-                    <span>Total Thoughts: {thoughts.length}</span>
-                    <span>Unique Entities: {new Set(thoughts.flatMap(t => t.entities)).size}</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs">💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>
                   </div>
-                  <div className="text-xs">
-                    Use #tags in your thoughts to create trackable entities
+                  <div className="flex items-center gap-4 text-xs">
+                    <span>D&D Chronicle v1.0</span>
+                    <span>•</span>
+                    <span>"Every adventure begins with a single thought"</span>
                   </div>
                 </div>
               </div>
