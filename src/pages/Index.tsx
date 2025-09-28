@@ -18,13 +18,13 @@ const Index = ({ thoughts, onThoughtAdded }: IndexProps) => {
   const existingEntities = Array.from(new Set(thoughts.flatMap(t => t.entities)));
 
   return (
-    <div className="container py-8">
+    <>
       <StatsCard thoughts={thoughts} />
       <ChatWindow 
         onThoughtAdded={onThoughtAdded} 
         existingEntities={existingEntities}
       />
-    </div>
+    </>
   );
 };
 

@@ -59,7 +59,8 @@ const App = () => {
             </header>
 
             {/* Main Layout */}
-            <main className="flex-1">
+            <main className="flex-1 container py-8">
+              <div className="max-w-2xl mx-auto">
                 <Routes>
                   <Route 
                     path="/" 
@@ -90,7 +91,8 @@ const App = () => {
                   />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </main>
+              </div>
+            </main>
 
             {/* Enhanced Footer */}
             <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
