@@ -2,41 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* D&D Fantasy Theme Design System - Dark Mode Focus
+All colors MUST be HSL for consistency.
+Sharp edges, high contrast, fantasy aesthetic.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Dark Fantasy Palette */
+    --background: 240 8% 8%;
+    --foreground: 45 100% 85%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 6% 12%;
+    --card-foreground: 45 100% 85%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 8% 10%;
+    --popover-foreground: 45 100% 85%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Golden amber primary for fantasy feel */
+    --primary: 45 100% 65%;
+    --primary-foreground: 240 8% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Muted slate secondary */
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 45 80% 75%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 240 5% 14%;
+    --muted-foreground: 45 40% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Fantasy accent colors */
+    --accent: 280 50% 40%;
+    --accent-foreground: 45 100% 85%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Entity type colors */
+    --entity-player: 120 60% 50%;
+    --entity-npc: 200 80% 60%;
+    --entity-location: 280 70% 55%;
+    --entity-item: 45 90% 65%;
+    --entity-organization: 0 70% 55%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 45 100% 85%;
 
-    --radius: 0.5rem;
+    --border: 240 6% 20%;
+    --input: 240 6% 16%;
+    --ring: 45 100% 65%;
+
+    /* Sharp edges - no border radius */
+    --radius: 0px;
 
     --sidebar-background: 0 0% 98%;
 
@@ -55,42 +68,53 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+}
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+/* Custom utility classes for D&D theme */
+@layer utilities {
+  .entity-tag {
+    @apply px-2 py-1 text-xs font-medium border;
+  }
+  
+  .entity-player {
+    @apply border-green-500/30 bg-green-500/10 text-green-400;
+  }
+  
+  .entity-npc {
+    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+  }
+  
+  .entity-location {
+    @apply border-purple-500/30 bg-purple-500/10 text-purple-400;
+  }
+  
+  .entity-item {
+    @apply border-yellow-500/30 bg-yellow-500/10 text-yellow-400;
+  }
+  
+  .entity-organization {
+    @apply border-red-500/30 bg-red-500/10 text-red-400;
+  }
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  .fantasy-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) hsl(var(--background));
+  }
+  
+  .fantasy-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .fantasy-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  .fantasy-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+  }
+  
+  .fantasy-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
   }
 }
 
