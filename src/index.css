@@ -2,51 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
-/* D&D Fantasy Theme Design System - Dark Mode Focus
+/* D&D Fantasy Theme Design System - Light Mode Focus
 All colors MUST be HSL for consistency.
-Sharp edges, high contrast, fantasy aesthetic.
+Sharp edges, high contrast, WCAG 2.2 AA compliant.
 */
 
 @layer base {
   :root {
-    /* Core Dark Fantasy Palette */
-    --background: 240 8% 8%;
-    --foreground: 45 100% 85%;
+    /* Core Light Fantasy Palette */
+    --background: 220 15% 97%;
+    --foreground: 220 25% 15%;
 
-    --card: 240 6% 12%;
-    --card-foreground: 45 100% 85%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 15%;
 
-    --popover: 240 8% 10%;
-    --popover-foreground: 45 100% 85%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 15%;
 
-    /* Golden amber primary for fantasy feel */
-    --primary: 45 100% 65%;
-    --primary-foreground: 240 8% 8%;
+    /* Professional blue primary */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Muted slate secondary */
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 45 80% 75%;
+    /* Light blue-gray secondary */
+    --secondary: 220 15% 92%;
+    --secondary-foreground: 220 25% 15%;
 
-    --muted: 240 5% 14%;
-    --muted-foreground: 45 40% 55%;
+    --muted: 220 10% 85%;
+    --muted-foreground: 220 15% 45%;
 
-    /* Fantasy accent colors */
-    --accent: 280 50% 40%;
-    --accent-foreground: 45 100% 85%;
+    /* Steel blue accent */
+    --accent: 210 40% 45%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Entity type colors */
-    --entity-player: 120 60% 50%;
-    --entity-npc: 200 80% 60%;
-    --entity-location: 280 70% 55%;
-    --entity-item: 45 90% 65%;
-    --entity-organization: 0 70% 55%;
+    /* Entity type colors - accessible contrast */
+    --entity-player: 140 50% 35%;
+    --entity-npc: 220 70% 40%;
+    --entity-location: 270 60% 40%;
+    --entity-item: 45 80% 45%;
+    --entity-organization: 345 65% 40%;
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 45 100% 85%;
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 20%;
-    --input: 240 6% 16%;
-    --ring: 45 100% 65%;
+    --border: 220 15% 85%;
+    --input: 0 0% 100%;
+    --ring: 217 91% 60%;
 
     /* Sharp edges - no border radius */
     --radius: 0px;
@@ -77,23 +77,23 @@ Sharp edges, high contrast, fantasy aesthetic.
   }
   
   .entity-player {
-    @apply border-green-500/30 bg-green-500/10 text-green-400;
+    @apply bg-green-50 border-green-300 text-green-700;
   }
   
   .entity-npc {
-    @apply border-blue-500/30 bg-blue-500/10 text-blue-400;
+    @apply bg-blue-50 border-blue-300 text-blue-700;
   }
   
   .entity-location {
-    @apply border-purple-500/30 bg-purple-500/10 text-purple-400;
+    @apply bg-purple-50 border-purple-300 text-purple-700;
   }
   
   .entity-item {
-    @apply border-yellow-500/30 bg-yellow-500/10 text-yellow-400;
+    @apply bg-amber-50 border-amber-300 text-amber-700;
   }
   
   .entity-organization {
-    @apply border-red-500/30 bg-red-500/10 text-red-400;
+    @apply bg-red-50 border-red-300 text-red-700;
   }
 
   .fantasy-scrollbar {
