@@ -23,7 +23,7 @@ interface RawMongoEntity {
 export interface BuildshipThought {
   id: string;
   content: string;
-  entities: string[];
+  relatedEntities: string[];
   timestamp: Date;
   gameDate?: string;
 }
@@ -45,7 +45,7 @@ const parseMongoDate = (mongoDate: { $date: { $numberLong: string } }): Date => 
 const transformThought = (raw: RawMongoThought): BuildshipThought => ({
   id: raw._id.$oid,
   content: raw.text,
-  entities: raw.relatedEntities || [],
+  relatedEntities: raw.relatedEntities || [],
   timestamp: parseMongoDate(raw.createdAt),
   gameDate: raw.inGameDate !== 'TBD' ? raw.inGameDate : undefined,
 });
@@ -108,7 +108,7 @@ export const getEntityMetrics = async (entities: BuildshipEntity[], thoughts: Bu
   
   // Calculate metrics from thoughts
   thoughts.forEach(thought => {
-    thought.entities.forEach(entityName => {
+    thought.relatedEntities.forEach(entityName => {
       const existing = entityMetrics.get(entityName) || { count: 0, lastMentioned: thought.timestamp };
       entityMetrics.set(entityName, {
         count: existing.count + 1,

@@ -74,8 +74,8 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
 
     // Update counts and dates from thought mentions
     localThoughts.forEach(thought => {
-      // Check entities field (current format)
-      thought.entities?.forEach(entityName => {
+      // Check relatedEntities field
+      thought.relatedEntities?.forEach(entityName => {
         const existing = entityMap.get(entityName.toLowerCase());
         if (existing) {
           existing.count++;

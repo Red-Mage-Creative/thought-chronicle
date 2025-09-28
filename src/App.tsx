@@ -18,7 +18,7 @@ import { toast } from "sonner";
 interface Thought {
   id: string;
   content: string;
-  entities: string[];
+  relatedEntities: string[];
   timestamp: Date;
   gameDate?: string;
 }
@@ -44,7 +44,7 @@ const App = () => {
     addThought({
       id: newThought.id,
       content: newThought.content,
-      entities: newThought.entities,
+      relatedEntities: newThought.relatedEntities,
       timestamp: newThought.timestamp,
       gameDate: newThought.gameDate
     });

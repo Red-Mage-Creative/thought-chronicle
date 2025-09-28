@@ -68,13 +68,9 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
     const thoughtData = {
       id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       content: content.trim(),
-      entities: allTags,
-      text: content.trim(),
       relatedEntities: allTags,
       timestamp: new Date(),
-      inGameDate: gameDate || undefined,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      gameDate: gameDate || undefined
     };
 
     // Add thought to local storage

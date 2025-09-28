@@ -4,7 +4,7 @@ import { Brain, Users, Calendar } from "lucide-react";
 interface Thought {
   id: string;
   content: string;
-  entities: string[];
+  relatedEntities: string[];
   timestamp: Date;
   gameDate?: string;
 }
@@ -15,7 +15,7 @@ interface StatsCardProps {
 
 export const StatsCard = ({ thoughts }: StatsCardProps) => {
   const totalThoughts = thoughts.length;
-  const uniqueEntities = new Set(thoughts.flatMap(t => t.entities)).size;
+  const uniqueEntities = new Set(thoughts.flatMap(t => t.relatedEntities)).size;
   const recentThoughts = thoughts.filter(
     t => Date.now() - t.timestamp.getTime() < 24 * 60 * 60 * 1000
   ).length;

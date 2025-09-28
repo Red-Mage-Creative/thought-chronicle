@@ -11,7 +11,7 @@ import { toast } from "sonner";
 interface Thought {
   id: string;
   content: string;
-  entities: string[];
+  relatedEntities: string[];
   timestamp: Date;
   gameDate?: string;
 }
@@ -44,13 +44,13 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
     if (searchTerm.trim()) {
       filtered = filtered.filter(thought => 
         thought.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        thought.entities.some(entity => entity.toLowerCase().includes(searchTerm.toLowerCase()))
+        thought.relatedEntities.some(entity => entity.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
     
     // Apply entity filter
     if (selectedEntity) {
-      filtered = filtered.filter(thought => thought.entities.includes(selectedEntity));
+      filtered = filtered.filter(thought => thought.relatedEntities.includes(selectedEntity));
     }
     
     return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -73,7 +73,7 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
   };
 
   // Get unique entities from all local thoughts for filter buttons
-  const uniqueEntities = Array.from(new Set(localThoughts.flatMap(t => t.entities)));
+  const uniqueEntities = Array.from(new Set(localThoughts.flatMap(t => t.relatedEntities)));
 
   return (
     <Card className="p-6 bg-card border-border h-full">
@@ -165,9 +165,9 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
                     {thought.content}
                   </div>
 
-                  {thought.entities.length > 0 && (
+                  {thought.relatedEntities.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {thought.entities.map(entity => (
+                      {thought.relatedEntities.map(entity => (
                         <Badge
                           key={entity}
                           variant="outline"
