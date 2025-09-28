@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
-import { Search, Users, MapPin, Package, Building, User, RefreshCw } from "lucide-react";
+import { Search, RefreshCw, Users, MapPin, Package, Shield, Scroll } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useLocalEntities, useLocalThoughts } from "@/hooks/useOfflineData";
 import { syncService } from "@/services/syncService";
 import { toast } from "sonner";
@@ -12,87 +12,99 @@ interface EntityDashboardProps {
   onEntityClick?: (entity: string) => void;
 }
 
+// Helper function to categorize entities based on name patterns
+const categorizeEntity = (entity: string): string => {
+  const lower = entity.toLowerCase();
+  if (['he', 'she', 'they', 'i'].some(pronoun => lower.includes(pronoun))) return 'player';
+  if (['guild', 'faction', 'order', 'clan'].some(org => lower.includes(org))) return 'organization';
+  if (['sword', 'armor', 'potion', 'ring', 'staff'].some(item => lower.includes(item))) return 'item';
+  if (['city', 'town', 'forest', 'mountain', 'river'].some(loc => lower.includes(loc))) return 'location';
+  return 'npc';
+};
+
+// Get icon for entity type
+const getEntityIcon = (type: string) => {
+  switch (type) {
+    case 'player': return Users;
+    case 'npc': return Users;
+    case 'location': return MapPin;
+    case 'item': return Package;
+    case 'organization': return Shield;
+    default: return Scroll;
+  }
+};
+
+const getEntityClass = (type: string): string => {
+  switch (type) {
+    case 'player': return 'entity-player';
+    case 'npc': return 'entity-npc';
+    case 'location': return 'entity-location';
+    case 'item': return 'entity-item';
+    case 'organization': return 'entity-organization';
+    default: return 'entity-npc';
+  }
+};
+
 export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { entities: localEntities } = useLocalEntities();
+  const { entities: localEntities, refreshFromStorage } = useLocalEntities();
   const { thoughts: localThoughts } = useLocalThoughts();
 
-  const categorizeEntity = (entity: string): string => {
-    if (entity.includes('player') || entity.includes('pc')) return 'player';
-    if (entity.includes('npc') || entity.includes('character')) return 'npc';
-    if (entity.includes('location') || entity.includes('place') || entity.includes('city')) return 'location';
-    if (entity.includes('item') || entity.includes('weapon') || entity.includes('artifact')) return 'item';
-    if (entity.includes('guild') || entity.includes('organization') || entity.includes('faction')) return 'organization';
-    return 'npc'; // default
-  };
-
-  const getEntityIcon = (type: string) => {
-    switch (type) {
-      case 'player': return <User className="h-4 w-4" />;
-      case 'npc': return <Users className="h-4 w-4" />;
-      case 'location': return <MapPin className="h-4 w-4" />;
-      case 'item': return <Package className="h-4 w-4" />;
-      case 'organization': return <Building className="h-4 w-4" />;
-      default: return <Users className="h-4 w-4" />;
-    }
-  };
-
-  const getEntityClass = (type: string): string => {
-    switch (type) {
-      case 'player': return 'entity-player';
-      case 'npc': return 'entity-npc';
-      case 'location': return 'entity-location';
-      case 'item': return 'entity-item';
-      case 'organization': return 'entity-organization';
-      default: return 'entity-npc';
-    }
-  };
-
-  // Calculate entity metrics from local thoughts
+  // Calculate entity metrics from local entities and thought mentions
   const entitiesWithMetrics = useMemo(() => {
-    // Get unique entities from thoughts if no server entities exist
-    const allEntityNames = localEntities.length > 0 
-      ? localEntities.map(e => e.name)
-      : Array.from(new Set(localThoughts.flatMap(t => t.entities)));
-    
-    return allEntityNames.map(entityName => {
-      const mentioningThoughts = localThoughts.filter(thought => 
-        thought.entities.includes(entityName)
-      );
-      
-      const entityType = categorizeEntity(entityName);
-      
-      return {
-        name: entityName,
-        type: entityType,
-        count: mentioningThoughts.length,
-        lastMentioned: mentioningThoughts.length > 0 
-          ? new Date(Math.max(...mentioningThoughts.map(t => t.timestamp.getTime())))
-          : new Date()
-      };
+    const entityMap = new Map<string, { 
+      name: string; 
+      type: string; 
+      count: number; 
+      lastMentioned: Date;
+    }>();
+
+    // Start with all local entities
+    localEntities.forEach(entity => {
+      entityMap.set(entity.name.toLowerCase(), {
+        name: entity.name,
+        type: entity.type,
+        count: 0,
+        lastMentioned: entity.lastMentioned
+      });
     });
+
+    // Update counts and dates from thought mentions
+    localThoughts.forEach(thought => {
+      // Check entities field (current format)
+      thought.entities?.forEach(entityName => {
+        const existing = entityMap.get(entityName.toLowerCase());
+        if (existing) {
+          existing.count++;
+          if (thought.timestamp > existing.lastMentioned) {
+            existing.lastMentioned = thought.timestamp;
+          }
+        }
+      });
+    });
+
+    return Array.from(entityMap.values());
   }, [localEntities, localThoughts]);
 
   // Filter entities based on search and selected type
   const filteredEntities = useMemo(() => {
     let filtered = entitiesWithMetrics;
-    
-    // Apply search filter
-    if (searchTerm.trim()) {
-      filtered = filtered.filter(entity => 
+
+    if (searchTerm) {
+      filtered = filtered.filter(entity =>
         entity.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
-    // Apply type filter
-    if (selectedType) {
+
+    if (selectedType !== "all") {
       filtered = filtered.filter(entity => entity.type === selectedType);
     }
-    
-    return filtered.sort((a, b) => b.count - a.count);
+
+    // Sort by count (descending) then by name
+    return filtered.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }, [entitiesWithMetrics, searchTerm, selectedType]);
 
   const handleRefresh = async () => {
@@ -100,108 +112,108 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
     try {
       const result = await syncService.refreshFromServer();
       if (result.success) {
-        toast.success("Registry updated successfully");
+        refreshFromStorage();
+        toast.success(`Refreshed ${result.syncedCount} records from server`);
       } else {
         toast.error(result.message);
       }
     } catch (error) {
-      toast.error("Failed to refresh entity registry");
+      toast.error("Failed to refresh from server");
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // Get unique entity types for filter buttons
-  const entityTypes = Array.from(new Set(entitiesWithMetrics.map(entity => entity.type)));
+  const uniqueTypes = Array.from(new Set(entitiesWithMetrics.map(e => e.type)));
 
   return (
-    <Card className="p-6 bg-card border-border h-full">
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-foreground">
-          <Search className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Entities</h2>
+    <Card className="h-full">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Entity Registry</h2>
+          <Button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex gap-2">
+        <div className="space-y-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
+              placeholder="Search entities..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search entities..."
-              className="bg-input border-border text-foreground placeholder:text-muted-foreground flex-1"
+              className="pl-10"
             />
-            <Button 
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              variant="outline"
-              size="icon"
-              title="Refresh Registry"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={selectedType === null ? "default" : "outline"}
+              variant={selectedType === "all" ? "default" : "outline"}
               size="sm"
-              onClick={() => setSelectedType(null)}
-              className="text-xs"
+              onClick={() => setSelectedType("all")}
             >
-              All
+              All ({entitiesWithMetrics.length})
             </Button>
-            {entityTypes.map(type => (
-              <Button
-                key={type}
-                variant={selectedType === type ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedType(selectedType === type ? null : type)}
-                className="text-xs"
-              >
-                {getEntityIcon(type)}
-                <span className="ml-1 capitalize">{type}s</span>
-              </Button>
-            ))}
+            {uniqueTypes.map((type) => {
+              const count = entitiesWithMetrics.filter(e => e.type === type).length;
+              const Icon = getEntityIcon(type);
+              return (
+                <Button
+                  key={type}
+                  variant={selectedType === type ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedType(type)}
+                  className="capitalize"
+                >
+                  <Icon className="h-3 w-3 mr-1" />
+                  {type} ({count})
+                </Button>
+              );
+            })}
           </div>
         </div>
 
-        <div className="space-y-2 max-h-[400px] overflow-y-auto fantasy-scrollbar">
+        <div className="space-y-3">
           {filteredEntities.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No entities found</p>
-              <p className="text-xs mt-1">
-                {searchTerm || selectedType ? "Try adjusting your search" : "Add some thoughts with entities to see them here"}
-              </p>
-            </div>
+            <p className="text-center text-muted-foreground py-8">
+              No entities found. Start writing chronicles to create entities!
+            </p>
           ) : (
-            filteredEntities.map((entity) => (
-              <div
-                key={entity.name}
-                onClick={() => onEntityClick?.(entity.name)}
-                className="flex items-center justify-between p-3 bg-muted/30 border border-border hover:bg-muted/50 cursor-pointer transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="text-muted-foreground">
-                    {getEntityIcon(entity.type)}
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground">#{entity.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Last mentioned: {entity.lastMentioned.toLocaleDateString()}
+            filteredEntities.map((entity) => {
+              const Icon = getEntityIcon(entity.type);
+              return (
+                <div
+                  key={entity.name}
+                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent cursor-pointer transition-colors"
+                  onClick={() => onEntityClick?.(entity.name)}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <h3 className="font-medium">{entity.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Last mentioned: {entity.lastMentioned.toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="capitalize">
+                      {entity.type}
+                    </Badge>
+                    <Badge variant="outline">
+                      {entity.count} mention{entity.count !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={`entity-tag ${getEntityClass(entity.type)}`}>
-                    {entity.type}
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    {entity.count}
-                  </Badge>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

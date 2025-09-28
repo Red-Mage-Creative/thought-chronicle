@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TagInput } from "@/components/TagInput";
 import { Settings } from "@/components/Settings";
-import { useLocalThoughts, useLocalEntities } from "@/hooks/useOfflineData";
+import { useLocalThoughts, useLocalEntities, useOfflineSync } from "@/hooks/useOfflineData";
 import { LocalThought, LocalEntity } from "@/services/localStorageService";
 
 interface ChatWindowProps {
@@ -20,7 +20,8 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
   const [tags, setTags] = useState<string[]>([]);
   
   const { addThought } = useLocalThoughts();
-  const { entities, refreshFromStorage } = useLocalEntities();
+  const { entities, addEntity, refreshFromStorage } = useLocalEntities();
+  const { refreshSyncStatus } = useOfflineSync();
 
   const createEntitiesFromTags = (tagNames: string[]): LocalEntity[] => {
     const newEntities: LocalEntity[] = [];
@@ -38,14 +39,16 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
           entityType = 'item';
         }
         
-        newEntities.push({
+        // Actually create the entity in localStorage
+        const createdEntity = addEntity({
           name: tagName,
           type: entityType,
           description: `Auto-created from tag: ${tagName}`,
           lastMentioned: new Date(),
-          count: 0,
-          syncStatus: 'pending'
+          count: 0
         });
+        
+        newEntities.push(createdEntity);
       }
     });
     
@@ -77,11 +80,8 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
     // Add thought to local storage
     addThought(thoughtData);
     
-    // Store new entities if any
-    if (newEntities.length > 0) {
-      // Note: We'll need to add entity creation to localStorageService
-      console.log('New entities to create:', newEntities);
-    }
+    // Refresh sync status to update pending count
+    refreshSyncStatus();
     
     // Clear form
     setContent("");

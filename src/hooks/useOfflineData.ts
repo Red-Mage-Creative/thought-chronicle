@@ -43,7 +43,13 @@ export const useLocalEntities = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  return { entities, refreshFromStorage };
+  const addEntity = (entityData: Omit<LocalEntity, 'localId' | 'syncStatus'>) => {
+    const newEntity = localStorageService.addEntity(entityData);
+    refreshFromStorage();
+    return newEntity;
+  };
+
+  return { entities, addEntity, refreshFromStorage };
 };
 
 export const useOfflineSync = () => {

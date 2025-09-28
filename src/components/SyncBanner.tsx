@@ -31,7 +31,8 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
   };
 
   return (
-    <Card className="mx-4 mb-4 border-amber-300 bg-amber-50">
+    <div className="max-w-2xl mx-auto px-4 mb-4">
+      <Card className="border-amber-300 bg-amber-50">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-amber-700">
@@ -57,6 +58,7 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
           {isSyncing ? "Committing..." : "Send to Archive"}
         </Button>
       </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
