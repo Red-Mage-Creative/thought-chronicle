@@ -1,40 +1,20 @@
 import { useState } from "react";
-import { Search, Users, MapPin, Package, Building, User } from "lucide-react";
+import { Search, Users, MapPin, Package, Building, User, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-interface Thought {
-  id: string;
-  content: string;
-  entities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
+import { useEntitiesSearch } from "@/hooks/useBuildshipData";
 
 interface EntityDashboardProps {
-  thoughts: Thought[];
   onEntityClick?: (entity: string) => void;
 }
 
-export const EntityDashboard = ({ thoughts, onEntityClick }: EntityDashboardProps) => {
+export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
-  // Extract and categorize all entities
-  const entityCounts = thoughts.reduce((acc, thought) => {
-    thought.entities.forEach(entity => {
-      if (!acc[entity]) {
-        acc[entity] = { count: 0, lastMentioned: thought.timestamp, type: categorizeEntity(entity) };
-      }
-      acc[entity].count++;
-      if (thought.timestamp > acc[entity].lastMentioned) {
-        acc[entity].lastMentioned = thought.timestamp;
-      }
-    });
-    return acc;
-  }, {} as Record<string, { count: number; lastMentioned: Date; type: string }>);
+  const { data: entities = [], isLoading, error } = useEntitiesSearch(searchTerm);
 
   const categorizeEntity = (entity: string): string => {
     if (entity.includes('player') || entity.includes('pc')) return 'player';
@@ -67,13 +47,12 @@ export const EntityDashboard = ({ thoughts, onEntityClick }: EntityDashboardProp
     }
   };
 
-  const filteredEntities = Object.entries(entityCounts)
-    .filter(([entity, data]) => {
-      const matchesSearch = entity.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = !selectedType || data.type === selectedType;
-      return matchesSearch && matchesType;
+  const filteredEntities = entities
+    .filter(entity => {
+      const matchesType = !selectedType || entity.type === selectedType;
+      return matchesType;
     })
-    .sort(([, a], [, b]) => b.count - a.count);
+    .sort((a, b) => b.count - a.count);
 
   const entityTypes = ['player', 'npc', 'location', 'item', 'organization'];
 
@@ -118,36 +97,47 @@ export const EntityDashboard = ({ thoughts, onEntityClick }: EntityDashboardProp
         </div>
 
         <div className="space-y-2 max-h-[400px] overflow-y-auto fantasy-scrollbar">
-          {filteredEntities.length === 0 ? (
+          {error ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>Error loading entities</p>
+              <p className="text-xs mt-1">{error.message}</p>
+            </div>
+          ) : isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin" />
+              <p>Loading entities...</p>
+            </div>
+          ) : filteredEntities.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No entities found</p>
-              <p className="text-xs mt-1">Start recording thoughts with #tags to create entities</p>
+              <p className="text-xs mt-1">Try adjusting your search</p>
             </div>
           ) : (
-            filteredEntities.map(([entity, data]) => (
+            filteredEntities.map((entity) => (
               <div
-                key={entity}
-                onClick={() => onEntityClick?.(entity)}
+                key={entity.name}
+                onClick={() => onEntityClick?.(entity.name)}
                 className="flex items-center justify-between p-3 bg-muted/30 border border-border hover:bg-muted/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className="text-muted-foreground">
-                    {getEntityIcon(data.type)}
+                    {getEntityIcon(entity.type)}
                   </div>
                   <div>
-                    <div className="font-medium text-foreground">#{entity}</div>
+                    <div className="font-medium text-foreground">#{entity.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      Last mentioned: {data.lastMentioned.toLocaleDateString()}
+                      Last mentioned: {entity.lastMentioned.toLocaleDateString()}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={`entity-tag ${getEntityClass(data.type)}`}>
-                    {data.type}
+                  <Badge variant="outline" className={`entity-tag ${getEntityClass(entity.type)}`}>
+                    {entity.type}
                   </Badge>
                   <Badge variant="secondary" className="text-xs">
-                    {data.count}
+                    {entity.count}
                   </Badge>
                 </div>
               </div>

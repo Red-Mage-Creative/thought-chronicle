@@ -9,13 +9,12 @@ interface Thought {
 }
 
 interface HistoryPageProps {
-  thoughts: Thought[];
   onEntityClick?: (entity: string) => void;
 }
 
-const HistoryPage = ({ thoughts, onEntityClick }: HistoryPageProps) => {
+const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
   return (
-    <ThoughtsList thoughts={thoughts} onEntityClick={onEntityClick} />
+    <ThoughtsList onEntityClick={onEntityClick} />
   );
 };
 

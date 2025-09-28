@@ -91,7 +91,6 @@ const App = () => {
                     path="/entities" 
                     element={
                       <EntitiesPage 
-                        thoughts={thoughts} 
                         onEntityClick={handleEntityClick} 
                       />
                     } 
@@ -100,7 +99,6 @@ const App = () => {
                     path="/history" 
                     element={
                       <HistoryPage 
-                        thoughts={thoughts} 
                         onEntityClick={handleEntityClick} 
                       />
                     } 

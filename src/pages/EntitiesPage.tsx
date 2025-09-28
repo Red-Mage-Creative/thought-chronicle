@@ -9,13 +9,12 @@ interface Thought {
 }
 
 interface EntitiesPageProps {
-  thoughts: Thought[];
   onEntityClick?: (entity: string) => void;
 }
 
-const EntitiesPage = ({ thoughts, onEntityClick }: EntitiesPageProps) => {
+const EntitiesPage = ({ onEntityClick }: EntitiesPageProps) => {
   return (
-    <EntityDashboard thoughts={thoughts} onEntityClick={onEntityClick} />
+    <EntityDashboard onEntityClick={onEntityClick} />
   );
 };
 

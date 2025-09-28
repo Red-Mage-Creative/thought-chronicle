@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Calendar, Clock, Hash } from "lucide-react";
+import { Calendar, Clock, Hash, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useThoughtsSearch } from "@/hooks/useBuildshipData";
 
 interface Thought {
   id: string;
@@ -14,13 +15,14 @@ interface Thought {
 }
 
 interface ThoughtsListProps {
-  thoughts: Thought[];
   onEntityClick?: (entity: string) => void;
 }
 
-export const ThoughtsList = ({ thoughts, onEntityClick }: ThoughtsListProps) => {
+export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+
+  const { data: thoughts = [], isLoading, error } = useThoughtsSearch(searchTerm);
 
   const getEntityClass = (entityType: string): string => {
     if (entityType.includes('player') || entityType.includes('pc')) return 'entity-player';
@@ -31,12 +33,10 @@ export const ThoughtsList = ({ thoughts, onEntityClick }: ThoughtsListProps) => 
     return 'entity-npc'; // default
   };
 
-
+  // Filter by selected entity locally (since server search handles the main query)
   const filteredThoughts = thoughts.filter(thought => {
-    const matchesSearch = thought.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         thought.entities.some(entity => entity.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesEntity = !selectedEntity || thought.entities.includes(selectedEntity);
-    return matchesSearch && matchesEntity;
+    return matchesEntity;
   }).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   const allEntities = Array.from(new Set(thoughts.flatMap(t => t.entities)));
@@ -86,11 +86,22 @@ export const ThoughtsList = ({ thoughts, onEntityClick }: ThoughtsListProps) => 
         </div>
 
         <div className="space-y-3 max-h-[500px] overflow-y-auto fantasy-scrollbar">
-          {filteredThoughts.length === 0 ? (
+          {error ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No thoughts recorded yet</p>
-              <p className="text-xs mt-1">Start chronicling your adventures!</p>
+              <p>Error loading thoughts</p>
+              <p className="text-xs mt-1">{error.message}</p>
+            </div>
+          ) : isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin" />
+              <p>Loading thoughts...</p>
+            </div>
+          ) : filteredThoughts.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No thoughts found</p>
+              <p className="text-xs mt-1">Try adjusting your search</p>
             </div>
           ) : (
             filteredThoughts.map(thought => (
