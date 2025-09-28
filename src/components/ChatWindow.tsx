@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { TagInput } from "@/components/TagInput";
 
 interface Thought {
   id: string;
@@ -15,11 +16,13 @@ interface Thought {
 
 interface ChatWindowProps {
   onThoughtAdded?: (thought: Thought) => void;
+  existingEntities?: string[];
 }
 
-export const ChatWindow = ({ onThoughtAdded }: ChatWindowProps) => {
+export const ChatWindow = ({ onThoughtAdded, existingEntities = [] }: ChatWindowProps) => {
   const [content, setContent] = useState("");
   const [gameDate, setGameDate] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   const extractEntities = (text: string): string[] => {
     const entityRegex = /#(\w+)/g;
@@ -30,17 +33,19 @@ export const ChatWindow = ({ onThoughtAdded }: ChatWindowProps) => {
   const handleSubmit = () => {
     if (content.trim().length === 0) return;
     
-    const entities = extractEntities(content);
+    const contentEntities = extractEntities(content);
+    const allEntities = [...new Set([...contentEntities, ...tags])];
     const thought: Thought = {
       id: Date.now().toString(),
       content: content.trim(),
-      entities,
+      entities: allEntities,
       timestamp: new Date(),
       gameDate: gameDate || undefined,
     };
 
     onThoughtAdded?.(thought);
     setContent("");
+    setTags([]);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -83,7 +88,7 @@ export const ChatWindow = ({ onThoughtAdded }: ChatWindowProps) => {
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-foreground">
           <Hash className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Chronicle Entry</h2>
+          <h2 className="text-xl font-semibold">Record your Thoughts</h2>
         </div>
         
         <div className="space-y-3">
@@ -92,7 +97,7 @@ export const ChatWindow = ({ onThoughtAdded }: ChatWindowProps) => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder="Record your thoughts... Use #tags to create entities (e.g., #player-thara, #location-waterdeep, #npc-tavern-keeper)"
+              placeholder="Record your thoughts... You can also add #tags inline or use the tag input below."
               className="min-h-[120px] bg-input border-border text-foreground placeholder:text-muted-foreground resize-none fantasy-scrollbar"
               maxLength={600}
             />
@@ -109,6 +114,18 @@ export const ChatWindow = ({ onThoughtAdded }: ChatWindowProps) => {
               </div>
             </div>
           )}
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Tags</label>
+              <TagInput
+                tags={tags}
+                onTagsChange={setTags}
+                existingEntities={existingEntities}
+                placeholder="Add entity tags (e.g., player-thara, location-waterdeep)..."
+              />
+            </div>
+          </div>
 
           <div className="flex items-center gap-3">
             <input
@@ -130,8 +147,8 @@ export const ChatWindow = ({ onThoughtAdded }: ChatWindowProps) => {
         </div>
 
         <div className="text-xs text-muted-foreground">
-          <strong>Tip:</strong> Use tags like #player-name, #npc-name, #location-name, #item-name, #organization-name to create trackable entities.
-          Press Ctrl+Enter to submit quickly.
+          <strong>Tip:</strong> Add tags to track entities like players, NPCs, locations, items, and organizations.
+          You can use #tags inline or the dedicated tag input. Press Ctrl+Enter to submit quickly.
         </div>
       </div>
     </Card>

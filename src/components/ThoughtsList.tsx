@@ -66,7 +66,7 @@ export const ThoughtsList = ({ thoughts, onEntityClick }: ThoughtsListProps) => 
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-foreground">
           <Hash className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Chronicle History</h2>
+          <h2 className="text-xl font-semibold">History</h2>
         </div>
 
         <div className="space-y-3">

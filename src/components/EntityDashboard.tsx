@@ -82,7 +82,7 @@ export const EntityDashboard = ({ thoughts, onEntityClick }: EntityDashboardProp
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-foreground">
           <Search className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Entity Registry</h2>
+          <h2 className="text-xl font-semibold">Entities</h2>
         </div>
 
         <div className="space-y-3">
