@@ -2,36 +2,39 @@ import { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { X, Plus } from "lucide-react";
+import { LocalEntity } from "@/services/localStorageService";
 
 interface TagInputProps {
   tags: string[];
   onTagsChange: (tags: string[]) => void;
-  existingEntities: string[];
+  existingEntities: LocalEntity[];
   placeholder?: string;
 }
 
 export const TagInput = ({ tags, onTagsChange, existingEntities, placeholder = "Add tags..." }: TagInputProps) => {
   const [inputValue, setInputValue] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<LocalEntity[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getEntityClass = (entityType: string): string => {
-    if (entityType.includes('player') || entityType.includes('pc')) return 'entity-player';
-    if (entityType.includes('npc') || entityType.includes('character')) return 'entity-npc';
-    if (entityType.includes('location') || entityType.includes('place') || entityType.includes('city')) return 'entity-location';
-    if (entityType.includes('item') || entityType.includes('weapon') || entityType.includes('artifact')) return 'entity-item';
-    if (entityType.includes('guild') || entityType.includes('organization') || entityType.includes('faction')) return 'entity-organization';
-    return 'entity-npc';
+    switch (entityType.toLowerCase()) {
+      case 'player': case 'pc': return 'entity-player';
+      case 'character': case 'npc': return 'entity-npc';
+      case 'location': case 'place': case 'city': return 'entity-location';
+      case 'item': case 'weapon': case 'artifact': return 'entity-item';
+      case 'organization': case 'guild': case 'faction': return 'entity-organization';
+      default: return 'entity-npc';
+    }
   };
 
   useEffect(() => {
     if (inputValue.trim()) {
       const filtered = existingEntities
         .filter(entity => 
-          entity.toLowerCase().includes(inputValue.toLowerCase()) &&
-          !tags.includes(entity)
+          entity.name.toLowerCase().includes(inputValue.toLowerCase()) &&
+          !tags.includes(entity.name.toLowerCase())
         )
         .slice(0, 5);
       setSuggestions(filtered);
@@ -59,7 +62,7 @@ export const TagInput = ({ tags, onTagsChange, existingEntities, placeholder = "
     if (e.key === "Enter") {
       e.preventDefault();
       if (showSuggestions && suggestions[selectedSuggestion]) {
-        addTag(suggestions[selectedSuggestion]);
+        addTag(suggestions[selectedSuggestion].name);
       } else if (inputValue.trim()) {
         addTag(inputValue);
       }
@@ -108,19 +111,19 @@ export const TagInput = ({ tags, onTagsChange, existingEntities, placeholder = "
           <div className="absolute top-full left-0 right-0 z-10 bg-card border border-border mt-1 max-h-32 overflow-y-auto fantasy-scrollbar">
             {suggestions.map((suggestion, index) => (
               <div
-                key={suggestion}
-                onClick={() => addTag(suggestion)}
+                key={suggestion.id || suggestion.name}
+                onClick={() => addTag(suggestion.name)}
                 className={`px-3 py-2 cursor-pointer text-sm flex items-center gap-2 ${
                   index === selectedSuggestion ? 'bg-muted' : 'hover:bg-muted/50'
                 }`}
               >
-                <Badge variant="outline" className={`entity-tag ${getEntityClass(suggestion)} text-xs`}>
-                  #{suggestion}
+                <Badge variant="outline" className={`entity-tag ${getEntityClass(suggestion.type)} text-xs`}>
+                  #{suggestion.name}
                 </Badge>
-                <span className="text-muted-foreground">existing</span>
+                <span className="text-muted-foreground text-xs">({suggestion.type})</span>
               </div>
             ))}
-            {inputValue.trim() && !suggestions.includes(inputValue.trim().toLowerCase()) && (
+            {inputValue.trim() && !suggestions.some(s => s.name.toLowerCase() === inputValue.trim().toLowerCase()) && (
               <div
                 onClick={() => addTag(inputValue)}
                 className={`px-3 py-2 cursor-pointer text-sm flex items-center gap-2 border-t border-border ${
@@ -128,7 +131,7 @@ export const TagInput = ({ tags, onTagsChange, existingEntities, placeholder = "
                 }`}
               >
                 <Plus className="h-3 w-3" />
-                <span>Create "#{inputValue.trim().toLowerCase()}"</span>
+                <span>Create "#{inputValue.trim().toLowerCase()}" (new)</span>
               </div>
             )}
           </div>

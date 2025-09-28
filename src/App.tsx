@@ -101,18 +101,16 @@ const App = () => {
             {/* Main Layout */}
             <main className="flex-1 container py-8">
               <div className="max-w-2xl mx-auto">
-                <Routes>
-                  <Route 
-                    path="/" 
-                    element={
-                      <Index 
-                        thoughts={thoughts} 
-                        onThoughtAdded={handleThoughtAdded} 
-                        defaultTags={defaultTags}
-                        onDefaultTagsChange={handleDefaultTagsChange}
+                    <Routes>
+                      <Route 
+                        path="/" 
+                        element={
+                          <Index 
+                            defaultTags={defaultTags}
+                            onDefaultTagsChange={handleDefaultTagsChange}
+                          />
+                        } 
                       />
-                    } 
-                  />
                   <Route 
                     path="/entities" 
                     element={

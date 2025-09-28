@@ -10,6 +10,7 @@ export interface LocalEntity extends BuildshipEntity {
   localId?: string;
   modifiedLocally?: Date;
   syncStatus: 'pending' | 'synced' | 'conflict';
+  id?: string;
 }
 
 export interface PendingChanges {
@@ -92,7 +93,24 @@ export const localStorageService = {
     data.thoughts.unshift(localThought);
     data.pendingChanges.thoughts.added.push(localThought);
     this.saveData(data);
+    console.log('Added thought, pending count:', this.getPendingChangesCount());
     return localThought;
+  },
+
+  // Add a new entity locally
+  addEntity(entity: Omit<LocalEntity, 'localId' | 'syncStatus'>): LocalEntity {
+    const data = this.getData();
+    const localEntity: LocalEntity = {
+      ...entity,
+      localId: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      syncStatus: 'pending',
+      modifiedLocally: new Date()
+    };
+    
+    data.entities.push(localEntity);
+    data.pendingChanges.entities.added.push(localEntity);
+    this.saveData(data);
+    return localEntity;
   },
 
   // Update server data (from API refresh)

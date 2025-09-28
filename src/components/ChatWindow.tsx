@@ -6,27 +6,51 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TagInput } from "@/components/TagInput";
 import { Settings } from "@/components/Settings";
-
-interface Thought {
-  id: string;
-  content: string;
-  entities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
+import { useLocalThoughts, useLocalEntities } from "@/hooks/useOfflineData";
+import { LocalThought, LocalEntity } from "@/services/localStorageService";
 
 interface ChatWindowProps {
-  onThoughtAdded?: (thought: Thought) => void;
-  existingEntities?: string[];
   defaultTags: string[];
   onDefaultTagsChange: (tags: string[]) => void;
 }
 
-export const ChatWindow = ({ onThoughtAdded, existingEntities = [], defaultTags, onDefaultTagsChange }: ChatWindowProps) => {
+export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps) => {
   const [content, setContent] = useState("");
   const [gameDate, setGameDate] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  
+  const { addThought } = useLocalThoughts();
+  const { entities, refreshFromStorage } = useLocalEntities();
 
+  const createEntitiesFromTags = (tagNames: string[]): LocalEntity[] => {
+    const newEntities: LocalEntity[] = [];
+    const existingEntityNames = entities.map(e => e.name.toLowerCase());
+    
+    tagNames.forEach(tagName => {
+      if (!existingEntityNames.includes(tagName.toLowerCase())) {
+        // Determine entity type based on tag name (simple heuristic)
+        let entityType = 'character';
+        if (tagName.toLowerCase().includes('city') || tagName.toLowerCase().includes('town')) {
+          entityType = 'location';
+        } else if (tagName.toLowerCase().includes('guild') || tagName.toLowerCase().includes('org')) {
+          entityType = 'organization';
+        } else if (tagName.toLowerCase().includes('sword') || tagName.toLowerCase().includes('item')) {
+          entityType = 'item';
+        }
+        
+        newEntities.push({
+          name: tagName,
+          type: entityType,
+          description: `Auto-created from tag: ${tagName}`,
+          lastMentioned: new Date(),
+          count: 0,
+          syncStatus: 'pending'
+        });
+      }
+    });
+    
+    return newEntities;
+  };
 
   const handleSubmit = () => {
     if (content.trim().length === 0) return;
@@ -34,17 +58,38 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [], defaultTags,
     // Combine manual tags with default tags
     const allTags = [...new Set([...defaultTags, ...tags])];
     
-    const thought: Thought = {
-      id: Date.now().toString(),
+    // Create entities for new tags
+    const newEntities = createEntitiesFromTags(allTags);
+    
+    // Create thought in MongoDB-compatible format
+    const thoughtData = {
+      id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       content: content.trim(),
       entities: allTags,
+      text: content.trim(),
+      relatedEntities: allTags,
       timestamp: new Date(),
-      gameDate: gameDate || undefined,
+      inGameDate: gameDate || undefined,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
-    onThoughtAdded?.(thought);
+    // Add thought to local storage
+    addThought(thoughtData);
+    
+    // Store new entities if any
+    if (newEntities.length > 0) {
+      // Note: We'll need to add entity creation to localStorageService
+      console.log('New entities to create:', newEntities);
+    }
+    
+    // Clear form
     setContent("");
     setTags([]);
+    setGameDate("");
+    
+    // Refresh entity cache
+    refreshFromStorage();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -66,10 +111,10 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [], defaultTags,
             <Hash className="h-5 w-5 text-primary" />
             <h2 className="text-xl font-semibold">Record your Thoughts</h2>
           </div>
-          <Settings 
+           <Settings 
             defaultTags={defaultTags}
             onDefaultTagsChange={onDefaultTagsChange}
-            existingEntities={existingEntities}
+            existingEntities={entities.map(e => e.name)}
           />
         </div>
         
@@ -92,10 +137,10 @@ export const ChatWindow = ({ onThoughtAdded, existingEntities = [], defaultTags,
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Additional Tags</label>
-              <TagInput
+               <TagInput
                 tags={tags}
                 onTagsChange={setTags}
-                existingEntities={existingEntities}
+                existingEntities={entities}
                 placeholder="Add additional entity tags..."
               />
               {defaultTags.length > 0 && (
