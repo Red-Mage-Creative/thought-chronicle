@@ -20,6 +20,7 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Always show suggestions, with "Create new Entity" as default when no input
     if (inputValue.trim()) {
       const filtered = suggestions.filter(suggestion =>
         suggestion.name.toLowerCase().includes(inputValue.toLowerCase()) &&
@@ -28,7 +29,8 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
       setFilteredSuggestions(filtered.slice(0, 5));
       setSelectedIndex(-1);
     } else {
-      setFilteredSuggestions([]);
+      // Show a limited set of recent/popular suggestions even without input
+      setFilteredSuggestions(suggestions.slice(0, 3));
     }
   }, [inputValue, suggestions, tags]);
 
@@ -36,6 +38,17 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
     const trimmed = tagName.trim();
     if (trimmed && !tags.some(tag => tag.toLowerCase() === trimmed.toLowerCase())) {
       onTagsChange([...tags, trimmed]);
+      setInputValue('');
+      setFilteredSuggestions([]);
+    }
+  };
+
+  const addMultipleTags = (input: string) => {
+    const newTags = input.split(',').map(tag => tag.trim()).filter(tag => 
+      tag && !tags.some(existingTag => existingTag.toLowerCase() === tag.toLowerCase())
+    );
+    if (newTags.length > 0) {
+      onTagsChange([...tags, ...newTags]);
       setInputValue('');
       setFilteredSuggestions([]);
     }
@@ -52,7 +65,22 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
         if (selectedIndex >= 0 && filteredSuggestions[selectedIndex]) {
           addTag(filteredSuggestions[selectedIndex].name);
         } else if (inputValue.trim()) {
-          addTag(inputValue);
+          // Check if input contains commas for multiple tags
+          if (inputValue.includes(',')) {
+            addMultipleTags(inputValue);
+          } else {
+            addTag(inputValue);
+          }
+        }
+        break;
+      case 'Tab':
+        e.preventDefault();
+        if (inputValue.trim()) {
+          if (inputValue.includes(',')) {
+            addMultipleTags(inputValue);
+          } else {
+            addTag(inputValue);
+          }
         }
         break;
       case 'ArrowDown':
@@ -112,7 +140,7 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
           placeholder={placeholder}
         />
         
-        {filteredSuggestions.length > 0 && (
+        {(filteredSuggestions.length > 0 || inputValue.trim()) && (
           <div className="absolute z-10 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-40 overflow-y-auto">
             {filteredSuggestions.map((suggestion, index) => (
               <button
@@ -131,20 +159,32 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
                 </div>
               </button>
             ))}
-            {inputValue.trim() && !filteredSuggestions.some(s => s.name.toLowerCase() === inputValue.trim().toLowerCase()) && (
-              <button
-                type="button"
-                className={`w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
-                  selectedIndex === filteredSuggestions.length ? 'bg-accent text-accent-foreground' : ''
-                }`}
-                onClick={() => addTag(inputValue)}
-              >
-                <div className="flex items-center gap-2">
-                  <Plus className="h-3 w-3" />
-                  <span>Create "{inputValue.trim()}" (new)</span>
-                </div>
-              </button>
-            )}
+            {/* Always show "Create new Entity" option */}
+            <button
+              type="button"
+              className={`w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
+                selectedIndex === filteredSuggestions.length ? 'bg-accent text-accent-foreground' : ''
+              }`}
+              onClick={() => {
+                if (inputValue.trim()) {
+                  if (inputValue.includes(',')) {
+                    addMultipleTags(inputValue);
+                  } else {
+                    addTag(inputValue);
+                  }
+                }
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Plus className="h-3 w-3" />
+                <span>
+                  {inputValue.trim() 
+                    ? `Create "${inputValue.trim()}" (new)` 
+                    : 'Create new entity'
+                  }
+                </span>
+              </div>
+            </button>
           </div>
         )}
       </div>

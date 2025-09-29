@@ -1,15 +1,21 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, Users, Calendar } from "lucide-react";
-
+import { useThoughts } from '@/hooks/useThoughts';
+import { useEntities } from '@/hooks/useEntities';
 import { LocalThought } from '@/types/thoughts';
 
 interface StatsCardProps {
-  thoughts: LocalThought[];
+  thoughts?: LocalThought[];
 }
 
-export const StatsCard = ({ thoughts }: StatsCardProps) => {
+export const StatsCard = ({ thoughts: propsThoughts }: StatsCardProps = {}) => {
+  // Use live data from hooks if thoughts prop not provided
+  const { thoughts: liveThoughts } = useThoughts();
+  const { entities } = useEntities();
+  
+  const thoughts = propsThoughts || liveThoughts;
   const totalThoughts = thoughts.length;
-  const uniqueEntities = new Set(thoughts.flatMap(t => t.relatedEntities)).size;
+  const uniqueEntities = entities.length;
   const recentThoughts = thoughts.filter(
     t => Date.now() - t.timestamp.getTime() < 24 * 60 * 60 * 1000
   ).length;

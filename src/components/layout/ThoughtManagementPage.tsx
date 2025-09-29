@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ThoughtForm } from '@/components/forms/ThoughtForm';
 import { SyncBanner } from '@/components/SyncBanner';
+import { Settings } from '@/components/Settings';
+import { StatsCard } from '@/components/StatsCard';
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
 import { useSyncState } from '@/hooks/useSyncState';
@@ -18,7 +20,7 @@ export const ThoughtManagementPage = ({
   onDefaultTagsChange 
 }: ThoughtManagementPageProps) => {
   const { thoughts, createThought, refreshThoughts } = useThoughts();
-  const { getSuggestions, refreshEntities } = useEntities();
+  const { getSuggestions, refreshEntities, entities } = useEntities();
   const { syncStatus, refreshSyncStatus } = useSyncState();
   const { toast } = useToast();
 
@@ -96,6 +98,19 @@ export const ThoughtManagementPage = ({
       {syncStatus.pendingChanges > 0 && (
         <SyncBanner onSync={handleSync} />
       )}
+      
+      <StatsCard thoughts={thoughts} />
+      
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Record a Thought</h2>
+        {onDefaultTagsChange && (
+          <Settings
+            defaultTags={defaultTags}
+            onDefaultTagsChange={onDefaultTagsChange}
+            existingEntities={getSuggestions()}
+          />
+        )}
+      </div>
       
       <ThoughtForm
         onSubmit={handleThoughtSubmit}
