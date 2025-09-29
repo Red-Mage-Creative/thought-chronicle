@@ -71,7 +71,11 @@ export const useOfflineSync = () => {
 
   const refreshSyncStatus = () => {
     const data = dataStorageService.getData();
-    setPendingCount(dataStorageService.getPendingChangesCount());
+    // Calculate pending count directly to avoid recursion
+    const { thoughts, entities } = data.pendingChanges;
+    const pendingCount = thoughts.added.length + thoughts.modified.length + thoughts.deleted.length +
+                        entities.added.length + entities.modified.length + entities.deleted.length;
+    setPendingCount(pendingCount);
     setLastSyncTime(data.lastSyncTime);
     setLastRefreshTime(data.lastRefreshTime);
   };

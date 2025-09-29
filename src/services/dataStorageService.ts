@@ -75,8 +75,15 @@ export const dataStorageService = {
     
     data.thoughts.unshift(localThought);
     data.pendingChanges.thoughts.added.push(localThought.localId!);
+    
+    // Optimize pending changes in memory before saving
+    data.pendingChanges.thoughts = this.optimizeEntityChanges(
+      data.pendingChanges.thoughts.added,
+      data.pendingChanges.thoughts.modified,
+      data.pendingChanges.thoughts.deleted
+    );
+    
     this.saveData(data);
-    this.optimizePendingChanges();
     return localThought;
   },
 
@@ -92,8 +99,15 @@ export const dataStorageService = {
     
     data.entities.push(localEntity);
     data.pendingChanges.entities.added.push(localEntity.localId!);
+    
+    // Optimize pending changes in memory before saving
+    data.pendingChanges.entities = this.optimizeEntityChanges(
+      data.pendingChanges.entities.added,
+      data.pendingChanges.entities.modified,
+      data.pendingChanges.entities.deleted
+    );
+    
     this.saveData(data);
-    this.optimizePendingChanges();
     return localEntity;
   },
 
@@ -201,9 +215,8 @@ export const dataStorageService = {
     this.saveData(data);
   },
 
-  // Get total pending changes count (optimized)
+  // Get total pending changes count (read-only)
   getPendingChangesCount(): number {
-    this.optimizePendingChanges();
     const data = this.getData();
     const { thoughts, entities } = data.pendingChanges;
     return thoughts.added.length + thoughts.modified.length + thoughts.deleted.length +

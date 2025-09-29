@@ -65,8 +65,14 @@ export const thoughtService = {
       data.pendingChanges.thoughts.modified.push(thoughtIdForSync);
     }
     
+    // Optimize pending changes in memory before saving
+    data.pendingChanges.thoughts = dataStorageService.optimizeEntityChanges(
+      data.pendingChanges.thoughts.added,
+      data.pendingChanges.thoughts.modified,
+      data.pendingChanges.thoughts.deleted
+    );
+    
     dataStorageService.saveData(data);
-    dataStorageService.optimizePendingChanges();
     return updatedThought;
   },
 
@@ -85,8 +91,14 @@ export const thoughtService = {
         data.pendingChanges.thoughts.deleted.push(thought.localId);
       }
       
+      // Optimize pending changes in memory before saving
+      data.pendingChanges.thoughts = dataStorageService.optimizeEntityChanges(
+        data.pendingChanges.thoughts.added,
+        data.pendingChanges.thoughts.modified,
+        data.pendingChanges.thoughts.deleted
+      );
+      
       dataStorageService.saveData(data);
-      dataStorageService.optimizePendingChanges();
     }
   },
 

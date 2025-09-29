@@ -87,7 +87,13 @@ export const entityService = {
       data.pendingChanges.entities.deleted.push(entity.localId);
     }
     
+    // Optimize pending changes in memory before saving
+    data.pendingChanges.entities = dataStorageService.optimizeEntityChanges(
+      data.pendingChanges.entities.added,
+      data.pendingChanges.entities.modified,
+      data.pendingChanges.entities.deleted
+    );
+    
     dataStorageService.saveData(data);
-    dataStorageService.optimizePendingChanges();
   }
 };
