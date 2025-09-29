@@ -48,31 +48,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, username: string, displayName: string, accessCode: string) => {
     try {
-      // Normalize and validate access code
-      const normalizedAccessCode = accessCode.trim().toLowerCase();
-      
-      const { data: configData, error: configError } = await supabase
-        .from('app_config')
-        .select('value')
-        .eq('key', 'signup_access_code')
-        .maybeSingle();
+      // Validate access code using secure edge function
+      const { data: validationResult, error: validationError } = await supabase.functions.invoke('validate-access-code', {
+        body: { accessCode }
+      });
 
-      if (configError) {
-        console.error('Access code validation error:', configError);
-        const isNetworkError = configError.message?.includes('NetworkError') || configError.message?.includes('Failed to fetch');
-        const errorMessage = isNetworkError 
+      if (validationError) {
+        console.error('Access code validation error:', validationError);
+        const errorMessage = validationError.message?.includes('NetworkError') || validationError.message?.includes('Failed to fetch')
           ? 'Network issue while validating access code. Please try again.'
           : 'Unable to validate access code. Please try again.';
         return { error: { message: errorMessage } };
       }
 
-      if (!configData) {
-        console.error('No access code configuration found');
-        return { error: { message: 'Access code validation is not configured. Please contact support.' } };
-      }
-
-      const normalizedStoredCode = configData.value.trim().toLowerCase();
-      if (normalizedStoredCode !== normalizedAccessCode) {
+      if (!validationResult?.valid) {
         return { error: { message: 'Invalid access code. Please check and try again.' } };
       }
 
