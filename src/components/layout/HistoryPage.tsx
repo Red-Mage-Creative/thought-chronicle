@@ -10,9 +10,10 @@ import { ThoughtForm } from '@/components/forms/ThoughtForm';
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
 import { LocalThought } from '@/types/thoughts';
-import { Search, RefreshCw, Plus } from 'lucide-react';
+import { Search, RefreshCw, Plus, Calendar } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/use-toast';
+import { format, isToday, isYesterday, isThisWeek, isThisMonth, subDays, startOfDay, endOfDay } from 'date-fns';
 
 interface HistoryPageProps {
   onEntityClick?: (entityName: string) => void;
@@ -22,7 +23,7 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
   const { thoughts, createThought, updateThought, deleteThought, refreshThoughts, isLoading } = useThoughts();
   const { getSuggestions } = useEntities();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEntity, setSelectedEntity] = useState<string>('');
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingThought, setEditingThought] = useState<LocalThought | null>(null);
@@ -73,17 +74,45 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
 
   const filteredThoughts = thoughts.filter(thought => {
     const matchesSearch = thought.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEntity = !selectedEntity || 
-      thought.relatedEntities.some(entity => 
-        entity.toLowerCase() === selectedEntity.toLowerCase()
-      );
-    return matchesSearch && matchesEntity;
+    
+    // Filter by date based on when the thought was actually created
+    const thoughtDate = new Date(thought.timestamp);
+    let matchesDate = true;
+    
+    switch (selectedDateFilter) {
+      case 'today':
+        matchesDate = isToday(thoughtDate);
+        break;
+      case 'yesterday':
+        matchesDate = isYesterday(thoughtDate);
+        break;
+      case 'last7':
+        matchesDate = thoughtDate >= subDays(new Date(), 7);
+        break;
+      case 'thisWeek':
+        matchesDate = isThisWeek(thoughtDate);
+        break;
+      case 'thisMonth':
+        matchesDate = isThisMonth(thoughtDate);
+        break;
+      case 'all':
+      default:
+        matchesDate = true;
+        break;
+    }
+    
+    return matchesSearch && matchesDate;
   });
 
-  // Get unique entities mentioned in thoughts
-  const mentionedEntities = Array.from(
-    new Set(thoughts.flatMap(t => t.relatedEntities))
-  ).sort();
+  // Define date filter options
+  const dateFilterOptions = [
+    { key: 'all', label: 'All Time' },
+    { key: 'today', label: 'Today' },
+    { key: 'yesterday', label: 'Yesterday' },
+    { key: 'last7', label: 'Last 7 Days' },
+    { key: 'thisWeek', label: 'This Week' },
+    { key: 'thisMonth', label: 'This Month' }
+  ];
 
   return (
     <>
@@ -114,27 +143,23 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
           />
         </div>
 
-        {mentionedEntities.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-2 mb-4">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Filter by date written:</span>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          {dateFilterOptions.map((option) => (
             <Badge
-              variant={selectedEntity === '' ? 'default' : 'outline'}
+              key={option.key}
+              variant={selectedDateFilter === option.key ? 'default' : 'outline'}
               className="cursor-pointer"
-              onClick={() => setSelectedEntity('')}
+              onClick={() => setSelectedDateFilter(option.key)}
             >
-              All
+              {option.label}
             </Badge>
-            {mentionedEntities.map((entity) => (
-              <Badge
-                key={entity}
-                variant={selectedEntity === entity ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setSelectedEntity(entity)}
-              >
-                {entity}
-              </Badge>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
 
         <ThoughtList 
           thoughts={filteredThoughts} 
