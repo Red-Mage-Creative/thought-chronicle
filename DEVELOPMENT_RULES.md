@@ -5,16 +5,18 @@
 - Reuse existing components, colors, typography, and patterns
 - Adapt existing components rather than duplicating code
 - Only create new components if no suitable existing component exists
+- Ensure that the DesignSystemPage.tsx is ALWAYS up to date with the most recent version of a component.
 
 ## Rule 2: Changelog & Versioning
 - ALWAYS update `/changelog` page when making changes
 - Follow Conventional Commits (https://www.conventionalcommits.org/en/v1.0.0/)
 - Version format: MAJOR.MINOR.PATCH
 - Update version in ChangelogPage.tsx
+- Update version in AppFooter.tsx
 - Group changes by type: feat, fix, docs, style, refactor, test, chore
 - Check the ***Current*** date and use that for the change log. Use a function if you need to find the actual current date. 
 
-### Current Version: 1.0.0
+### Current Version: 1.1.0
 
 ## Rule 3: Clean Code Principles for Component Development
 ### 3.1 Component Structure & Naming
