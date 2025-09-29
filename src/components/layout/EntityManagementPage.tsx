@@ -26,7 +26,7 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
   const [showModal, setShowModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const [sortBy, setSortBy] = useState<'alphabetical' | 'mentions' | 'created' | 'updated'>('alphabetical');
+  const [sortBy, setSortBy] = useState<'alphabetical' | 'mentions' | 'created' | 'updated' | 'lastMentioned'>('alphabetical');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showUncategorized, setShowUncategorized] = useState(false);
 
@@ -88,6 +88,11 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
             const bUpdated = b.modifiedLocally?.getTime() || 0;
             const updatedCompare = bUpdated - aUpdated;
             return sortOrder === 'asc' ? -updatedCompare : updatedCompare;
+          case 'lastMentioned':
+            const aLastMentioned = a.metrics.lastMentioned?.getTime() || 0;
+            const bLastMentioned = b.metrics.lastMentioned?.getTime() || 0;
+            const lastMentionedCompare = bLastMentioned - aLastMentioned;
+            return sortOrder === 'asc' ? -lastMentionedCompare : lastMentionedCompare;
           default:
             return 0;
         }
@@ -158,10 +163,12 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
                   <SelectItem value="alphabetical-desc">Alphabetical (Z-A)</SelectItem>
                   <SelectItem value="mentions-desc">Most Mentioned</SelectItem>
                   <SelectItem value="mentions-asc">Least Mentioned</SelectItem>
-                  <SelectItem value="created-desc">Recently Created</SelectItem>
-                  <SelectItem value="created-asc">Oldest Created</SelectItem>
-                  <SelectItem value="updated-desc">Recently Updated</SelectItem>
-                  <SelectItem value="updated-asc">Oldest Updated</SelectItem>
+                  <SelectItem value="lastMentioned-desc">Mentioned (New → Old)</SelectItem>
+                  <SelectItem value="lastMentioned-asc">Mentioned (Old → New)</SelectItem>
+                  <SelectItem value="created-desc">Created (New → Old)</SelectItem>
+                  <SelectItem value="created-asc">Created (Old → New)</SelectItem>
+                  <SelectItem value="updated-desc">Updated (New → Old)</SelectItem>
+                  <SelectItem value="updated-asc">Updated (Old → New)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EntityWithMetrics } from '@/types/entities';
-import { Users } from 'lucide-react';
+import { Users, Calendar, Clock, MessageSquare } from 'lucide-react';
 import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 import { format } from 'date-fns';
@@ -79,7 +79,10 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
                     <div className="text-sm text-muted-foreground space-y-1">
                       <div>Mentioned {entity.metrics.count} time{entity.metrics.count !== 1 ? 's' : ''}</div>
                       {entity.metrics.lastMentioned && (
-                        <div>Last mention: {format(entity.metrics.lastMentioned, 'MMM d, yyyy')}</div>
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          {format(entity.metrics.lastMentioned, 'MMM d, yyyy')}
+                        </div>
                       )}
                     </div>
 
@@ -93,10 +96,16 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
                       </div>
                     )}
 
-                    <div className="text-xs text-muted-foreground mt-auto pt-2 border-t space-y-1">
-                      <div>Created: {entity.createdLocally ? format(entity.createdLocally, 'MMM d, yyyy') : 'Unknown'}</div>
+                    <div className="text-xs text-muted-foreground mt-auto pt-2 border-t flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {entity.createdLocally ? format(entity.createdLocally, 'MMM d, yyyy') : 'Unknown'}
+                      </div>
                       {entity.modifiedLocally && (
-                        <div>Updated: {format(entity.modifiedLocally, 'MMM d, yyyy')}</div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {format(entity.modifiedLocally, 'MMM d, yyyy')}
+                        </div>
                       )}
                     </div>
                   </div>
