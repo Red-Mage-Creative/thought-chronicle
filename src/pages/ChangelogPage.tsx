@@ -18,6 +18,14 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "0.4.0",
+  date: "2025-09-29",
+  features: ["Implemented client-side leaked password protection using HaveIBeenPwned API with k-anonymity model", "Added real-time password security assessment during registration", "Enhanced password strength indicators with breach detection status"],
+  improvements: ["Improved signup security by preventing the use of passwords found in known data breaches", "Enhanced user experience with live password security feedback", "Added privacy-preserving password breach checking (only first 5 hash characters sent to API)"],
+  fixes: [],
+  docs: [],
+  maintenance: []
+}, {
   version: "0.3.0",
   date: "2025-09-29",
   features: ["Added comprehensive Privacy Policy page with data collection transparency", "Created Terms of Service page with user rights and responsibilities", "Implemented Cookie Controls page with granular privacy settings", "Made changelog and design system pages publicly accessible without authentication"],

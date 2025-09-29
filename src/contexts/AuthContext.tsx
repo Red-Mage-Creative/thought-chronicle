@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { checkPasswordBreach } from '@/utils/passwordSecurity';
 
 interface AuthContextType {
   session: Session | null;
@@ -48,6 +49,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, username: string, displayName: string, accessCode: string) => {
     try {
+      // Check password against known breaches first
+      const breachResult = await checkPasswordBreach(password);
+      if (breachResult.isBreached) {
+        return { 
+          error: { 
+            message: `This password has been found in ${breachResult.breachCount?.toLocaleString()} data breaches. Please choose a different password for your security.` 
+          } 
+        };
+      }
+      
+      if (breachResult.error) {
+        // Don't block signup if breach check fails, just log the issue
+        console.warn('Password breach check failed:', breachResult.error);
+      }
+
       // Validate access code using secure edge function
       const { data: validationResult, error: validationError } = await supabase.functions.invoke('validate-access-code', {
         body: { accessCode }

@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Sword, Eye, EyeOff, Shield } from 'lucide-react';
+import { Sword, Eye, EyeOff, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
 import { signInSchema, signUpSchema, getPasswordStrength, type SignInFormData, type SignUpFormData } from '@/utils/validation';
+import { assessPasswordSecurity } from '@/utils/passwordSecurity';
 import { toast } from 'sonner';
 import { AppFooter } from '@/components/layout/AppFooter';
 
@@ -34,8 +35,30 @@ export const AuthPage = () => {
   const [accessCode, setAccessCode] = useState('');
   const [signUpErrors, setSignUpErrors] = useState<Partial<SignUpFormData>>({});
   
-  // Password strength
-  const passwordStrength = getPasswordStrength(signUpPassword);
+  // Password security assessment
+  const [passwordSecurity, setPasswordSecurity] = useState<any>(null);
+  const [isCheckingPassword, setIsCheckingPassword] = useState(false);
+
+  // Debounced password security check
+  useEffect(() => {
+    if (signUpPassword.length < 8) {
+      setPasswordSecurity(null);
+      return;
+    }
+
+    setIsCheckingPassword(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const security = await assessPasswordSecurity(signUpPassword);
+        setPasswordSecurity(security);
+      } catch (error) {
+        console.error('Password security check failed:', error);
+      }
+      setIsCheckingPassword(false);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [signUpPassword]);
 
   useEffect(() => {
     if (user) {
@@ -264,19 +287,50 @@ export const AuthPage = () => {
                         </Button>
                       </div>
                       {signUpPassword && (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           <div className="flex items-center space-x-2">
                             <div className="flex-1">
-                              <Progress value={(passwordStrength.score / 5) * 100} className="h-2" />
+                              <Progress 
+                                value={passwordSecurity ? (passwordSecurity.strength.score / 5) * 100 : 0} 
+                                className="h-2" 
+                              />
                             </div>
                             <span className="text-xs text-muted-foreground">
-                              {passwordStrength.score === 5 ? 'Strong' : 
-                               passwordStrength.score >= 3 ? 'Medium' : 'Weak'}
+                              {passwordSecurity ? (
+                                passwordSecurity.strength.score === 5 ? 'Strong' : 
+                                passwordSecurity.strength.score >= 3 ? 'Medium' : 'Weak'
+                              ) : 'Checking...'}
                             </span>
                           </div>
-                          {passwordStrength.feedback.length > 0 && (
+                          
+                          {/* Security status indicator */}
+                          {passwordSecurity && (
+                            <div className="flex items-center space-x-2">
+                              {passwordSecurity.breach.isBreached ? (
+                                <div className="flex items-center space-x-1 text-destructive">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  <span className="text-xs">Found in {passwordSecurity.breach.breachCount?.toLocaleString()} breaches</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center space-x-1 text-green-600">
+                                  <CheckCircle className="h-3 w-3" />
+                                  <span className="text-xs">Not found in known breaches</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Checking indicator */}
+                          {isCheckingPassword && (
+                            <div className="flex items-center space-x-1 text-muted-foreground">
+                              <div className="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full"></div>
+                              <span className="text-xs">Checking password security...</span>
+                            </div>
+                          )}
+                          
+                          {passwordSecurity?.recommendations.length > 0 && (
                             <p className="text-xs text-muted-foreground">
-                              Missing: {passwordStrength.feedback.join(', ')}
+                              {passwordSecurity.recommendations.join(', ')}
                             </p>
                           )}
                         </div>
