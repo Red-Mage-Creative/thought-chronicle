@@ -1,13 +1,15 @@
 import { ThoughtManagementPage } from "@/components/layout/ThoughtManagementPage";
-import { useState } from "react";
 
-const Index = () => {
-  const [defaultTags, setDefaultTags] = useState<string[]>([]);
+interface IndexProps {
+  defaultTags?: string[];
+  onDefaultTagsChange?: (tags: string[]) => void;
+}
 
+const Index = ({ defaultTags = [], onDefaultTagsChange }: IndexProps) => {
   return (
     <ThoughtManagementPage
       defaultTags={defaultTags}
-      onDefaultTagsChange={setDefaultTags}
+      onDefaultTagsChange={onDefaultTagsChange}
     />
   );
 };

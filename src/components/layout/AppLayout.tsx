@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, ReactElement, cloneElement } from 'react';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
 import { cn } from '@/lib/utils';
@@ -8,9 +8,11 @@ interface AppLayoutProps {
   children: ReactNode;
   variant?: 'narrow' | 'wide' | 'full';
   thoughts?: LocalThought[];
+  defaultTags?: string[];
+  onDefaultTagsChange?: (tags: string[]) => void;
 }
 
-export const AppLayout = ({ children, variant = 'narrow', thoughts }: AppLayoutProps) => {
+export const AppLayout = ({ children, variant = 'narrow', thoughts, defaultTags, onDefaultTagsChange }: AppLayoutProps) => {
   const getContainerClasses = () => {
     switch (variant) {
       case 'narrow':
@@ -30,7 +32,10 @@ export const AppLayout = ({ children, variant = 'narrow', thoughts }: AppLayoutP
       <main className="flex-1">
         <div className="container">
           <div className="max-w-2xl mx-auto py-6 space-y-6">
-            {children}
+            {defaultTags && onDefaultTagsChange ? 
+              cloneElement(children as ReactElement, { defaultTags, onDefaultTagsChange }) : 
+              children
+            }
           </div>
         </div>
       </main>

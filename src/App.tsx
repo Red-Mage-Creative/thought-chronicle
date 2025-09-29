@@ -11,7 +11,7 @@ import EntitiesPage from "./pages/EntitiesPage";
 import HistoryPage from "./pages/HistoryPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
 import NotFound from "./pages/NotFound";
-import { useLocalThoughts, useOfflineSync } from "./hooks/useOfflineData";
+import { useOfflineSync } from "./hooks/useOfflineData";
 import { syncService } from "./services/syncService";
 import { toast } from "sonner";
 
@@ -22,7 +22,6 @@ const App = () => {
   const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
   const [defaultTags, setDefaultTags] = useState<string[]>([]);
   
-  const { thoughts, addThought } = useLocalThoughts();
   const { refreshSyncStatus } = useOfflineSync();
   const { thoughts: allThoughts } = useThoughts();
 
@@ -34,16 +33,6 @@ const App = () => {
     }
   }, []);
 
-  const handleThoughtAdded = (newThought: any) => {
-    addThought({
-      id: newThought.id,
-      content: newThought.content,
-      relatedEntities: newThought.relatedEntities,
-      timestamp: newThought.timestamp,
-      gameDate: newThought.gameDate
-    });
-    refreshSyncStatus();
-  };
 
   const handleDefaultTagsChange = (newDefaultTags: string[]) => {
     setDefaultTags(newDefaultTags);
@@ -74,7 +63,7 @@ const App = () => {
               <Route 
                 path="/" 
                 element={
-                  <AppLayout variant="narrow" thoughts={allThoughts}>
+                  <AppLayout variant="narrow" thoughts={allThoughts} defaultTags={defaultTags} onDefaultTagsChange={handleDefaultTagsChange}>
                     <Index />
                   </AppLayout>
                 } 
