@@ -39,10 +39,59 @@ export const thoughtService = {
     return thought;
   },
 
+  updateThought(
+    thoughtId: string,
+    content: string,
+    relatedEntities: string[],
+    gameDate?: string
+  ): LocalThought | null {
+    const data = dataStorageService.getData();
+    const thoughtIndex = data.thoughts.findIndex(t => t.localId === thoughtId || t.id === thoughtId);
+    
+    if (thoughtIndex === -1) return null;
+    
+    // Ensure all related entities exist
+    const validatedEntities = relatedEntities.map(entityName => {
+      const entity = entityService.ensureEntityExists(entityName.trim());
+      return entity.name;
+    });
+    
+    const updatedThought: LocalThought = {
+      ...data.thoughts[thoughtIndex],
+      content: content.trim(),
+      relatedEntities: validatedEntities,
+      gameDate,
+      modifiedLocally: new Date(),
+      syncStatus: 'pending'
+    };
+    
+    data.thoughts[thoughtIndex] = updatedThought;
+    
+    // Track as modified for sync
+    const thoughtIdForSync = updatedThought.localId || updatedThought.id!;
+    if (!data.pendingChanges.thoughts.modified.includes(thoughtIdForSync)) {
+      data.pendingChanges.thoughts.modified.push(thoughtIdForSync);
+    }
+    
+    dataStorageService.saveData(data);
+    return updatedThought;
+  },
+
   deleteThought(thoughtId: string): void {
     const data = dataStorageService.getData();
-    data.thoughts = data.thoughts.filter(t => t.localId !== thoughtId && t.id !== thoughtId);
-    dataStorageService.saveData(data);
+    const thoughtIndex = data.thoughts.findIndex(t => t.localId === thoughtId || t.id === thoughtId);
+    
+    if (thoughtIndex !== -1) {
+      const thought = data.thoughts[thoughtIndex];
+      data.thoughts.splice(thoughtIndex, 1);
+      
+      // Track for sync if it has server ID
+      if (thought.id) {
+        data.pendingChanges.thoughts.deleted.push(thought.id);
+      }
+      
+      dataStorageService.saveData(data);
+    }
   },
 
   getThoughtsByEntity(entityName: string): LocalThought[] {

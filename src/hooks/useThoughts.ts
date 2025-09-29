@@ -37,10 +37,36 @@ export const useThoughts = () => {
     }
   };
 
+  const updateThought = async (
+    thoughtId: string,
+    content: string,
+    relatedEntities: string[],
+    gameDate?: string
+  ) => {
+    try {
+      const thought = thoughtService.updateThought(thoughtId, content, relatedEntities, gameDate);
+      refreshThoughts();
+      return thought;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const deleteThought = async (thoughtId: string) => {
+    try {
+      thoughtService.deleteThought(thoughtId);
+      refreshThoughts();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     thoughts,
     isLoading,
     createThought,
+    updateThought,
+    deleteThought,
     refreshThoughts
   };
 };

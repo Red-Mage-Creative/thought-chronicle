@@ -12,12 +12,26 @@ interface ThoughtFormProps {
   onSubmit: (content: string, tags: string[], gameDate?: string) => Promise<void>;
   suggestions: EntitySuggestion[];
   defaultTags?: string[];
+  initialData?: {
+    content: string;
+    relatedEntities: string[];
+    gameDate?: string;
+  };
+  isEditMode?: boolean;
 }
 
-export const ThoughtForm = ({ onSubmit, suggestions, defaultTags = [] }: ThoughtFormProps) => {
-  const [content, setContent] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [gameDate, setGameDate] = useState('');
+export const ThoughtForm = ({ 
+  onSubmit, 
+  suggestions, 
+  defaultTags = [], 
+  initialData,
+  isEditMode = false 
+}: ThoughtFormProps) => {
+  const [content, setContent] = useState(initialData?.content || '');
+  const [tags, setTags] = useState<string[]>(
+    initialData?.relatedEntities?.filter(entity => !defaultTags.includes(entity)) || []
+  );
+  const [gameDate, setGameDate] = useState(initialData?.gameDate || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -37,8 +51,8 @@ export const ThoughtForm = ({ onSubmit, suggestions, defaultTags = [] }: Thought
       setGameDate('');
       
       toast({
-        title: 'Thought recorded',
-        description: 'Your thought has been saved successfully.'
+        title: isEditMode ? 'Thought updated' : 'Thought recorded',
+        description: isEditMode ? 'Your thought has been updated successfully.' : 'Your thought has been saved successfully.'
       });
     } catch (error) {
       console.error('Error submitting thought:', error);
@@ -61,7 +75,9 @@ export const ThoughtForm = ({ onSubmit, suggestions, defaultTags = [] }: Thought
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-foreground">Record a Thought</CardTitle>
+        <CardTitle className="text-foreground">
+          {isEditMode ? 'Edit Thought' : 'Record a Thought'}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -117,7 +133,10 @@ export const ThoughtForm = ({ onSubmit, suggestions, defaultTags = [] }: Thought
           disabled={!isContentValid || isSubmitting}
           className="w-full"
         >
-          {isSubmitting ? 'Recording...' : 'Record Thought'}
+          {isSubmitting 
+            ? (isEditMode ? 'Updating...' : 'Recording...') 
+            : (isEditMode ? 'Update Thought' : 'Record Thought')
+          }
         </Button>
       </CardContent>
     </Card>

@@ -2,17 +2,26 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LocalThought } from '@/types/thoughts';
 
-import { Clock, Calendar } from 'lucide-react';
+import { Clock, Calendar, Edit, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { getEntityClass } from '@/utils/entityUtils';
 
 interface ThoughtListProps {
   thoughts: LocalThought[];
   onEntityClick?: (entityName: string) => void;
+  onEditThought?: (thought: LocalThought) => void;
+  onDeleteThought?: (thoughtId: string) => void;
   isLoading?: boolean;
 }
 
 
-export const ThoughtList = ({ thoughts, onEntityClick, isLoading }: ThoughtListProps) => {
+export const ThoughtList = ({ 
+  thoughts, 
+  onEntityClick, 
+  onEditThought, 
+  onDeleteThought, 
+  isLoading 
+}: ThoughtListProps) => {
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -80,11 +89,37 @@ export const ThoughtList = ({ thoughts, onEntityClick, isLoading }: ThoughtListP
                   </div>
                 )}
               </div>
-              {thought.syncStatus === 'pending' && (
-                <Badge variant="outline" className="text-xs">
-                  Pending Sync
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {thought.syncStatus === 'pending' && (
+                  <Badge variant="outline" className="text-xs">
+                    Pending Sync
+                  </Badge>
+                )}
+                {(onEditThought || onDeleteThought) && (
+                  <div className="flex items-center gap-1">
+                    {onEditThought && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => onEditThought(thought)}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {onDeleteThought && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive"
+                        onClick={() => onDeleteThought(thought.localId || thought.id!)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
