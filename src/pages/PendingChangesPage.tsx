@@ -235,7 +235,7 @@ export default function PendingChangesPage() {
                 {changes.map((change, index) => (
                   <TableRow key={`${change.type}-${change.action}-${change.id}-${index}`} className="text-xs">
                     <TableCell className="py-2">
-                      <Badge variant="outline" className="capitalize text-xs px-1 py-0">
+                      <Badge variant="secondary" className="capitalize text-xs px-1 py-0">
                         {change.type}
                       </Badge>
                     </TableCell>
