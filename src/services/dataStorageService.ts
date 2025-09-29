@@ -1,6 +1,7 @@
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { PendingChanges } from '@/types/sync';
+import { generateLocalId } from '@/utils/entityUtils';
 
 export interface LocalDataStore {
   thoughts: LocalThought[];
@@ -38,6 +39,11 @@ export const dataStorageService = {
       parsed.thoughts?.forEach((thought: LocalThought) => {
         thought.timestamp = new Date(thought.timestamp);
         if (thought.modifiedLocally) thought.modifiedLocally = new Date(thought.modifiedLocally);
+        
+        // Data migration: ensure relatedEntities exists
+        if (!thought.relatedEntities) {
+          thought.relatedEntities = (thought as any).entities || [];
+        }
       });
       
       return { ...getDefaultStore(), ...parsed };
@@ -50,9 +56,45 @@ export const dataStorageService = {
   saveData(data: LocalDataStore): void {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      // Dispatch custom event for immediate UI refresh
+      window.dispatchEvent(new CustomEvent('storageUpdated'));
     } catch (error) {
       // Error saving to localStorage - could implement retry logic
     }
+  },
+
+  // Add a new thought locally
+  addThought(thought: Omit<LocalThought, 'localId' | 'syncStatus'>): LocalThought {
+    const data = this.getData();
+    const localThought: LocalThought = {
+      ...thought,
+      localId: generateLocalId(),
+      syncStatus: 'pending',
+      modifiedLocally: new Date()
+    };
+    
+    data.thoughts.unshift(localThought);
+    data.pendingChanges.thoughts.added.push(localThought.localId!);
+    this.saveData(data);
+    this.optimizePendingChanges();
+    return localThought;
+  },
+
+  // Add a new entity locally
+  addEntity(entity: Omit<LocalEntity, 'localId' | 'syncStatus'>): LocalEntity {
+    const data = this.getData();
+    const localEntity: LocalEntity = {
+      ...entity,
+      localId: generateLocalId(),
+      syncStatus: 'pending',
+      modifiedLocally: new Date()
+    };
+    
+    data.entities.push(localEntity);
+    data.pendingChanges.entities.added.push(localEntity.localId!);
+    this.saveData(data);
+    this.optimizePendingChanges();
+    return localEntity;
   },
 
   // Optimize pending changes by eliminating redundant operations
@@ -79,21 +121,20 @@ export const dataStorageService = {
   },
 
   // Helper method to optimize changes for a specific entity type
-  optimizeEntityChanges<T extends { id?: string; localId?: string }>(
-    added: T[],
-    modified: T[],
+  optimizeEntityChanges(
+    added: string[],
+    modified: string[],
     deleted: string[]
-  ): { added: T[]; modified: T[]; deleted: string[] } {
-    const finalAdded: T[] = [];
-    const finalModified: T[] = [];
+  ): { added: string[]; modified: string[]; deleted: string[] } {
+    const finalAdded: string[] = [];
+    const finalModified: string[] = [];
     const finalDeleted: string[] = [];
 
     // Track which items we've processed
     const processedIds = new Set<string>();
 
     // Process added items
-    for (const item of added) {
-      const itemId = item.id || item.localId;
+    for (const itemId of added) {
       if (!itemId) continue;
 
       // Check if this added item was later deleted
@@ -105,23 +146,21 @@ export const dataStorageService = {
       }
 
       // Check if this added item was later modified
-      const modifiedIndex = modified.findIndex(m => (m.id || m.localId) === itemId);
-      if (modifiedIndex >= 0) {
-        // Add then modify = keep only the final added state with modifications
-        const modifiedItem = modified[modifiedIndex];
-        finalAdded.push(modifiedItem);
+      const wasModified = modified.includes(itemId);
+      if (wasModified) {
+        // Add then modify = keep only the final added state
+        finalAdded.push(itemId);
         processedIds.add(itemId);
         continue;
       }
 
       // No changes after add, keep the add
-      finalAdded.push(item);
+      finalAdded.push(itemId);
       processedIds.add(itemId);
     }
 
     // Process modified items (that weren't already handled above)
-    for (const item of modified) {
-      const itemId = item.id || item.localId;
+    for (const itemId of modified) {
       if (!itemId || processedIds.has(itemId)) continue;
 
       // Check if this modified item was later deleted
@@ -134,7 +173,7 @@ export const dataStorageService = {
       }
 
       // Keep the modification
-      finalModified.push(item);
+      finalModified.push(itemId);
       processedIds.add(itemId);
     }
 
@@ -149,6 +188,36 @@ export const dataStorageService = {
       modified: finalModified,
       deleted: finalDeleted
     };
+  },
+
+  // Clear pending changes after successful sync
+  clearPendingChanges(): void {
+    const data = this.getData();
+    data.pendingChanges = {
+      thoughts: { added: [], modified: [], deleted: [] },
+      entities: { added: [], modified: [], deleted: [] }
+    };
+    data.lastSyncTime = new Date();
+    this.saveData(data);
+  },
+
+  // Get total pending changes count (optimized)
+  getPendingChangesCount(): number {
+    this.optimizePendingChanges();
+    const data = this.getData();
+    const { thoughts, entities } = data.pendingChanges;
+    return thoughts.added.length + thoughts.modified.length + thoughts.deleted.length +
+           entities.added.length + entities.modified.length + entities.deleted.length;
+  },
+
+  // Check if data needs refresh (older than 24 hours)
+  needsRefresh(): boolean {
+    const data = this.getData();
+    if (!data.lastRefreshTime) return true;
+    
+    const dayAgo = new Date();
+    dayAgo.setHours(dayAgo.getHours() - 24);
+    return data.lastRefreshTime < dayAgo;
   },
 
   clearAll(): void {

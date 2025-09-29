@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { localStorageService } from "@/services/localStorageService";
+import { dataStorageService } from "@/services/dataStorageService";
 
 interface AddEntityModalProps {
   open: boolean;
@@ -52,7 +52,7 @@ export const AddEntityModal = ({ open, onOpenChange, onEntityAdded }: AddEntityM
     }
 
     // Check for duplicate entities (case-insensitive)
-    const data = localStorageService.getData();
+    const data = dataStorageService.getData();
     const existingEntity = data.entities.find(entity => 
       entity.name.toLowerCase() === name.trim().toLowerCase()
     );
@@ -66,13 +66,11 @@ export const AddEntityModal = ({ open, onOpenChange, onEntityAdded }: AddEntityM
     try {
       const entityData = {
         name: name.trim(),
-        type,
-        description: description.trim() || undefined,
-        lastMentioned: new Date(),
-        count: 0
+        type: type as any,
+        description: description.trim() || undefined
       };
 
-      localStorageService.addEntity(entityData);
+      dataStorageService.addEntity(entityData);
       toast.success(`${name} has been added to the Entity Registry`);
       
       // Reset form

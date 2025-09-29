@@ -1,7 +1,7 @@
 import { LocalEntity, EntityType, EntityWithMetrics } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
-import { inferEntityType, generateLocalId } from '@/utils/entityUtils';
+import { inferEntityType } from '@/utils/entityUtils';
 
 export const entityService = {
   getAllEntities(): LocalEntity[] {
@@ -27,19 +27,11 @@ export const entityService = {
       throw new Error(`Entity "${name}" already exists`);
     }
     
-    const entity: LocalEntity = {
-      localId: generateLocalId(),
+    const entity = dataStorageService.addEntity({
       name,
       type: type || inferEntityType(name),
-      description,
-      syncStatus: 'pending',
-      modifiedLocally: new Date()
-    };
-    
-    data.entities.push(entity);
-    data.pendingChanges.entities.added.push(entity.localId!);
-    dataStorageService.saveData(data);
-    dataStorageService.optimizePendingChanges();
+      description
+    });
     
     return entity;
   },

@@ -1,4 +1,4 @@
-import { localStorageService } from './localStorageService';
+import { dataStorageService } from './dataStorageService';
 import { searchThoughts, searchEntities } from './buildshipApi';
 
 export interface SyncResult {
@@ -10,7 +10,7 @@ export interface SyncResult {
 export const syncService = {
   async syncToServer(): Promise<SyncResult> {
     try {
-      const data = localStorageService.getData();
+      const data = dataStorageService.getData();
       const { thoughts } = data.pendingChanges;
       
       // For now, we'll simulate uploading to server
@@ -33,7 +33,7 @@ export const syncService = {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Clear pending changes on success
-      localStorageService.clearPendingChanges();
+      dataStorageService.clearPendingChanges();
 
       return {
         success: true,
@@ -58,8 +58,8 @@ export const syncService = {
         searchEntities('')
       ]);
 
-      // Update local storage with server data
-      localStorageService.updateServerData(thoughts, entities);
+      // Update local storage with server data (implement this method if needed)
+      // dataStorageService.updateServerData(thoughts, entities);
 
       return {
         success: true,

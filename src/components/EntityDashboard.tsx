@@ -41,7 +41,7 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
         name: entity.name,
         type: entity.type,
         count: 0,
-        lastMentioned: entity.lastMentioned
+        lastMentioned: entity.modifiedLocally || new Date()
       });
     });
 

@@ -33,13 +33,16 @@ export const useSyncState = () => {
     
     const handleOnline = () => refreshSyncStatus();
     const handleOffline = () => refreshSyncStatus();
+    const handleStorageUpdate = () => refreshSyncStatus();
     
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    window.addEventListener('storageUpdated', handleStorageUpdate);
     
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('storageUpdated', handleStorageUpdate);
     };
   }, []);
 

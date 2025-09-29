@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { localStorageService, LocalThought, LocalEntity } from '@/services/localStorageService';
+import { dataStorageService } from '@/services/dataStorageService';
+import { LocalThought } from '@/types/thoughts';
+import { LocalEntity } from '@/types/entities';
 
 export const useLocalThoughts = () => {
   const [thoughts, setThoughts] = useState<LocalThought[]>([]);
 
   const refreshFromStorage = () => {
-    const data = localStorageService.getData();
+    const data = dataStorageService.getData();
     setThoughts(data.thoughts);
   };
 
@@ -14,12 +16,17 @@ export const useLocalThoughts = () => {
     
     // Listen for storage changes
     const handleStorageChange = () => refreshFromStorage();
+    const handleStorageUpdate = () => refreshFromStorage();
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('storageUpdated', handleStorageUpdate);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storageUpdated', handleStorageUpdate);
+    };
   }, []);
 
   const addThought = (thoughtData: Omit<LocalThought, 'localId' | 'syncStatus'>) => {
-    const newThought = localStorageService.addThought(thoughtData);
+    const newThought = dataStorageService.addThought(thoughtData);
     refreshFromStorage();
     return newThought;
   };
@@ -31,7 +38,7 @@ export const useLocalEntities = () => {
   const [entities, setEntities] = useState<LocalEntity[]>([]);
 
   const refreshFromStorage = () => {
-    const data = localStorageService.getData();
+    const data = dataStorageService.getData();
     setEntities(data.entities);
   };
 
@@ -39,12 +46,17 @@ export const useLocalEntities = () => {
     refreshFromStorage();
     
     const handleStorageChange = () => refreshFromStorage();
+    const handleStorageUpdate = () => refreshFromStorage();
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('storageUpdated', handleStorageUpdate);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storageUpdated', handleStorageUpdate);
+    };
   }, []);
 
   const addEntity = (entityData: Omit<LocalEntity, 'localId' | 'syncStatus'>) => {
-    const newEntity = localStorageService.addEntity(entityData);
+    const newEntity = dataStorageService.addEntity(entityData);
     refreshFromStorage();
     return newEntity;
   };
@@ -58,8 +70,8 @@ export const useOfflineSync = () => {
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
 
   const refreshSyncStatus = () => {
-    const data = localStorageService.getData();
-    setPendingCount(localStorageService.getPendingChangesCount());
+    const data = dataStorageService.getData();
+    setPendingCount(dataStorageService.getPendingChangesCount());
     setLastSyncTime(data.lastSyncTime);
     setLastRefreshTime(data.lastRefreshTime);
   };
@@ -68,12 +80,17 @@ export const useOfflineSync = () => {
     refreshSyncStatus();
     
     const handleStorageChange = () => refreshSyncStatus();
+    const handleStorageUpdate = () => refreshSyncStatus();
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('storageUpdated', handleStorageUpdate);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('storageUpdated', handleStorageUpdate);
+    };
   }, []);
 
   const needsRefresh = useMemo(() => {
-    return localStorageService.needsRefresh();
+    return dataStorageService.needsRefresh();
   }, [lastRefreshTime]);
 
   return { 

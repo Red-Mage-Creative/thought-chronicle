@@ -1,7 +1,6 @@
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
 import { entityService } from './entityService';
-import { generateLocalId } from '@/utils/entityUtils';
 
 export const thoughtService = {
   getAllThoughts(): LocalThought[] {
@@ -22,20 +21,12 @@ export const thoughtService = {
       return entity.name; // Use the canonical name from the entity
     });
     
-    const thought: LocalThought = {
-      localId: generateLocalId(),
+    const thought = dataStorageService.addThought({
       content: content.trim(),
       relatedEntities: validatedEntities,
       timestamp: new Date(),
-      gameDate,
-      syncStatus: 'pending',
-      modifiedLocally: new Date()
-    };
-    
-    data.thoughts.unshift(thought);
-    data.pendingChanges.thoughts.added.push(thought.localId!);
-    dataStorageService.saveData(data);
-    dataStorageService.optimizePendingChanges();
+      gameDate
+    });
     
     return thought;
   },
