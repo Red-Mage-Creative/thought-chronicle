@@ -130,7 +130,7 @@ export const AuthPage = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Sword className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">D&D Chronicle</h1>
+            <h1 className="text-3xl font-bold">Chronicle</h1>
             <Shield className="h-8 w-8 text-primary" />
           </div>
           <p className="text-muted-foreground">Access your adventure journal</p>
