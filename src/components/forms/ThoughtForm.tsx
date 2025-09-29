@@ -4,13 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { TagSelector } from './TagSelector';
-import { Settings } from '@/components/Settings';
 import { EntitySuggestion } from '@/types/entities';
-import { Pin } from 'lucide-react';
-
 interface ThoughtFormProps {
   onSubmit: (content: string, tags: string[], gameDate?: string) => Promise<void>;
   suggestions: EntitySuggestion[];
@@ -21,44 +17,33 @@ interface ThoughtFormProps {
     gameDate?: string;
   };
   isEditMode?: boolean;
-  showSettings?: boolean;
-  onDefaultTagsChange?: (tags: string[]) => void;
-  existingEntities?: EntitySuggestion[];
 }
-
-export const ThoughtForm = ({ 
-  onSubmit, 
-  suggestions, 
-  defaultTags = [], 
+export const ThoughtForm = ({
+  onSubmit,
+  suggestions,
+  defaultTags = [],
   initialData,
-  isEditMode = false,
-  showSettings = false,
-  onDefaultTagsChange,
-  existingEntities = []
+  isEditMode = false
 }: ThoughtFormProps) => {
   const [content, setContent] = useState(initialData?.content || '');
-  const [tags, setTags] = useState<string[]>(
-    initialData?.relatedEntities?.filter(entity => !defaultTags.includes(entity)) || []
-  );
+  const [tags, setTags] = useState<string[]>(initialData?.relatedEntities?.filter(entity => !defaultTags.includes(entity)) || []);
   const [gameDate, setGameDate] = useState(initialData?.gameDate || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const allTags = [...defaultTags, ...tags];
   const isContentValid = content.trim().length > 0 && content.length <= 2000;
-
   const handleSubmit = async () => {
     if (!isContentValid) return;
-
     setIsSubmitting(true);
     try {
       await onSubmit(content, allTags, gameDate || undefined);
-      
+
       // Clear form
       setContent('');
       setTags([]);
       setGameDate('');
-      
       toast({
         title: isEditMode ? 'Thought updated' : 'Thought recorded',
         description: isEditMode ? 'Your thought has been updated successfully.' : 'Your thought has been saved successfully.'
@@ -74,50 +59,23 @@ export const ThoughtForm = ({
       setIsSubmitting(false);
     }
   };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && e.ctrlKey && isContentValid) {
       handleSubmit();
     }
   };
-
-  return (
-    <Card className="w-full">
+  return <Card className="w-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-foreground">
-            {isEditMode ? 'Edit Thought' : 'Record a Thought'}
-          </CardTitle>
-          {showSettings && onDefaultTagsChange && (
-            <div className="flex items-center gap-2">
-              {defaultTags.length > 0 && (
-                <Badge variant="secondary" className="text-xs">
-                  <Pin className="h-3 w-3 mr-1" />
-                  {defaultTags.length} default
-                </Badge>
-              )}
-              <Settings
-                defaultTags={defaultTags}
-                onDefaultTagsChange={onDefaultTagsChange}
-                existingEntities={existingEntities}
-              />
-            </div>
-          )}
-        </div>
+        <CardTitle className="text-foreground">
+          {isEditMode ? 'Edit Thought' : 'Record a Thought'}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="content">What happened in your campaign?</Label>
-          <Textarea
-            id="content"
-            placeholder="Describe the events, encounters, or discoveries..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="min-h-24 resize-none"
-          />
+          <Textarea id="content" placeholder="Describe the events, encounters, or discoveries..." value={content} onChange={e => setContent(e.target.value)} onKeyDown={handleKeyPress} className="min-h-24 resize-none" />
           <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Press Ctrl+Enter to submit</span>
+            
             <span className={content.length > 2000 ? 'text-destructive' : ''}>
               {content.length}/2000
             </span>
@@ -126,55 +84,23 @@ export const ThoughtForm = ({
 
         <div className="space-y-2">
           <Label>Tags (Characters, Locations, Items, etc.)</Label>
-          {defaultTags.length > 0 && (
-            <div className="mb-2 p-3 bg-primary/5 border border-primary/20 rounded-md">
-              <div className="flex items-center gap-2 mb-2">
-                <Pin className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Primed Tags (will be auto-added)</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                 {defaultTags.map((tag) => (
-                   <Badge 
-                     key={tag} 
-                     variant="outline" 
-                     className="entity-tag entity-default-tag text-xs"
-                   >
-                     <Pin className="h-3 w-3 mr-1" />
-                     #{tag}
-                   </Badge>
-                 ))}
-              </div>
-            </div>
-          )}
-          <TagSelector
-            tags={tags}
-            onTagsChange={setTags}
-            suggestions={suggestions}
-            placeholder="Add additional tags..."
-          />
+          <TagSelector tags={tags} onTagsChange={setTags} suggestions={suggestions} placeholder="Add tags..." />
+          {defaultTags.length > 0 && <div className="flex flex-wrap gap-1">
+              <span className="text-sm text-muted-foreground">Default tags:</span>
+              {defaultTags.map(tag => <span key={tag} className="entity-tag entity-player text-xs">
+                  {tag}
+                </span>)}
+            </div>}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="gameDate">Game Date (optional)</Label>
-          <Input
-            id="gameDate"
-            placeholder="e.g., Day 15 of Flamerule, 1492 DR"
-            value={gameDate}
-            onChange={(e) => setGameDate(e.target.value)}
-          />
+          <Input id="gameDate" placeholder="e.g., Day 15 of Flamerule, 1492 DR" value={gameDate} onChange={e => setGameDate(e.target.value)} />
         </div>
 
-        <Button
-          onClick={handleSubmit}
-          disabled={!isContentValid || isSubmitting}
-          className="w-full"
-        >
-          {isSubmitting 
-            ? (isEditMode ? 'Updating...' : 'Recording...') 
-            : (isEditMode ? 'Update Thought' : 'Record Thought')
-          }
+        <Button onClick={handleSubmit} disabled={!isContentValid || isSubmitting} className="w-full">
+          {isSubmitting ? isEditMode ? 'Updating...' : 'Recording...' : isEditMode ? 'Update Thought' : 'Record Thought'}
         </Button>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
