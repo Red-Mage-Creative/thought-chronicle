@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthGuard } from "@/components/AuthGuard";
+import { AppInitializer } from "@/components/AppInitializer";
 import { useThoughts } from "@/hooks/useThoughts";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
@@ -74,9 +75,10 @@ const App = () => {
         <Toaster />
         <Sonner />
         <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<AuthPage />} />
+          <AppInitializer>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/auth" element={<AuthPage />} />
               <Route 
                 path="/" 
                 element={
@@ -183,8 +185,9 @@ const App = () => {
                   </AuthGuard>
                 } 
               />
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          </AppInitializer>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

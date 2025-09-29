@@ -14,29 +14,27 @@ interface CampaignManagementModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   campaigns: LocalCampaign[];
-  currentCampaign: LocalCampaign | null;
-  onCampaignUpdate: () => void;
+  onCampaignsUpdated: () => void;
 }
 
 export const CampaignManagementModal = ({
   open,
   onOpenChange,
   campaigns,
-  currentCampaign,
-  onCampaignUpdate
+  onCampaignsUpdated
 }: CampaignManagementModalProps) => {
   const [editingCampaign, setEditingCampaign] = useState<LocalCampaign | null>(null);
   const [deletingCampaign, setDeletingCampaign] = useState<LocalCampaign | null>(null);
 
   const handleEditSuccess = () => {
     setEditingCampaign(null);
-    onCampaignUpdate();
+    onCampaignsUpdated();
     toast.success('Campaign updated successfully');
   };
 
   const handleDeleteSuccess = () => {
     setDeletingCampaign(null);
-    onCampaignUpdate();
+    onCampaignsUpdated();
     toast.success('Campaign deleted successfully');
   };
 
@@ -54,6 +52,7 @@ export const CampaignManagementModal = ({
           
           <div className="space-y-4">
             {campaigns.map((campaign) => {
+              const currentCampaign = campaignService.getCurrentCampaign();
               const isCurrentCampaign = currentCampaign?.localId === campaign.localId;
               
               return (

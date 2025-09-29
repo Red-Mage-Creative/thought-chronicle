@@ -91,7 +91,31 @@ export const dataStorageService = {
         }
       });
       
-      return { ...getDefaultStore(), ...parsed };
+      // Properly merge pendingChanges to ensure all fields exist
+      const defaultStore = getDefaultStore();
+      const mergedPendingChanges = {
+        campaigns: {
+          added: parsed.pendingChanges?.campaigns?.added || [],
+          modified: parsed.pendingChanges?.campaigns?.modified || [],
+          deleted: parsed.pendingChanges?.campaigns?.deleted || []
+        },
+        thoughts: {
+          added: parsed.pendingChanges?.thoughts?.added || [],
+          modified: parsed.pendingChanges?.thoughts?.modified || [],
+          deleted: parsed.pendingChanges?.thoughts?.deleted || []
+        },
+        entities: {
+          added: parsed.pendingChanges?.entities?.added || [],
+          modified: parsed.pendingChanges?.entities?.modified || [],
+          deleted: parsed.pendingChanges?.entities?.deleted || []
+        }
+      };
+      
+      return {
+        ...defaultStore,
+        ...parsed,
+        pendingChanges: mergedPendingChanges
+      };
     } catch (error) {
       // Error loading from localStorage - return default store
       return getDefaultStore();
