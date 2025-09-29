@@ -48,6 +48,20 @@ export const AppFooter = () => {
               <div>
                 💡 Tip: Press Ctrl+Enter to quickly save your thoughts
               </div>
+              <div className="flex gap-3 text-xs text-muted-foreground mt-2">
+                <a 
+                  href="/design-system" 
+                  className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+                >
+                  Design System
+                </a>
+                <a 
+                  href="/changelog" 
+                  className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+                >
+                  Changelog
+                </a>
+              </div>
             </div>
           </div>
         </div>

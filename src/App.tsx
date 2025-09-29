@@ -11,6 +11,8 @@ import EntitiesPage from "./pages/EntitiesPage";
 import EntityDetailsPage from "./pages/EntityDetailsPage";
 import HistoryPage from "./pages/HistoryPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
+import DesignSystemPage from "./pages/DesignSystemPage";
+import ChangelogPage from "./pages/ChangelogPage";
 import NotFound from "./pages/NotFound";
 import { useOfflineSync } from "./hooks/useOfflineData";
 import { syncService } from "./services/syncService";
@@ -110,6 +112,22 @@ const App = () => {
                 element={
                   <AppLayout variant="narrow">
                     <PendingChangesPage />
+                  </AppLayout>
+                } 
+              />
+              <Route 
+                path="/design-system" 
+                element={
+                  <AppLayout variant="wide">
+                    <DesignSystemPage />
+                  </AppLayout>
+                } 
+              />
+              <Route 
+                path="/changelog" 
+                element={
+                  <AppLayout variant="narrow">
+                    <ChangelogPage />
                   </AppLayout>
                 } 
               />
