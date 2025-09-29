@@ -5,6 +5,7 @@ import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
 import { useSyncState } from '@/hooks/useSyncState';
 import { syncService } from '@/services/syncService';
+import { businessLogicService } from '@/services/businessLogicService';
 import { useToast } from '@/hooks/use-toast';
 
 interface ThoughtManagementPageProps {
@@ -22,11 +23,37 @@ export const ThoughtManagementPage = ({
   const { toast } = useToast();
 
   const handleThoughtSubmit = async (content: string, tags: string[], gameDate?: string) => {
-    await createThought(content, tags, gameDate);
-    
-    // Refresh related data
-    refreshEntities();
-    refreshSyncStatus();
+    try {
+      // Separate manual tags from default tags for proper entity creation
+      const manualTags = tags.filter(tag => !defaultTags.includes(tag));
+      
+      const result = await businessLogicService.processThoughtCreation(
+        content,
+        manualTags,
+        defaultTags,
+        gameDate
+      );
+      
+      // Show entity creation notification if entities were created
+      if (result.newEntitiesCreated > 0) {
+        const message = businessLogicService.formatEntityCreationMessage(
+          result.newEntitiesCreated,
+          result.entityNames
+        );
+        toast({
+          title: 'Entities created',
+          description: message
+        });
+      }
+      
+      // Refresh related data
+      refreshThoughts();
+      refreshEntities();
+      refreshSyncStatus();
+    } catch (error) {
+      console.error('Error creating thought:', error);
+      throw error; // Re-throw to let ThoughtForm handle the error display
+    }
   };
 
   const handleSync = async () => {
