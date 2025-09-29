@@ -20,7 +20,16 @@ export const AppFooter = () => {
           <div className="flex justify-between text-sm text-muted-foreground">
             <div className="text-xs">
               <div className="font-medium">Chronicle - A TTRPG note-taking application.</div>
-              <div className="font-medium">Version 1.2.1</div>
+              <div className="font-medium">
+                Version 1.2.1
+                <a 
+                  href="/changelog" 
+                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
+                >
+                  <FileText className="h-3 w-3" />
+                  Changelog
+                </a>
+              </div>
               <br />
               <div className="italic">"Every adventure begins with a single thought"</div>
               <br />
@@ -55,13 +64,6 @@ export const AppFooter = () => {
                 >
                   <Palette className="h-3 w-3" />
                   Design System
-                </a>
-                <a 
-                  href="/changelog" 
-                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
-                >
-                  <FileText className="h-3 w-3" />
-                  Changelog
                 </a>
               </div>
             </div>
