@@ -24,8 +24,7 @@ export const AppHeader = () => {
             <div className="flex items-center gap-3">
               <Sword className="h-6 w-6 text-primary" />
               <div>
-                <h1 className="text-xl font-bold text-foreground">D&D Chronicle</h1>
-                <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
+                <h1 className="text-xl font-bold text-foreground">Chronicle</h1>
               </div>
             </div>
             <div className="flex items-center gap-4">
