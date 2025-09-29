@@ -100,7 +100,7 @@ const App = () => {
               <Route 
                 path="/pending-changes" 
                 element={
-                  <AppLayout variant="wide">
+                  <AppLayout variant="narrow">
                     <PendingChangesPage />
                   </AppLayout>
                 } 

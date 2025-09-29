@@ -15,7 +15,7 @@ export const StatsCard = ({ thoughts }: StatsCardProps) => {
   ).length;
 
   return (
-    <Card className="mb-6 bg-card/50 border-border/50 max-w-2xl mx-auto">
+    <Card className="mb-6 bg-card/50 border-border/50 w-full">
       <CardContent className="p-6 pt-6">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="flex flex-col items-center gap-2">

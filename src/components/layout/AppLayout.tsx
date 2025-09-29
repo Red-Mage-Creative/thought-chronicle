@@ -26,8 +26,10 @@ export const AppLayout = ({ children, variant = 'narrow' }: AppLayoutProps) => {
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <main className="flex-1">
-        <div className={cn(getContainerClasses())}>
-          {children}
+        <div className="container">
+          <div className="max-w-2xl mx-auto py-6 space-y-6">
+            {children}
+          </div>
         </div>
       </main>
       <AppFooter />
