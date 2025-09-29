@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Upload, Trash2, Edit3, Plus, ArrowLeft } from "lucide-react";
+import { AlertCircle, Upload, Trash2, Edit3, Plus, ArrowLeft, Home, Database } from "lucide-react";
 import { dataStorageService } from "@/services/dataStorageService";
 import { syncService } from "@/services/syncService";
 import { useOfflineSync } from "@/hooks/useOfflineData";
@@ -57,7 +57,7 @@ export default function PendingChangesPage() {
         id,
         type: 'thought',
         action: 'added',
-        name: thought?.content.substring(0, 30) + '...' || 'Unknown thought',
+        name: thought?.content || 'Unknown thought',
         timestamp: thought?.modifiedLocally || new Date()
       });
     });
@@ -68,7 +68,7 @@ export default function PendingChangesPage() {
         id,
         type: 'thought',
         action: 'modified',
-        name: thought?.content.substring(0, 30) + '...' || 'Unknown thought',
+        name: thought?.content || 'Unknown thought',
         timestamp: thought?.modifiedLocally || new Date()
       });
     });
@@ -78,7 +78,7 @@ export default function PendingChangesPage() {
         id,
         type: 'thought',
         action: 'deleted',
-        name: `Deleted thought (${id.substring(0, 8)}...)`,
+        name: `Deleted thought`,
         timestamp: new Date()
       });
     });
@@ -111,7 +111,7 @@ export default function PendingChangesPage() {
         id,
         type: 'entity',
         action: 'deleted',
-        name: `Deleted entity (${id.substring(0, 8)}...)`,
+        name: `Deleted entity`,
         timestamp: new Date()
       });
     });
@@ -130,6 +130,17 @@ export default function PendingChangesPage() {
       case 'deleted': return <Trash2 className="h-4 w-4" />;
       default: return <AlertCircle className="h-4 w-4" />;
     }
+  };
+
+  const getIdIcon = (id: string) => {
+    // Check if ID is a local ID (starts with 'local_' or is a UUID without dashes)
+    const isLocalId = id.startsWith('local_') || (!id.includes('-') && id.length > 8);
+    return isLocalId ? <Home className="h-3 w-3" /> : <Database className="h-3 w-3" />;
+  };
+
+  const formatId = (id: string) => {
+    // Extract only digits from the ID
+    return id.replace(/\D/g, '');
   };
 
   const getActionColor = (action: string) => {
@@ -241,7 +252,10 @@ export default function PendingChangesPage() {
                       {change.timestamp.toLocaleDateString()} {change.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground py-2">
-                      {change.id.substring(0, 8)}...
+                      <div className="flex items-center gap-1">
+                        {getIdIcon(change.id)}
+                        {formatId(change.id)}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
