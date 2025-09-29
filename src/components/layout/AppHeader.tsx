@@ -113,7 +113,7 @@ export const AppHeader = () => {
             className="row-start-2 col-start-1 font-bold text-lg text-foreground hover:text-primary transition-colors flex items-center gap-2"
           >
             <ScrollText className="h-5 w-5" />
-            D&D Chronicle
+            Chronicle
           </Link>
 
           {/* Row 2, Columns 2-3: Navigation */}
