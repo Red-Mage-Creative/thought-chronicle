@@ -101,5 +101,146 @@ export const campaignService = {
     };
 
     return await this.createCampaign(campaignData);
+  },
+
+  // Update existing campaign
+  async updateCampaign(campaignId: string, data: Partial<CreateCampaignData>): Promise<LocalCampaign> {
+    const localData = dataStorageService.getData();
+    const campaignIndex = localData.campaigns.findIndex(c => c.localId === campaignId || c.id === campaignId);
+    
+    if (campaignIndex === -1) {
+      throw new Error('Campaign not found');
+    }
+
+    const updatedCampaign = {
+      ...localData.campaigns[campaignIndex],
+      ...data,
+      updated_at: new Date(),
+      modifiedLocally: new Date(),
+      syncStatus: 'pending' as const
+    };
+
+    localData.campaigns[campaignIndex] = updatedCampaign;
+    
+    // Add to pending changes
+    const pendingId = updatedCampaign.id || updatedCampaign.localId!;
+    if (!localData.pendingChanges.campaigns.modified.includes(pendingId)) {
+      localData.pendingChanges.campaigns.modified.push(pendingId);
+    }
+
+    dataStorageService.saveData(localData);
+    return updatedCampaign;
+  },
+
+  // Get campaign statistics
+  getCampaignStats(campaignId: string): { thoughtsCount: number; entitiesCount: number } {
+    const data = dataStorageService.getCampaignData(campaignId);
+    return {
+      thoughtsCount: data.thoughts.length,
+      entitiesCount: data.entities.length
+    };
+  },
+
+  // Delete campaign with data migration options
+  async deleteCampaign(
+    campaignId: string, 
+    migrationOptions: { action: 'move' | 'delete'; targetCampaignId?: string }
+  ): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User must be authenticated');
+
+    const localData = dataStorageService.getData();
+    const campaignIndex = localData.campaigns.findIndex(c => c.localId === campaignId || c.id === campaignId);
+    
+    if (campaignIndex === -1) {
+      throw new Error('Campaign not found');
+    }
+
+    // Prevent deletion of last campaign
+    if (localData.campaigns.length <= 1) {
+      throw new Error('Cannot delete the last campaign. You must have at least one campaign.');
+    }
+
+    const campaign = localData.campaigns[campaignIndex];
+    const campaignData = dataStorageService.getCampaignData(campaignId);
+
+    // Handle data migration
+    if (migrationOptions.action === 'move' && migrationOptions.targetCampaignId) {
+      // Move thoughts to target campaign
+      campaignData.thoughts.forEach(thought => {
+        const thoughtIndex = localData.thoughts.findIndex(t => t.localId === thought.localId);
+        if (thoughtIndex !== -1) {
+          localData.thoughts[thoughtIndex] = {
+            ...thought,
+            campaign_id: migrationOptions.targetCampaignId!,
+            modifiedLocally: new Date(),
+            syncStatus: 'pending'
+          };
+        }
+      });
+
+      // Move entities to target campaign
+      campaignData.entities.forEach(entity => {
+        const entityIndex = localData.entities.findIndex(e => e.localId === entity.localId);
+        if (entityIndex !== -1) {
+          localData.entities[entityIndex] = {
+            ...entity,
+            campaign_id: migrationOptions.targetCampaignId!,
+            modifiedLocally: new Date(),
+            syncStatus: 'pending'
+          };
+        }
+      });
+    } else if (migrationOptions.action === 'delete') {
+      // Delete all associated thoughts
+      campaignData.thoughts.forEach(thought => {
+        const thoughtIndex = localData.thoughts.findIndex(t => t.localId === thought.localId);
+        if (thoughtIndex !== -1) {
+          localData.thoughts.splice(thoughtIndex, 1);
+          // Add to pending deletions
+          const thoughtId = thought.id || thought.localId!;
+          if (!localData.pendingChanges.thoughts.deleted.includes(thoughtId)) {
+            localData.pendingChanges.thoughts.deleted.push(thoughtId);
+          }
+        }
+      });
+
+      // Delete all associated entities
+      campaignData.entities.forEach(entity => {
+        const entityIndex = localData.entities.findIndex(e => e.localId === entity.localId);
+        if (entityIndex !== -1) {
+          localData.entities.splice(entityIndex, 1);
+          // Add to pending deletions
+          const entityId = entity.id || entity.localId!;
+          if (!localData.pendingChanges.entities.deleted.includes(entityId)) {
+            localData.pendingChanges.entities.deleted.push(entityId);
+          }
+        }
+      });
+    }
+
+    // Remove the campaign
+    localData.campaigns.splice(campaignIndex, 1);
+    
+    // Add campaign to pending deletions
+    const campaignIdToDelete = campaign.id || campaign.localId!;
+    if (!localData.pendingChanges.campaigns.deleted.includes(campaignIdToDelete)) {
+      localData.pendingChanges.campaigns.deleted.push(campaignIdToDelete);
+    }
+
+    // Switch to another campaign if we're deleting the current one
+    if (localData.currentCampaignId === campaignId) {
+      const newCurrentCampaign = localData.campaigns[0];
+      if (newCurrentCampaign) {
+        localData.currentCampaignId = newCurrentCampaign.localId!;
+      }
+    }
+
+    dataStorageService.saveData(localData);
+    
+    // Dispatch campaign switched event
+    window.dispatchEvent(new CustomEvent('campaignSwitched', { 
+      detail: { campaignId: localData.currentCampaignId } 
+    }));
   }
 };

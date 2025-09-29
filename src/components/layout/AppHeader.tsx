@@ -1,15 +1,64 @@
-import { Sword, Settings } from "lucide-react";
+import { Sword, Settings, Plus } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CampaignSelector } from "@/components/CampaignSelector";
+import { CampaignCreateForm } from "@/components/CampaignCreateForm";
+import { CampaignManagementModal } from "@/components/CampaignManagementModal";
+import { campaignService } from "@/services/campaignService";
+import { LocalCampaign } from "@/types/campaigns";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const AppHeader = () => {
   const { user, signOut } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
+  const [campaigns, setCampaigns] = useState<LocalCampaign[]>([]);
+  const [currentCampaign, setCurrentCampaign] = useState<LocalCampaign | null>(null);
+
+  // Load campaigns on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      loadCampaigns();
+      
+      // Listen for campaign switches
+      const handleCampaignSwitch = () => {
+        loadCampaigns();
+      };
+      
+      window.addEventListener('campaignSwitched', handleCampaignSwitch);
+      return () => window.removeEventListener('campaignSwitched', handleCampaignSwitch);
+    }
+  }, [user]);
+
+  const loadCampaigns = () => {
+    if (!user) return;
+    
+    try {
+      const userCampaigns = campaignService.getUserCampaigns();
+      setCampaigns(userCampaigns);
+      
+      const current = campaignService.getCurrentCampaign();
+      setCurrentCampaign(current);
+      
+      // Initialize user context and create default campaign if needed
+      campaignService.initializeUserContext(user.id);
+      
+      if (userCampaigns.length === 0) {
+        const displayName = user.user_metadata?.display_name || user.user_metadata?.username || 'Your';
+        campaignService.createDefaultCampaign(user.id, displayName).then(() => {
+          loadCampaigns(); // Reload after creating default
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load campaigns:', error);
+    }
+  };
 
   const getDisplayName = () => {
     if (!user) return '';
@@ -26,11 +75,27 @@ export const AppHeader = () => {
     setShowConfirmDialog(false);
   };
 
+  const handleCampaignChange = (campaignId: string) => {
+    loadCampaigns();
+  };
+
+  const handleCampaignCreate = () => {
+    setShowCreateDialog(false);
+    loadCampaigns();
+  };
+
+  const handleCreateSuccess = () => {
+    setShowCreateDialog(false);
+    loadCampaigns();
+    toast.success('Campaign created successfully');
+  };
+
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm">
       <div className="container py-4">
         <div className="max-w-2xl mx-auto">
-          <div className="grid grid-cols-3 grid-rows-2 gap-2" style={{gridTemplateAreas: `". . account" "brand nav nav"`}}>
+          <div className="grid grid-cols-3 grid-rows-3 gap-2" style={{gridTemplateAreas: `". . account" "campaign . create" "brand nav nav"`}}>
+            
             {/* Account section - Row 1, Column 3 */}
             {user && (
               <div className="flex items-center gap-2 justify-end" style={{gridArea: 'account'}}>
@@ -59,14 +124,41 @@ export const AppHeader = () => {
                 </DropdownMenu>
               </div>
             )}
+
+            {/* Campaign section - Row 2, Column 1 */}
+            {user && campaigns.length > 0 && (
+              <div style={{gridArea: 'campaign'}}>
+                <CampaignSelector
+                  campaigns={campaigns}
+                  currentCampaign={currentCampaign}
+                  onCampaignChange={handleCampaignChange}
+                  onCampaignCreate={handleCampaignCreate}
+                  onManageCampaigns={() => setShowManagementModal(true)}
+                />
+              </div>
+            )}
+
+            {/* Create Campaign - Row 2, Column 3 */}
+            {user && (
+              <div className="flex items-center gap-2 justify-end" style={{gridArea: 'create'}}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCreateDialog(true)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
             
-            {/* Brand section - Row 2, Column 1 */}
+            {/* Brand section - Row 3, Column 1 */}
             <div className="flex items-center gap-3" style={{gridArea: 'brand'}}>
               <Sword className="h-6 w-6 text-primary" />
               <h1 className="text-xl font-bold text-foreground">Chronicle</h1>
             </div>
             
-            {/* Navigation section - Row 2, Columns 2-3 */}
+            {/* Navigation section - Row 3, Columns 2-3 */}
             <div className="flex items-center justify-end" style={{gridArea: 'nav'}}>
               <Navigation />
             </div>
@@ -82,6 +174,25 @@ export const AppHeader = () => {
         confirmText="Sign Out"
         variant="destructive"
         onConfirm={handleSignOut}
+      />
+
+      {/* Create Campaign Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Campaign</DialogTitle>
+          </DialogHeader>
+          <CampaignCreateForm onSuccess={handleCreateSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Campaign Management Modal */}
+      <CampaignManagementModal
+        open={showManagementModal}
+        onOpenChange={setShowManagementModal}
+        campaigns={campaigns}
+        currentCampaign={currentCampaign}
+        onCampaignUpdate={loadCampaigns}
       />
     </header>
   );

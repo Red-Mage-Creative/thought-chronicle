@@ -13,13 +13,15 @@ interface CampaignSelectorProps {
   currentCampaign: LocalCampaign | null;
   onCampaignChange: (campaignId: string) => void;
   onCampaignCreate: () => void;
+  onManageCampaigns?: () => void;
 }
 
 export const CampaignSelector = ({ 
   campaigns, 
   currentCampaign, 
   onCampaignChange,
-  onCampaignCreate 
+  onCampaignCreate,
+  onManageCampaigns 
 }: CampaignSelectorProps) => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
@@ -81,8 +83,8 @@ export const CampaignSelector = ({
         </DialogContent>
       </Dialog>
 
-      {currentCampaign && (
-        <Button variant="ghost" size="icon">
+      {currentCampaign && onManageCampaigns && (
+        <Button variant="ghost" size="icon" onClick={onManageCampaigns}>
           <Settings className="h-4 w-4" />
         </Button>
       )}
