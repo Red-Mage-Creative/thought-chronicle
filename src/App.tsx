@@ -4,9 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Sword } from "lucide-react";
-import { Navigation } from "@/components/Navigation";
-import { SyncBanner } from "@/components/SyncBanner";
+import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -76,75 +74,31 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-background flex flex-col">
-            {/* Header */}
-            <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-              <div className="container py-8">
-                <div className="max-w-2xl mx-auto">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Sword className="h-6 w-6 text-primary" />
-                      <div>
-                        <h1 className="text-xl font-bold text-foreground">D&D Chronicle</h1>
-                        <p className="text-sm text-muted-foreground">Fantasy Adventure Note-Taking</p>
-                      </div>
-                    </div>
-                    <Navigation />
-                  </div>
-                </div>
-              </div>
-            </header>
-
-            {/* Main Layout */}
-            <main className="flex-1">
-              <div className="w-full">
-                    <Routes>
-                      <Route 
-                        path="/" 
-                        element={<Index />} 
-                      />
-                  <Route 
-                    path="/entities" 
-                    element={
-                      <EntitiesPage 
-                        onEntityClick={handleEntityClick} 
-                      />
-                    } 
+          <AppLayout>
+            <Routes>
+              <Route 
+                path="/" 
+                element={<Index />} 
+              />
+              <Route 
+                path="/entities" 
+                element={
+                  <EntitiesPage 
+                    onEntityClick={handleEntityClick} 
                   />
-                  <Route 
-                    path="/history" 
-                    element={
-                      <HistoryPage 
-                        onEntityClick={handleEntityClick} 
-                      />
-                    } 
+                } 
+              />
+              <Route 
+                path="/history" 
+                element={
+                  <HistoryPage 
+                    onEntityClick={handleEntityClick} 
                   />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-            </main>
-
-            {/* Enhanced Footer */}
-            <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-              <div className="container py-6">
-                <div className="max-w-2xl mx-auto">
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <div className="text-xs">
-                      <div className="font-medium">D&D Chronicle</div>
-                      <div className="font-medium">Version 1.0</div>
-                      <br />
-                      <div className="italic">"Every adventure begins with a single thought"</div>
-                      <br />
-                      <div className="text-xs">Built with Lovable.</div>
-                    </div>
-                    <div className="text-xs">
-                      <span>💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </footer>
-          </div>
+                } 
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppLayout>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

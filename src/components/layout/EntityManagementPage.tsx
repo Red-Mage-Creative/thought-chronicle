@@ -70,7 +70,7 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
   const uniqueTypes: EntityType[] = ['character', 'location', 'organization', 'item'];
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -142,6 +142,6 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
           />
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };

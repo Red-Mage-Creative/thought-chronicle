@@ -1,4 +1,5 @@
 import { HistoryPage as HistoryPageLayout } from "@/components/layout/HistoryPage";
+import { MainLayout } from "@/components/layout/MainLayout";
 
 interface HistoryPageProps {
   onEntityClick?: (entity: string) => void;
@@ -6,7 +7,9 @@ interface HistoryPageProps {
 
 const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
   return (
-    <HistoryPageLayout onEntityClick={onEntityClick} />
+    <MainLayout>
+      <HistoryPageLayout onEntityClick={onEntityClick} />
+    </MainLayout>
   );
 };
 

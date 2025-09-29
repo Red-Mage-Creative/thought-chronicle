@@ -49,7 +49,7 @@ export const ThoughtManagementPage = ({
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <>
       {syncStatus.pendingChanges > 0 && (
         <SyncBanner onSync={handleSync} />
       )}
@@ -67,6 +67,6 @@ export const ThoughtManagementPage = ({
           <StatsCard thoughts={thoughts} />
         </div>
       </div>
-    </div>
+    </>
   );
 };

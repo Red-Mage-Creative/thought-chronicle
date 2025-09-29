@@ -58,57 +58,55 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
   ).sort();
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-foreground">Campaign History</CardTitle>
-            <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} size="sm">
-              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search thoughts..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {mentionedEntities.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={selectedEntity === '' ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => setSelectedEntity('')}
-              >
-                All
-              </Badge>
-              {mentionedEntities.map((entity) => (
-                <Badge
-                  key={entity}
-                  variant={selectedEntity === entity ? 'default' : 'outline'}
-                  className="cursor-pointer"
-                  onClick={() => setSelectedEntity(entity)}
-                >
-                  {entity}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          <ThoughtList 
-            thoughts={filteredThoughts} 
-            onEntityClick={onEntityClick}
-            isLoading={isLoading}
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-foreground">Campaign History</CardTitle>
+          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} size="sm">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search thoughts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {mentionedEntities.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <Badge
+              variant={selectedEntity === '' ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => setSelectedEntity('')}
+            >
+              All
+            </Badge>
+            {mentionedEntities.map((entity) => (
+              <Badge
+                key={entity}
+                variant={selectedEntity === entity ? 'default' : 'outline'}
+                className="cursor-pointer"
+                onClick={() => setSelectedEntity(entity)}
+              >
+                {entity}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        <ThoughtList 
+          thoughts={filteredThoughts} 
+          onEntityClick={onEntityClick}
+          isLoading={isLoading}
+        />
+      </CardContent>
+    </Card>
   );
 };
