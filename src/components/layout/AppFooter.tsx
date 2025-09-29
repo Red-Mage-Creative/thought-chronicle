@@ -1,4 +1,4 @@
-import { Brain, Users, Calendar } from "lucide-react";
+import { Brain, Users, Calendar, Palette, FileText } from "lucide-react";
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
 
@@ -48,17 +48,19 @@ export const AppFooter = () => {
               <div>
                 💡 Tip: Press Ctrl+Enter to quickly save your thoughts
               </div>
-              <div className="flex gap-3 text-xs text-muted-foreground mt-2">
+              <div className="flex gap-4 text-xs justify-end mt-2">
                 <a 
                   href="/design-system" 
-                  className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
                 >
+                  <Palette className="h-3 w-3" />
                   Design System
                 </a>
                 <a 
                   href="/changelog" 
-                  className="hover:text-foreground transition-colors underline-offset-2 hover:underline"
+                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
                 >
+                  <FileText className="h-3 w-3" />
                   Changelog
                 </a>
               </div>
