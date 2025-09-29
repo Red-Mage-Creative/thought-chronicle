@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { TagSelector } from './TagSelector';
+import { Settings } from '@/components/Settings';
 import { EntitySuggestion } from '@/types/entities';
 
 interface ThoughtFormProps {
@@ -18,6 +19,9 @@ interface ThoughtFormProps {
     gameDate?: string;
   };
   isEditMode?: boolean;
+  showSettings?: boolean;
+  onDefaultTagsChange?: (tags: string[]) => void;
+  existingEntities?: EntitySuggestion[];
 }
 
 export const ThoughtForm = ({ 
@@ -25,7 +29,10 @@ export const ThoughtForm = ({
   suggestions, 
   defaultTags = [], 
   initialData,
-  isEditMode = false 
+  isEditMode = false,
+  showSettings = false,
+  onDefaultTagsChange,
+  existingEntities = []
 }: ThoughtFormProps) => {
   const [content, setContent] = useState(initialData?.content || '');
   const [tags, setTags] = useState<string[]>(
@@ -75,9 +82,18 @@ export const ThoughtForm = ({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-foreground">
-          {isEditMode ? 'Edit Thought' : 'Record a Thought'}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-foreground">
+            {isEditMode ? 'Edit Thought' : 'Record a Thought'}
+          </CardTitle>
+          {showSettings && onDefaultTagsChange && (
+            <Settings
+              defaultTags={defaultTags}
+              onDefaultTagsChange={onDefaultTagsChange}
+              existingEntities={existingEntities}
+            />
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

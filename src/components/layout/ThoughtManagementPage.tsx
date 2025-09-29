@@ -99,23 +99,13 @@ export const ThoughtManagementPage = ({
         <SyncBanner onSync={handleSync} />
       )}
       
-      <StatsCard thoughts={thoughts} />
-      
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Record a Thought</h2>
-        {onDefaultTagsChange && (
-          <Settings
-            defaultTags={defaultTags}
-            onDefaultTagsChange={onDefaultTagsChange}
-            existingEntities={getSuggestions()}
-          />
-        )}
-      </div>
-      
       <ThoughtForm
         onSubmit={handleThoughtSubmit}
         suggestions={getSuggestions()}
         defaultTags={defaultTags}
+        showSettings={!!onDefaultTagsChange}
+        onDefaultTagsChange={onDefaultTagsChange}
+        existingEntities={getSuggestions()}
       />
     </>
   );

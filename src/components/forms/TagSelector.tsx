@@ -17,11 +17,12 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
   const [inputValue, setInputValue] = useState('');
   const [filteredSuggestions, setFilteredSuggestions] = useState<EntitySuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Always show suggestions, with "Create new Entity" as default when no input
-    if (inputValue.trim()) {
+    // Only show suggestions when focused and has input
+    if (isFocused && inputValue.trim()) {
       const filtered = suggestions.filter(suggestion =>
         suggestion.name.toLowerCase().includes(inputValue.toLowerCase()) &&
         !tags.some(tag => tag.toLowerCase() === suggestion.name.toLowerCase())
@@ -29,10 +30,9 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
       setFilteredSuggestions(filtered.slice(0, 5));
       setSelectedIndex(-1);
     } else {
-      // Show a limited set of recent/popular suggestions even without input
-      setFilteredSuggestions(suggestions.slice(0, 3));
+      setFilteredSuggestions([]);
     }
-  }, [inputValue, suggestions, tags]);
+  }, [inputValue, suggestions, tags, isFocused]);
 
   const addTag = (tagName: string) => {
     const trimmed = tagName.trim();
@@ -50,7 +50,27 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
     if (newTags.length > 0) {
       onTagsChange([...tags, ...newTags]);
       setInputValue('');
-      setFilteredSuggestions([]);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Check for comma and process immediately
+    if (value.includes(',')) {
+      const parts = value.split(',');
+      const tagsToAdd = parts.slice(0, -1).map(tag => tag.trim()).filter(tag => 
+        tag && !tags.some(existingTag => existingTag.toLowerCase() === tag.toLowerCase())
+      );
+      
+      if (tagsToAdd.length > 0) {
+        onTagsChange([...tags, ...tagsToAdd]);
+      }
+      
+      // Keep the text after the last comma
+      setInputValue(parts[parts.length - 1].trim());
+    } else {
+      setInputValue(value);
     }
   };
 
@@ -135,12 +155,14 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
         <Input
           ref={inputRef}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
         />
         
-        {(filteredSuggestions.length > 0 || inputValue.trim()) && (
+        {(filteredSuggestions.length > 0 || (isFocused && inputValue.trim())) && (
           <div className="absolute z-10 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-40 overflow-y-auto">
             {filteredSuggestions.map((suggestion, index) => (
               <button
