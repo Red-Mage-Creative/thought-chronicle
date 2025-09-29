@@ -2,27 +2,31 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, Settings as SettingsIcon } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { User, Settings as SettingsIcon, RefreshCw, LogOut } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { campaignService } from "@/services/campaignService";
 import { LocalCampaign } from "@/types/campaigns";
 import { CampaignManagementModal } from "@/components/CampaignManagementModal";
+import { QuickCampaignSwitcher } from "@/components/QuickCampaignSwitcher";
 import { toast } from "sonner";
 
 export const AppHeader = () => {
   const { user, signOut } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showManagementModal, setShowManagementModal] = useState(false);
+  const [showSwitcherModal, setShowSwitcherModal] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<LocalCampaign | null>(null);
+  const [allCampaigns, setAllCampaigns] = useState<LocalCampaign[]>([]);
 
   useEffect(() => {
     if (user) {
-      loadCurrentCampaign();
+      loadCampaignData();
       
       // Listen for campaign switches
       const handleCampaignSwitch = () => {
-        loadCurrentCampaign();
+        loadCampaignData();
       };
       
       window.addEventListener('campaignSwitched', handleCampaignSwitch);
@@ -30,9 +34,11 @@ export const AppHeader = () => {
     }
   }, [user]);
 
-  const loadCurrentCampaign = () => {
+  const loadCampaignData = () => {
     const current = campaignService.getCurrentCampaign();
+    const all = campaignService.getUserCampaigns();
     setCurrentCampaign(current);
+    setAllCampaigns(all);
   };
 
   const getDisplayName = () => {
@@ -51,55 +57,83 @@ export const AppHeader = () => {
   };
 
   const handleCampaignsUpdated = () => {
-    loadCurrentCampaign();
+    loadCampaignData();
   };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
-        {/* Left: Brand */}
-        <Link 
-          to="/" 
-          className="font-bold text-lg text-foreground hover:text-primary transition-colors"
-        >
-          D&D Chronicle
-        </Link>
-
-        {/* Center: Navigation */}
-        <nav className="flex items-center gap-2">
-          <Link to="/entities">
-            <Button variant="ghost" size="sm">Entities</Button>
+      <div className="container">
+        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+          {/* Left: Brand */}
+          <Link 
+            to="/" 
+            className="font-bold text-lg text-foreground hover:text-primary transition-colors"
+          >
+            D&D Chronicle
           </Link>
-          <Link to="/history">
-            <Button variant="ghost" size="sm">History</Button>
-          </Link>
-        </nav>
 
-        {/* Right: User Info & Settings */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground hidden sm:inline">
-            {getDisplayName()}
-            {currentCampaign && (
-              <>, Campaign: <span className="text-foreground font-medium">{currentCampaign.name}</span></>
-            )}
-          </span>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <User className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setShowManagementModal(true)}>
-                <SettingsIcon className="h-4 w-4 mr-2" />
-                Campaign Management
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowConfirmDialog(true)}>
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Center: Navigation */}
+          <nav className="flex items-center gap-2">
+            <Link to="/entities">
+              <Button variant="ghost" size="sm">Entities</Button>
+            </Link>
+            <Link to="/history">
+              <Button variant="ghost" size="sm">History</Button>
+            </Link>
+          </nav>
+
+          {/* Right: User Info & Settings */}
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    onClick={() => setShowManagementModal(true)}
+                    className="text-sm text-muted-foreground hidden sm:inline hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    {getDisplayName()}
+                    {currentCampaign && (
+                      <>, Campaign: <span className="text-foreground font-medium truncate max-w-[150px] inline-block align-bottom">{currentCampaign.name}</span></>
+                    )}
+                  </button>
+                </TooltipTrigger>
+                {currentCampaign && (
+                  <TooltipContent side="bottom" className="max-w-xs">
+                    <div className="space-y-1">
+                      <div className="font-semibold">{currentCampaign.name}</div>
+                      {currentCampaign.description && (
+                        <div className="text-xs text-muted-foreground">{currentCampaign.description}</div>
+                      )}
+                      <div className="text-xs text-muted-foreground">{currentCampaign.members.length} member{currentCampaign.members.length !== 1 ? 's' : ''}</div>
+                    </div>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-background z-50">
+                <DropdownMenuItem onClick={() => setShowSwitcherModal(true)}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Switch Campaign
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowManagementModal(true)}>
+                  <SettingsIcon className="h-4 w-4 mr-2" />
+                  Campaign Management
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowConfirmDialog(true)}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -113,11 +147,18 @@ export const AppHeader = () => {
         cancelText="Cancel"
       />
 
+      <QuickCampaignSwitcher
+        open={showSwitcherModal}
+        onOpenChange={setShowSwitcherModal}
+        campaigns={allCampaigns}
+        currentCampaignId={currentCampaign?.localId || currentCampaign?.id || null}
+      />
+
       {showManagementModal && (
         <CampaignManagementModal
           open={showManagementModal}
           onOpenChange={setShowManagementModal}
-          campaigns={campaignService.getUserCampaigns()}
+          campaigns={allCampaigns}
           onCampaignsUpdated={handleCampaignsUpdated}
         />
       )}
