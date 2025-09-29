@@ -41,8 +41,8 @@ export default function DesignSystemPage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        <div className="container max-w-6xl mx-auto py-8 space-y-12">
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-4xl mx-auto py-8 space-y-8">
           {/* Header */}
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold tracking-tight">Design System</h1>
@@ -319,33 +319,33 @@ export default function DesignSystemPage() {
                   </div>
                 </div>
                 <Separator />
-                <div className="space-y-3">
-                  <h4 className="font-medium">Entity Type Tags</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Entity tags are clickable and include type-specific icons. They navigate to the entity details page on click.
-                  </p>
-                  <div className="flex gap-2 flex-wrap">
-                    <div className="flex items-center gap-1 entity-tag entity-player cursor-pointer hover:opacity-80 transition-opacity">
-                      <User className="h-3 w-3" />
-                      Character
+                  <div className="space-y-3">
+                    <h4 className="font-medium">Entity Type Tags</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Entity tags use Badge component with entity-specific CSS classes. They are clickable and include type-specific icons.
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      <Badge className="entity-player cursor-pointer hover:opacity-80 transition-opacity">
+                        <User className="h-3 w-3 mr-1" />
+                        Character
+                      </Badge>
+                      <Badge className="entity-location cursor-pointer hover:opacity-80 transition-opacity">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        Location
+                      </Badge>
+                      <Badge className="entity-item cursor-pointer hover:opacity-80 transition-opacity">
+                        <Sword className="h-3 w-3 mr-1" />
+                        Item
+                      </Badge>
+                      <Badge className="entity-organization cursor-pointer hover:opacity-80 transition-opacity">
+                        <Building className="h-3 w-3 mr-1" />
+                        Organization
+                      </Badge>
+                      <Badge className="entity-uncategorized cursor-pointer hover:opacity-80 transition-opacity">
+                        <Tag className="h-3 w-3 mr-1" />
+                        Uncategorized
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-1 entity-tag entity-location cursor-pointer hover:opacity-80 transition-opacity">
-                      <MapPin className="h-3 w-3" />
-                      Location
-                    </div>
-                    <div className="flex items-center gap-1 entity-tag entity-item cursor-pointer hover:opacity-80 transition-opacity">
-                      <Sword className="h-3 w-3" />
-                      Item
-                    </div>
-                    <div className="flex items-center gap-1 entity-tag entity-organization cursor-pointer hover:opacity-80 transition-opacity">
-                      <Building className="h-3 w-3" />
-                      Organization
-                    </div>
-                    <div className="flex items-center gap-1 entity-tag entity-uncategorized cursor-pointer hover:opacity-80 transition-opacity">
-                      <Tag className="h-3 w-3" />
-                      Uncategorized
-                    </div>
-                  </div>
                   <p className="text-xs text-muted-foreground">
                     Icons are automatically inferred based on entity type using the getEntityIcon utility function.
                   </p>

@@ -30,11 +30,11 @@ export const ENTITY_ICONS = {
 
 // Entity type mapping for CSS classes
 export const ENTITY_CLASSES = {
-  [ENTITY_TYPES.CHARACTER]: 'entity-tag entity-npc',
-  [ENTITY_TYPES.LOCATION]: 'entity-tag entity-location',
-  [ENTITY_TYPES.ORGANIZATION]: 'entity-tag entity-organization',
-  [ENTITY_TYPES.ITEM]: 'entity-tag entity-item',
-  [ENTITY_TYPES.UNCATEGORIZED]: 'entity-tag entity-uncategorized',
+  [ENTITY_TYPES.CHARACTER]: 'entity-npc',
+  [ENTITY_TYPES.LOCATION]: 'entity-location',
+  [ENTITY_TYPES.ORGANIZATION]: 'entity-organization',
+  [ENTITY_TYPES.ITEM]: 'entity-item',
+  [ENTITY_TYPES.UNCATEGORIZED]: 'entity-uncategorized',
   // Legacy support
   player: 'entity-player',
   npc: 'entity-npc',

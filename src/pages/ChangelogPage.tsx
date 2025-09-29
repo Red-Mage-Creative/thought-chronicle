@@ -1,7 +1,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sparkles, Bug, Palette, Wrench, FileText, TestTube, Calendar, GitBranch } from "lucide-react";
+
 interface ChangelogEntry {
   version: string;
   date: string;
@@ -14,6 +16,7 @@ interface ChangelogEntry {
   chores?: string[];
   maintenance?: string[];
 }
+
 const changelog: ChangelogEntry[] = [{
   version: "1.1.0",
   date: "2025-09-29",
@@ -31,6 +34,7 @@ const changelog: ChangelogEntry[] = [{
   fixes: ["Proper text truncation in entity cards to prevent overflow", "Consistent date formatting across all components", "Fixed entity metrics calculation for accurate mention counts", "Resolved navigation issues between entity pages", "Corrected entity type badge styling inconsistencies"],
   docs: ["Added comprehensive design system documentation", "Created changelog with conventional commit standards", "Documented all UI components with examples"]
 }];
+
 const getCommitIcon = (type: string) => {
   switch (type) {
     case 'features':
@@ -49,6 +53,7 @@ const getCommitIcon = (type: string) => {
       return <GitBranch className="h-4 w-4" />;
   }
 };
+
 const getCommitColor = (type: string) => {
   switch (type) {
     case 'features':
@@ -67,6 +72,7 @@ const getCommitColor = (type: string) => {
       return 'bg-gray-50 border-gray-200 text-gray-700';
   }
 };
+
 const getCommitLabel = (type: string) => {
   switch (type) {
     case 'features':
@@ -87,6 +93,7 @@ const getCommitLabel = (type: string) => {
       return 'Other';
   }
 };
+
 const CommitSection = ({
   type,
   items
@@ -95,7 +102,9 @@ const CommitSection = ({
   items: string[];
 }) => {
   if (!items || items.length === 0) return null;
-  return <div className="space-y-3">
+
+  return (
+    <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className={`flex items-center gap-1 px-2 py-1 rounded-sm border text-xs font-medium ${getCommitColor(type)}`}>
           {getCommitIcon(type)}
@@ -106,15 +115,20 @@ const CommitSection = ({
         </Badge>
       </div>
       <ul className="space-y-2 ml-4">
-        {items.map((item, index) => <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+        {items.map((item, index) => (
+          <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
             <span className="text-muted-foreground mt-1.5 text-xs">•</span>
             <span>{item}</span>
-          </li>)}
+          </li>
+        ))}
       </ul>
-    </div>;
+    </div>
+  );
 };
+
 export default function ChangelogPage() {
-  return <div className="min-h-screen bg-background">
+  return (
+    <div className="min-h-screen bg-background">
       <div className="container max-w-4xl mx-auto py-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
@@ -125,64 +139,89 @@ export default function ChangelogPage() {
         </div>
 
         {/* Changelog Entries */}
-        <div className="space-y-8">
-          {changelog.map((entry, index) => <Card key={entry.version} className={index === 0 ? "border-primary" : ""}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <CardTitle className="text-2xl">
-                      v{entry.version}
-                      {index === 0 && <Badge className="ml-2 text-xs">Current</Badge>}
-                    </CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    {new Date(entry.date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <CommitSection type="features" items={entry.features} />
-                
-                {entry.improvements && entry.improvements.length > 0 && <>
-                    <Separator />
-                    <CommitSection type="improvements" items={entry.improvements} />
-                  </>}
-                
-                {entry.fixes && entry.fixes.length > 0 && <>
-                    <Separator />
-                    <CommitSection type="fixes" items={entry.fixes} />
-                  </>}
-                
-                {entry.docs && entry.docs.length > 0 && <>
-                    <Separator />
-                    <CommitSection type="docs" items={entry.docs} />
-                  </>}
-                
-                {entry.refactor && entry.refactor.length > 0 && <>
-                    <Separator />
-                    <CommitSection type="refactor" items={entry.refactor} />
-                  </>}
-                
-                {entry.tests && entry.tests.length > 0 && <>
-                    <Separator />
-                    <CommitSection type="tests" items={entry.tests} />
-                  </>}
-                
-                {entry.chores && entry.chores.length > 0 && <>
-                    <Separator />
-                    <CommitSection type="chores" items={entry.chores} />
-                  </>}
-              </CardContent>
-            </Card>)}
-        </div>
-
-        {/* Footer Note */}
-        
+        <Accordion type="single" collapsible defaultValue="item-0" className="space-y-4">
+          {changelog.map((entry, index) => (
+            <AccordionItem key={entry.version} value={`item-${index}`} className="border rounded-lg">
+              <Card className={index === 0 ? "border-primary" : ""}>
+                <AccordionTrigger className="hover:no-underline p-0">
+                  <CardHeader className="w-full">
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3">
+                        <CardTitle className="text-2xl">
+                          v{entry.version}
+                          {index === 0 && <Badge className="ml-2 text-xs">Current</Badge>}
+                        </CardTitle>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(entry.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    </div>
+                  </CardHeader>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <CardContent className="space-y-6 pt-0">
+                    <CommitSection type="features" items={entry.features} />
+                    
+                    {entry.improvements && entry.improvements.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="improvements" items={entry.improvements} />
+                      </>
+                    )}
+                    
+                    {entry.fixes && entry.fixes.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="fixes" items={entry.fixes} />
+                      </>
+                    )}
+                    
+                    {entry.docs && entry.docs.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="docs" items={entry.docs} />
+                      </>
+                    )}
+                    
+                    {entry.refactor && entry.refactor.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="refactor" items={entry.refactor} />
+                      </>
+                    )}
+                    
+                    {entry.tests && entry.tests.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="tests" items={entry.tests} />
+                      </>
+                    )}
+                    
+                    {entry.chores && entry.chores.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="chores" items={entry.chores} />
+                      </>
+                    )}
+                    
+                    {entry.maintenance && entry.maintenance.length > 0 && (
+                      <>
+                        <Separator />
+                        <CommitSection type="maintenance" items={entry.maintenance} />
+                      </>
+                    )}
+                  </CardContent>
+                </AccordionContent>
+              </Card>
+            </AccordionItem>
+          ))}
+        </Accordion>
       </div>
-    </div>;
+    </div>
+  );
 }

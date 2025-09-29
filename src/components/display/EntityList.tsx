@@ -68,7 +68,6 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
 
                     <div className="mb-2">
                       <Badge 
-                        variant="secondary"
                         className={`text-xs ${getEntityClass(entity.type)} inline-flex items-center gap-1`}
                       >
                         <Icon className="h-3 w-3" />
