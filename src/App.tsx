@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthGuard } from "@/components/AuthGuard";
 import { useThoughts } from "@/hooks/useThoughts";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
@@ -13,6 +15,7 @@ import HistoryPage from "./pages/HistoryPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
 import DesignSystemPage from "./pages/DesignSystemPage";
 import ChangelogPage from "./pages/ChangelogPage";
+import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import { useOfflineSync } from "./hooks/useOfflineData";
 import { syncService } from "./services/syncService";
@@ -67,80 +70,99 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
               <Route 
                 path="/" 
                 element={
-                  <AppLayout variant="narrow" defaultTags={defaultTags} onDefaultTagsChange={handleDefaultTagsChange}>
-                    <Index />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow" defaultTags={defaultTags} onDefaultTagsChange={handleDefaultTagsChange}>
+                      <Index />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="/entities" 
                 element={
-                  <AppLayout variant="narrow">
-                    <EntitiesPage 
-                      onEntityClick={handleEntityClick} 
-                    />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <EntitiesPage 
+                        onEntityClick={handleEntityClick} 
+                      />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="/entities/:entityName" 
                 element={
-                  <AppLayout variant="narrow">
-                    <EntityDetailsPage 
-                      onEntityClick={handleEntityClick} 
-                    />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <EntityDetailsPage 
+                        onEntityClick={handleEntityClick} 
+                      />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="/history" 
                 element={
-                  <AppLayout variant="narrow">
-                    <HistoryPage 
-                      onEntityClick={handleEntityClick} 
-                    />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <HistoryPage 
+                        onEntityClick={handleEntityClick} 
+                      />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="/pending-changes" 
                 element={
-                  <AppLayout variant="narrow">
-                    <PendingChangesPage />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <PendingChangesPage />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="/design-system" 
                 element={
-                  <AppLayout variant="wide">
-                    <DesignSystemPage />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="wide">
+                      <DesignSystemPage />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="/changelog" 
                 element={
-                  <AppLayout variant="narrow">
-                    <ChangelogPage />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <ChangelogPage />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
               <Route 
                 path="*" 
                 element={
-                  <AppLayout variant="narrow">
-                    <NotFound />
-                  </AppLayout>
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <NotFound />
+                    </AppLayout>
+                  </AuthGuard>
                 } 
               />
-          </Routes>
-        </BrowserRouter>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
