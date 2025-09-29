@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TagInput } from "@/components/TagInput";
+import { TagSelector } from "@/components/forms/TagSelector";
 import { Settings } from "@/components/Settings";
 import { useLocalThoughts, useLocalEntities, useOfflineSync } from "@/hooks/useOfflineData";
 import { LocalThought, LocalEntity } from "@/services/localStorageService";
@@ -25,7 +25,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
   const { refreshSyncStatus } = useOfflineSync();
 
   // Create combined suggestions from local entities and mentioned-only entities
-  const combinedEntitiesForSuggestions = useMemo(() => {
+  const entitySuggestions = useMemo(() => {
     const entityMap = new Map<string, { name: string; type: string }>();
     
     // Add all formal entities
@@ -50,7 +50,10 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
       });
     });
     
-    return Array.from(entityMap.values());
+    return Array.from(entityMap.values()).map(entity => ({
+      name: entity.name,
+      type: entity.type as any // Temporary cast for compatibility
+    }));
   }, [entities, localThoughts]);
 
   const createEntitiesFromTags = (tagNames: string[]): LocalEntity[] => {
@@ -147,7 +150,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
            <Settings 
             defaultTags={defaultTags}
             onDefaultTagsChange={onDefaultTagsChange}
-            existingEntities={combinedEntitiesForSuggestions}
+            existingEntities={entitySuggestions}
           />
         </div>
         
@@ -170,10 +173,10 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Additional Tags</label>
-               <TagInput
+               <TagSelector
                 tags={tags}
                 onTagsChange={setTags}
-                existingEntities={combinedEntitiesForSuggestions}
+                suggestions={entitySuggestions}
                 placeholder="Add additional entity tags..."
               />
               {defaultTags.length > 0 && (

@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EntityWithMetrics, EntityType } from '@/types/entities';
-import { Users, MapPin, Building, Sword, Calendar, Hash } from 'lucide-react';
+import { Users, Calendar, Hash } from 'lucide-react';
+import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
 
 interface EntityListProps {
   entities: EntityWithMetrics[];
@@ -9,25 +10,6 @@ interface EntityListProps {
   isLoading?: boolean;
 }
 
-const getEntityIcon = (type: EntityType) => {
-  const icons = {
-    character: Users,
-    location: MapPin,
-    organization: Building,
-    item: Sword
-  };
-  return icons[type] || Users;
-};
-
-const getEntityClass = (type: EntityType): string => {
-  const classes = {
-    character: 'entity-tag entity-npc',
-    location: 'entity-tag entity-location',
-    organization: 'entity-tag entity-organization',
-    item: 'entity-tag entity-item'
-  };
-  return classes[type] || 'entity-tag entity-npc';
-};
 
 export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListProps) => {
   if (isLoading) {

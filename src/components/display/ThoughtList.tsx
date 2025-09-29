@@ -1,8 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LocalThought } from '@/types/thoughts';
-import { EntityType } from '@/types/entities';
+
 import { Clock, Calendar } from 'lucide-react';
+import { getEntityClass } from '@/utils/entityUtils';
 
 interface ThoughtListProps {
   thoughts: LocalThought[];
@@ -10,25 +11,6 @@ interface ThoughtListProps {
   isLoading?: boolean;
 }
 
-const getEntityClass = (entityName: string): string => {
-  // Simple heuristic for display - in a real app this would come from entity registry
-  const lower = entityName.toLowerCase();
-  
-  if (lower.includes('city') || lower.includes('town') || lower.includes('village') ||
-      lower.includes('castle') || lower.includes('temple') || lower.includes('tavern')) {
-    return 'entity-tag entity-location';
-  }
-  
-  if (lower.includes('guild') || lower.includes('order') || lower.includes('house')) {
-    return 'entity-tag entity-organization';
-  }
-  
-  if (lower.includes('sword') || lower.includes('ring') || lower.includes('potion')) {
-    return 'entity-tag entity-item';
-  }
-  
-  return 'entity-tag entity-npc';
-};
 
 export const ThoughtList = ({ thoughts, onEntityClick, isLoading }: ThoughtListProps) => {
   if (isLoading) {

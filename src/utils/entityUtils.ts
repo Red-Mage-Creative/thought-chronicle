@@ -1,0 +1,76 @@
+import { LucideIcon } from 'lucide-react';
+import { EntityType } from '@/types/entities';
+import { 
+  ENTITY_TYPES, 
+  ENTITY_ICONS, 
+  ENTITY_CLASSES, 
+  TYPE_INFERENCE_PATTERNS 
+} from './constants';
+
+/**
+ * Get the appropriate Lucide icon for an entity type
+ */
+export const getEntityIcon = (type: string): LucideIcon => {
+  const normalizedType = type?.toLowerCase();
+  return ENTITY_ICONS[normalizedType as keyof typeof ENTITY_ICONS] || ENTITY_ICONS[ENTITY_TYPES.CHARACTER];
+};
+
+/**
+ * Get the appropriate CSS class for an entity type
+ */
+export const getEntityClass = (type: string): string => {
+  const normalizedType = type?.toLowerCase();
+  return ENTITY_CLASSES[normalizedType as keyof typeof ENTITY_CLASSES] || ENTITY_CLASSES[ENTITY_TYPES.CHARACTER];
+};
+
+/**
+ * Infer entity type from name using pattern matching
+ */
+export const inferEntityType = (name: string): EntityType => {
+  const lower = name.toLowerCase();
+  
+  // Check each type's patterns
+  for (const [entityType, patterns] of Object.entries(TYPE_INFERENCE_PATTERNS)) {
+    if (patterns.some(pattern => lower.includes(pattern))) {
+      return entityType as EntityType;
+    }
+  }
+  
+  // Default to character for D&D content
+  return ENTITY_TYPES.CHARACTER;
+};
+
+/**
+ * Normalize entity type to standard format
+ */
+export const normalizeEntityType = (type: string): EntityType => {
+  const lower = type?.toLowerCase();
+  
+  // Map legacy types to standard types
+  const typeMapping: Record<string, EntityType> = {
+    'player': ENTITY_TYPES.CHARACTER,
+    'npc': ENTITY_TYPES.CHARACTER,
+    'place': ENTITY_TYPES.LOCATION,
+    'city': ENTITY_TYPES.LOCATION,
+    'weapon': ENTITY_TYPES.ITEM,
+    'artifact': ENTITY_TYPES.ITEM,
+    'guild': ENTITY_TYPES.ORGANIZATION,
+    'faction': ENTITY_TYPES.ORGANIZATION,
+  };
+  
+  return typeMapping[lower] || (lower as EntityType) || ENTITY_TYPES.CHARACTER;
+};
+
+/**
+ * Validate if a string is a valid entity type
+ */
+export const isValidEntityType = (type: string): type is EntityType => {
+  return Object.values(ENTITY_TYPES).includes(type as EntityType);
+};
+
+/**
+ * Get all valid entity types
+ */
+export const getAllEntityTypes = (): EntityType[] => {
+  return Object.values(ENTITY_TYPES);
+};

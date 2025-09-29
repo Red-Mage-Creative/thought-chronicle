@@ -1,41 +1,9 @@
 import { LocalEntity, EntityType, EntityWithMetrics } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
+import { inferEntityType } from '@/utils/entityUtils';
 
 const generateLocalId = (): string => `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-const inferEntityType = (name: string): EntityType => {
-  const lower = name.toLowerCase();
-  
-  // Character indicators
-  if (lower.includes('king') || lower.includes('queen') || lower.includes('lord') || 
-      lower.includes('lady') || lower.includes('sir') || lower.includes('captain') ||
-      lower.includes('priest') || lower.includes('wizard') || lower.includes('ranger')) {
-    return 'character';
-  }
-  
-  // Location indicators
-  if (lower.includes('city') || lower.includes('town') || lower.includes('village') ||
-      lower.includes('castle') || lower.includes('temple') || lower.includes('tavern') ||
-      lower.includes('forest') || lower.includes('mountain') || lower.includes('river')) {
-    return 'location';
-  }
-  
-  // Organization indicators
-  if (lower.includes('guild') || lower.includes('order') || lower.includes('house') ||
-      lower.includes('clan') || lower.includes('company') || lower.includes('faction')) {
-    return 'organization';
-  }
-  
-  // Item indicators
-  if (lower.includes('sword') || lower.includes('shield') || lower.includes('ring') ||
-      lower.includes('potion') || lower.includes('scroll') || lower.includes('armor')) {
-    return 'item';
-  }
-  
-  // Default to character for most D&D content
-  return 'character';
-};
 
 export const entityService = {
   getAllEntities(): LocalEntity[] {

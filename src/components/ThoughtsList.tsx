@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useLocalThoughts } from "@/hooks/useOfflineData";
 import { syncService } from "@/services/syncService";
 import { toast } from "sonner";
+import { getEntityClass } from '@/utils/entityUtils';
 
 interface Thought {
   id: string;
@@ -27,14 +28,6 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
 
   const { thoughts: localThoughts } = useLocalThoughts();
 
-  const getEntityClass = (entityType: string): string => {
-    if (entityType.includes('player') || entityType.includes('pc')) return 'entity-player';
-    if (entityType.includes('npc') || entityType.includes('character')) return 'entity-npc';
-    if (entityType.includes('location') || entityType.includes('place') || entityType.includes('city')) return 'entity-location';
-    if (entityType.includes('item') || entityType.includes('weapon') || entityType.includes('artifact')) return 'entity-item';
-    if (entityType.includes('guild') || entityType.includes('organization') || entityType.includes('faction')) return 'entity-organization';
-    return 'entity-npc'; // default
-  };
 
   // Filter local thoughts based on search and selected entity
   const filteredThoughts = useMemo(() => {

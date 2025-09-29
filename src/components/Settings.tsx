@@ -3,27 +3,21 @@ import { Settings as SettingsIcon, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { TagInput } from "@/components/TagInput";
+import { TagSelector } from "@/components/forms/TagSelector";
 import { Badge } from "@/components/ui/badge";
+import { EntitySuggestion } from '@/types/entities';
+import { getEntityClass } from '@/utils/entityUtils';
 
 interface SettingsProps {
   defaultTags: string[];
   onDefaultTagsChange: (tags: string[]) => void;
-  existingEntities: { name: string; type: string }[];
+  existingEntities: EntitySuggestion[];
 }
 
 export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }: SettingsProps) => {
   const [localDefaultTags, setLocalDefaultTags] = useState<string[]>(defaultTags);
   const [isOpen, setIsOpen] = useState(false);
 
-  const getEntityClass = (entityType: string): string => {
-    if (entityType.includes('player') || entityType.includes('pc')) return 'entity-player';
-    if (entityType.includes('npc') || entityType.includes('character')) return 'entity-npc';
-    if (entityType.includes('location') || entityType.includes('place') || entityType.includes('city')) return 'entity-location';
-    if (entityType.includes('item') || entityType.includes('weapon') || entityType.includes('artifact')) return 'entity-item';
-    if (entityType.includes('guild') || entityType.includes('organization') || entityType.includes('faction')) return 'entity-organization';
-    return 'entity-npc';
-  };
 
   const handleSave = () => {
     onDefaultTagsChange(localDefaultTags);
@@ -63,10 +57,10 @@ export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }:
               </p>
               
               <div className="space-y-3">
-                <TagInput
+                <TagSelector
                   tags={localDefaultTags}
                   onTagsChange={setLocalDefaultTags}
-                  existingEntities={existingEntities}
+                  suggestions={existingEntities}
                   placeholder="Add default tags (e.g., player-thara, campaign-waterdeep)..."
                 />
                 

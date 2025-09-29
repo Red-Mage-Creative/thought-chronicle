@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import { EntitySuggestion, EntityType } from '@/types/entities';
+import { X, Plus } from 'lucide-react';
+import { EntitySuggestion } from '@/types/entities';
+import { getEntityClass } from '@/utils/entityUtils';
 
 interface TagSelectorProps {
   tags: string[];
@@ -11,16 +12,6 @@ interface TagSelectorProps {
   suggestions: EntitySuggestion[];
   placeholder?: string;
 }
-
-const getEntityClass = (type: EntityType): string => {
-  const classes = {
-    character: 'entity-tag entity-npc',
-    location: 'entity-tag entity-location',
-    organization: 'entity-tag entity-organization',
-    item: 'entity-tag entity-item'
-  };
-  return classes[type] || 'entity-tag entity-npc';
-};
 
 export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags..." }: TagSelectorProps) => {
   const [inputValue, setInputValue] = useState('');
@@ -140,6 +131,20 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
                 </div>
               </button>
             ))}
+            {inputValue.trim() && !filteredSuggestions.some(s => s.name.toLowerCase() === inputValue.trim().toLowerCase()) && (
+              <button
+                type="button"
+                className={`w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
+                  selectedIndex === filteredSuggestions.length ? 'bg-accent text-accent-foreground' : ''
+                }`}
+                onClick={() => addTag(inputValue)}
+              >
+                <div className="flex items-center gap-2">
+                  <Plus className="h-3 w-3" />
+                  <span>Create "{inputValue.trim()}" (new)</span>
+                </div>
+              </button>
+            )}
           </div>
         )}
       </div>
