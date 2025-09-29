@@ -28,9 +28,9 @@ export const AppHeader = () => {
 
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm">
-      <div className="container py-8">
+      <div className="container py-4">
         <div className="max-w-2xl mx-auto">
-          <div className="grid grid-cols-3 grid-rows-2 gap-4" style={{gridTemplateAreas: `". . account" "brand nav nav"`}}>
+          <div className="grid grid-cols-3 grid-rows-2 gap-2" style={{gridTemplateAreas: `". . account" "brand nav nav"`}}>
             {/* Account section - Row 1, Column 3 */}
             {user && (
               <div className="flex items-center gap-2 justify-end" style={{gridArea: 'account'}}>
