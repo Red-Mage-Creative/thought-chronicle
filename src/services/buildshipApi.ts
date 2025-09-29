@@ -25,18 +25,23 @@ interface RawMongoEntity {
 // Transformed interfaces for components
 export interface BuildshipThought {
   id: string;
+  campaign_id: string;
   content: string;
   relatedEntities: string[];
   timestamp: Date;
   gameDate?: string;
+  created_by: string;
 }
 
 export interface BuildshipEntity {
+  id: string;
+  campaign_id: string;
   name: string;
   type: string;
   count: number;
   lastMentioned: Date;
   description?: string;
+  created_by: string;
 }
 
 // Utility function to parse MongoDB dates
@@ -47,27 +52,46 @@ const parseMongoDate = (mongoDate: { $date: { $numberLong: string } }): Date => 
 // Transform raw MongoDB thought to component format
 const transformThought = (raw: RawMongoThought): BuildshipThought => ({
   id: raw._id.$oid,
+  campaign_id: '', // Will be set by caller based on context
   content: raw.text,
   relatedEntities: raw.relatedEntities || [],
   timestamp: parseMongoDate(raw.createdAt),
   gameDate: raw.inGameDate !== 'TBD' ? raw.inGameDate : undefined,
+  created_by: '', // Will be set by caller based on context
 });
 
 // Transform raw MongoDB entity to component format
 const transformEntity = (raw: RawMongoEntity, count: number = 0, lastMentioned?: Date): BuildshipEntity => ({
+  id: raw._id.$oid,
+  campaign_id: '', // Will be set by caller based on context
   name: raw.entityName,
   type: raw.entityType,
   count,
   lastMentioned: lastMentioned || parseMongoDate(raw.updatedAt),
   description: raw.entityDescription,
+  created_by: '', // Will be set by caller based on context
 });
 
-export const searchThoughts = async (query: string = ""): Promise<BuildshipThought[]> => {
+export const searchThoughts = async (
+  query: string = "", 
+  campaignId?: string, 
+  userId?: string
+): Promise<BuildshipThought[]> => {
   const params = new URLSearchParams({
     index_name: 'thoughts',
     collection: 'thoughts',
     query: query.trim()
   });
+
+  // Add campaign filter if provided
+  if (campaignId) {
+    params.append('campaign_id', campaignId);
+  }
+
+  // Add user filter if provided
+  if (userId) {
+    params.append('user_id', userId);
+  }
 
   const response = await fetch(`${BASE_URL}/chronicle-search?${params}`);
   
@@ -79,15 +103,36 @@ export const searchThoughts = async (query: string = ""): Promise<BuildshipThoug
   const rawThoughts = data.results || data || [];
   
   // Transform MongoDB format to component format
-  return rawThoughts.map((raw: RawMongoThought) => transformThought(raw));
+  return rawThoughts.map((raw: RawMongoThought) => {
+    const thought = transformThought(raw);
+    return {
+      ...thought,
+      campaign_id: campaignId || '',
+      created_by: userId || ''
+    };
+  });
 };
 
-export const searchEntities = async (query: string = ""): Promise<BuildshipEntity[]> => {
+export const searchEntities = async (
+  query: string = "", 
+  campaignId?: string, 
+  userId?: string
+): Promise<BuildshipEntity[]> => {
   const params = new URLSearchParams({
     index_name: 'entities',
     collection: 'entities', 
     query: query.trim()
   });
+
+  // Add campaign filter if provided
+  if (campaignId) {
+    params.append('campaign_id', campaignId);
+  }
+
+  // Add user filter if provided
+  if (userId) {
+    params.append('user_id', userId);
+  }
 
   const response = await fetch(`${BASE_URL}/chronicle-search?${params}`);
   
@@ -98,10 +143,14 @@ export const searchEntities = async (query: string = ""): Promise<BuildshipEntit
   const data = await response.json();
   const rawEntities = data.results || data || [];
   
-  // Transform MongoDB format to component format and calculate entity metrics
+  // Transform MongoDB format to component format
   return await Promise.all(rawEntities.map(async (raw: RawMongoEntity) => {
-    // For now, return basic entity data - count calculation would need thoughts data
-    return transformEntity(raw, 0);
+    const entity = transformEntity(raw, 0);
+    return {
+      ...entity,
+      campaign_id: campaignId || '',
+      created_by: userId || ''
+    };
   }));
 };
 

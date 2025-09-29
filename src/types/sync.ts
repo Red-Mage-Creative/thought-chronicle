@@ -6,6 +6,11 @@ export interface SyncStatus {
 }
 
 export interface PendingChanges {
+  campaigns: {
+    added: string[];
+    modified: string[];
+    deleted: string[];
+  };
   thoughts: {
     added: string[];
     modified: string[];

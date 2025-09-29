@@ -1,10 +1,19 @@
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
+import { LocalCampaign } from '@/types/campaigns';
 import { PendingChanges } from '@/types/sync';
 import { generateLocalId } from '@/utils/entityUtils';
 import { encryptionService } from '@/utils/encryption';
 
 export interface LocalDataStore {
+  // Campaign context
+  currentCampaignId: string | null;
+  currentUserId: string | null;
+  
+  // Campaign data (cached locally)
+  campaigns: LocalCampaign[];
+  
+  // Campaign-scoped data
   thoughts: LocalThought[];
   entities: LocalEntity[];
   pendingChanges: PendingChanges;
@@ -15,9 +24,13 @@ export interface LocalDataStore {
 const STORAGE_KEY = 'dnd_chronicle_data';
 
 const getDefaultStore = (): LocalDataStore => ({
+  currentCampaignId: null,
+  currentUserId: null,
+  campaigns: [],
   thoughts: [],
   entities: [],
   pendingChanges: {
+    campaigns: { added: [], modified: [], deleted: [] },
     thoughts: { added: [], modified: [], deleted: [] },
     entities: { added: [], modified: [], deleted: [] }
   },
@@ -38,19 +51,44 @@ export const dataStorageService = {
       if (parsed.lastSyncTime) parsed.lastSyncTime = new Date(parsed.lastSyncTime);
       if (parsed.lastRefreshTime) parsed.lastRefreshTime = new Date(parsed.lastRefreshTime);
       
+      parsed.campaigns?.forEach((campaign: LocalCampaign) => {
+        campaign.created_at = new Date(campaign.created_at);
+        campaign.updated_at = new Date(campaign.updated_at);
+        if (campaign.modifiedLocally) campaign.modifiedLocally = new Date(campaign.modifiedLocally);
+        
+        // Parse member dates
+        campaign.members?.forEach(member => {
+          member.joined_at = new Date(member.joined_at);
+        });
+      });
+
       parsed.thoughts?.forEach((thought: LocalThought) => {
         thought.timestamp = new Date(thought.timestamp);
         if (thought.modifiedLocally) thought.modifiedLocally = new Date(thought.modifiedLocally);
         
-        // Data migration: ensure relatedEntities exists
+        // Data migration: ensure required fields exist
         if (!thought.relatedEntities) {
           thought.relatedEntities = [];
+        }
+        if (!thought.campaign_id && parsed.currentCampaignId) {
+          thought.campaign_id = parsed.currentCampaignId;
+        }
+        if (!thought.created_by && parsed.currentUserId) {
+          thought.created_by = parsed.currentUserId;
         }
       });
       
       parsed.entities?.forEach((entity: LocalEntity) => {
         if (entity.modifiedLocally) entity.modifiedLocally = new Date(entity.modifiedLocally);
         if (entity.createdLocally) entity.createdLocally = new Date(entity.createdLocally);
+        
+        // Data migration: ensure required fields exist
+        if (!entity.campaign_id && parsed.currentCampaignId) {
+          entity.campaign_id = parsed.currentCampaignId;
+        }
+        if (!entity.created_by && parsed.currentUserId) {
+          entity.created_by = parsed.currentUserId;
+        }
       });
       
       return { ...getDefaultStore(), ...parsed };
@@ -71,9 +109,49 @@ export const dataStorageService = {
     }
   },
 
-  // Add a new thought locally
+  // Set current campaign and user context
+  setCurrentContext(campaignId: string | null, userId: string | null): void {
+    const data = this.getData();
+    data.currentCampaignId = campaignId;
+    data.currentUserId = userId;
+    this.saveData(data);
+  },
+
+  // Get current campaign context
+  getCurrentContext(): { campaignId: string | null; userId: string | null } {
+    const data = this.getData();
+    return {
+      campaignId: data.currentCampaignId,
+      userId: data.currentUserId
+    };
+  },
+
+  // Add a new campaign locally
+  addCampaign(campaign: Omit<LocalCampaign, 'localId' | 'syncStatus'>): LocalCampaign {
+    const data = this.getData();
+    const localCampaign: LocalCampaign = {
+      ...campaign,
+      localId: generateLocalId(),
+      syncStatus: 'pending',
+      modifiedLocally: new Date()
+    };
+    
+    data.campaigns.push(localCampaign);
+    data.pendingChanges.campaigns.added.push(localCampaign.localId!);
+    
+    this.saveData(data);
+    return localCampaign;
+  },
+
+  // Add a new thought locally (campaign-scoped)
   addThought(thought: Omit<LocalThought, 'localId' | 'syncStatus'>): LocalThought {
     const data = this.getData();
+    
+    // Ensure campaign and user context
+    if (!thought.campaign_id || !thought.created_by) {
+      throw new Error('Campaign ID and User ID are required for thoughts');
+    }
+    
     const localThought: LocalThought = {
       ...thought,
       localId: generateLocalId(),
@@ -95,9 +173,14 @@ export const dataStorageService = {
     return localThought;
   },
 
-  // Add a new entity locally
+  // Add a new entity locally (campaign-scoped)
   addEntity(entity: Omit<LocalEntity, 'localId' | 'syncStatus' | 'createdLocally'>): LocalEntity {
     const data = this.getData();
+
+    // Ensure campaign and user context
+    if (!entity.campaign_id || !entity.created_by) {
+      throw new Error('Campaign ID and User ID are required for entities');
+    }
 
     const localEntity: LocalEntity = {
       ...entity,
@@ -121,9 +204,26 @@ export const dataStorageService = {
     return localEntity;
   },
 
+  // Get campaign-scoped data
+  getCampaignData(campaignId: string): { thoughts: LocalThought[]; entities: LocalEntity[] } {
+    const data = this.getData();
+    
+    const campaignThoughts = data.thoughts.filter(t => t.campaign_id === campaignId);
+    const campaignEntities = data.entities.filter(e => e.campaign_id === campaignId);
+    
+    return { thoughts: campaignThoughts, entities: campaignEntities };
+  },
+
   // Optimize pending changes by eliminating redundant operations
   optimizePendingChanges(): void {
     const data = this.getData();
+    
+    // Optimize campaigns
+    const optimizedCampaigns = this.optimizeEntityChanges(
+      data.pendingChanges.campaigns.added,
+      data.pendingChanges.campaigns.modified,
+      data.pendingChanges.campaigns.deleted
+    );
     
     // Optimize thoughts
     const optimizedThoughts = this.optimizeEntityChanges(
@@ -139,6 +239,7 @@ export const dataStorageService = {
       data.pendingChanges.entities.deleted
     );
     
+    data.pendingChanges.campaigns = optimizedCampaigns;
     data.pendingChanges.thoughts = optimizedThoughts;
     data.pendingChanges.entities = optimizedEntities;
     this.saveData(data);
@@ -218,6 +319,7 @@ export const dataStorageService = {
   clearPendingChanges(): void {
     const data = this.getData();
     data.pendingChanges = {
+      campaigns: { added: [], modified: [], deleted: [] },
       thoughts: { added: [], modified: [], deleted: [] },
       entities: { added: [], modified: [], deleted: [] }
     };
@@ -228,8 +330,9 @@ export const dataStorageService = {
   // Get total pending changes count (read-only)
   getPendingChangesCount(): number {
     const data = this.getData();
-    const { thoughts, entities } = data.pendingChanges;
-    return thoughts.added.length + thoughts.modified.length + thoughts.deleted.length +
+    const { campaigns, thoughts, entities } = data.pendingChanges;
+    return campaigns.added.length + campaigns.modified.length + campaigns.deleted.length +
+           thoughts.added.length + thoughts.modified.length + thoughts.deleted.length +
            entities.added.length + entities.modified.length + entities.deleted.length;
   },
 

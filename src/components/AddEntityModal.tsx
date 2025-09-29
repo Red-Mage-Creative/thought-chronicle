@@ -21,6 +21,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { dataStorageService } from "@/services/dataStorageService";
+import { campaignService } from "@/services/campaignService";
 
 interface AddEntityModalProps {
   open: boolean;
@@ -64,10 +65,20 @@ export const AddEntityModal = ({ open, onOpenChange, onEntityAdded }: AddEntityM
 
     setIsSubmitting(true);
     try {
+      const campaignId = campaignService.getCurrentCampaignId();
+      const userId = campaignService.getCurrentUserId();
+      
+      if (!campaignId || !userId) {
+        toast.error("No active campaign or user session found");
+        return;
+      }
+
       const entityData = {
         name: name.trim(),
         type: type as any,
-        description: description.trim() || undefined
+        description: description.trim() || undefined,
+        campaign_id: campaignId,
+        created_by: userId
       };
 
       dataStorageService.addEntity(entityData);

@@ -7,7 +7,12 @@ export interface BaseEntity {
   description?: string;
 }
 
-export interface LocalEntity extends BaseEntity {
+export interface CampaignEntity extends BaseEntity {
+  campaign_id: string;  // MongoDB ObjectId
+  created_by: string;   // Supabase user ID
+}
+
+export interface LocalEntity extends CampaignEntity {
   localId?: string;
   modifiedLocally?: Date;
   syncStatus: 'pending' | 'synced' | 'conflict';

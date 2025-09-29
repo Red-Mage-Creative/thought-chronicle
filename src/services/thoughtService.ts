@@ -1,5 +1,6 @@
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
+import { campaignService } from './campaignService';
 import { entityService } from './entityService';
 
 export const thoughtService = {
@@ -14,6 +15,12 @@ export const thoughtService = {
     gameDate?: string
   ): LocalThought {
     const data = dataStorageService.getData();
+    const campaignId = campaignService.getCurrentCampaignId();
+    const userId = campaignService.getCurrentUserId();
+    
+    if (!campaignId || !userId) {
+      throw new Error('No active campaign or user session found');
+    }
     
     // Ensure all related entities exist (auto-create if needed)
     const validatedEntities = relatedEntities.map(entityName => {
@@ -25,7 +32,9 @@ export const thoughtService = {
       content: content.trim(),
       relatedEntities: validatedEntities,
       timestamp: new Date(),
-      gameDate
+      gameDate,
+      campaign_id: campaignId,
+      created_by: userId
     });
     
     return thought;

@@ -20,7 +20,9 @@ describe('useEntities', () => {
         type: 'character',
         syncStatus: 'synced',
         modifiedLocally: new Date(),
-        createdLocally: new Date()
+        createdLocally: new Date(),
+        campaign_id: 'test-campaign',
+        created_by: 'test-user'
       }
     ])
     
@@ -31,7 +33,9 @@ describe('useEntities', () => {
         relatedEntities: ['Arthur'],
         timestamp: new Date(),
         syncStatus: 'synced',
-        modifiedLocally: new Date()
+        modifiedLocally: new Date(),
+        campaign_id: 'test-campaign',
+        created_by: 'test-user'
       }
     ])
     
@@ -43,6 +47,8 @@ describe('useEntities', () => {
         syncStatus: 'synced',
         modifiedLocally: new Date(),
         createdLocally: new Date(),
+        campaign_id: 'test-campaign',
+        created_by: 'test-user',
         metrics: { count: 1, lastMentioned: new Date() }
       }
     ])

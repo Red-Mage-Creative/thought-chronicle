@@ -1,6 +1,7 @@
 import { LocalEntity, EntityType, EntityWithMetrics } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
+import { campaignService } from './campaignService';
 import { inferEntityType } from '@/utils/entityUtils';
 
 export const entityService = {
@@ -21,6 +22,12 @@ export const entityService = {
     creationSource: 'manual' | 'auto' = 'manual'
   ): LocalEntity {
     const data = dataStorageService.getData();
+    const campaignId = campaignService.getCurrentCampaignId();
+    const userId = campaignService.getCurrentUserId();
+    
+    if (!campaignId || !userId) {
+      throw new Error('No active campaign or user session found');
+    }
     
     // Check for duplicates (case-insensitive)
     const existing = data.entities.find(e => e.name.toLowerCase() === name.toLowerCase());
@@ -34,7 +41,9 @@ export const entityService = {
       name,
       type: inferredType,
       description,
-      creationSource
+      creationSource,
+      campaign_id: campaignId,
+      created_by: userId
     });
     
     return entity;

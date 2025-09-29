@@ -112,7 +112,9 @@ describe('businessLogicService', () => {
         type: 'character',
         syncStatus: 'pending',
         modifiedLocally: new Date(),
-        createdLocally: new Date()
+        createdLocally: new Date(),
+        campaign_id: 'test-campaign',
+        created_by: 'test-user'
       })
       vi.mocked(thoughtService.createThought).mockReturnValue({
         localId: 'thought-id',
@@ -120,7 +122,9 @@ describe('businessLogicService', () => {
         relatedEntities: [],
         timestamp: new Date(),
         syncStatus: 'pending',
-        modifiedLocally: new Date()
+        modifiedLocally: new Date(),
+        campaign_id: 'test-campaign',
+        created_by: 'test-user'
       })
     })
 
