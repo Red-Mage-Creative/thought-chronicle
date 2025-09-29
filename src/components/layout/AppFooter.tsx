@@ -18,16 +18,16 @@ export const AppFooter = () => {
 
   return (
     <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
-      <div className="container py-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-muted-foreground">
+      <div className="container py-4 sm:py-6">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-sm text-muted-foreground">
             
             {/* Brand & Info */}
-            <div className="text-xs space-y-3">
+            <div className="text-xs space-y-2 sm:space-y-3">
               <div>
                 <div className="font-medium text-foreground mb-1">Chronicle</div>
                 <div className="text-muted-foreground">A TTRPG note-taking application</div>
-                <div className="italic mt-1">"Every adventure begins with a single thought"</div>
+                <div className="italic mt-1 text-[10px] sm:text-xs">"Every adventure begins with a single thought"</div>
               </div>
               <div className="font-medium">
                 <a 
@@ -35,14 +35,14 @@ export const AppFooter = () => {
                   className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline"
                 >
                   <FileText className="h-3 w-3" />
-                  Version 1.3.0
+                  Alpha - Version 0.3.0
                 </a>
               </div>
-              <div className="text-xs text-muted-foreground/70">Built with Lovable</div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground/70">Built with Lovable</div>
             </div>
 
             {/* Stats & Tips (only when logged in) */}
-            <div className="text-xs space-y-3">
+            <div className="text-xs space-y-2 sm:space-y-3 sm:col-span-1 md:col-span-1">
               {user && (
                 <>
                   <div className="space-y-2">
@@ -74,7 +74,7 @@ export const AppFooter = () => {
             </div>
 
             {/* Links */}
-            <div className="text-xs space-y-3">
+            <div className="text-xs space-y-2 sm:space-y-3 col-span-1 sm:col-span-2 md:col-span-1">
               <div className="space-y-2">
                 <div className="font-medium text-foreground">Resources</div>
                 <div className="flex flex-col gap-1">

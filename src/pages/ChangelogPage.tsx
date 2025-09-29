@@ -18,7 +18,7 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
-  version: "1.3.0",
+  version: "0.3.0",
   date: "2025-09-29",
   features: ["Added comprehensive Privacy Policy page with data collection transparency", "Created Terms of Service page with user rights and responsibilities", "Implemented Cookie Controls page with granular privacy settings", "Made changelog and design system pages publicly accessible without authentication"],
   improvements: ["Enhanced footer with conditional authentication-aware content", "Reorganized footer layout with proper legal and resource links", "Added footer to authentication page for better user experience", "Improved policy page navigation and accessibility"],
@@ -26,7 +26,7 @@ const changelog: ChangelogEntry[] = [{
   docs: ["Updated design system documentation with new footer patterns", "Added policy page documentation and legal compliance features"],
   maintenance: ["Restructured footer component with responsive three-column layout", "Updated AppLayout to support both authenticated and public pages", "Enhanced routing configuration for public accessibility"]
 }, {
-  version: "1.2.1",
+  version: "0.2.1",
   date: "2025-09-29",
   features: [],
   improvements: [],
@@ -34,7 +34,7 @@ const changelog: ChangelogEntry[] = [{
   docs: [],
   maintenance: []
 }, {
-  version: "1.2.0",
+  version: "0.2.0",
   date: "2025-09-29",
   features: ["Enhanced authentication flow with improved access code validation", "Added case-insensitive access code handling", "Implemented username-based login support"],
   improvements: ["Normalized access code validation to handle case sensitivity and whitespace", "Enhanced error handling with better debugging capabilities", "Improved user feedback for authentication failures"],
@@ -42,7 +42,7 @@ const changelog: ChangelogEntry[] = [{
   docs: ["Updated authentication documentation with new features"],
   maintenance: ["Added email column to profiles table", "Updated authentication context with robust error handling", "Improved database migration for user profile management"]
 }, {
-  version: "1.1.0",
+  version: "0.1.0",
   date: "2025-09-29",
   features: ["Enhanced entity tags with type-specific icons in thought list", "Clickable entity tags with navigation to entity details page"],
   improvements: ["Added visual feedback with hover effects on entity tags", "Improved entity type recognition using smart inference patterns"],
@@ -51,7 +51,7 @@ const changelog: ChangelogEntry[] = [{
   maintenance: ["Major tech debt refactoring - removed all debug logging from production code", "Fixed TypeScript type safety issues (removed 'any' types)", "Standardized error handling patterns across all services", "Updated version consistency between AppFooter and ChangelogPage", "Optimized function lengths and improved code clarity", "Enhanced DesignSystemPage documentation with entity tag improvements"],
   tests: ["Added comprehensive testing infrastructure with Vitest and React Testing Library", "Created unit tests for entityUtils with 100% coverage of core functions", "Implemented formatter utility tests with real-time mocking", "Added integration tests for businessLogicService with proper mocking patterns", "Created hook tests for useEntities with async behavior validation", "Established test setup with localStorage and DOM mocking", "Configured testing environment with proper TypeScript support"]
 }, {
-  version: "1.0.0",
+  version: "0.0.1",
   date: "2024-12-29",
   features: ["Entity registry with comprehensive card and table views", "Entity details page with full management capabilities", "Advanced sorting options (alphabetical, mentions, creation/update dates)", "Thought management system with entity linking and suggestions", "Real-time data synchronization between thoughts and entities", "Responsive design system with D&D fantasy theme", "Entity type system (Player, NPC, Location, Item, Organization)", "Search and filtering capabilities across entities", "Uncategorized entity detection and categorization", "Keyboard shortcuts for improved productivity"],
   improvements: ["Simplified card layouts with intuitive iconography", "Consistent entity type color coding throughout the app", "Enhanced hover states and interaction feedback", "Streamlined date display using icons for created/updated timestamps", "Improved mention tracking with clear visual indicators", "Responsive grid layouts for optimal viewing on all devices"],
