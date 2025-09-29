@@ -32,7 +32,7 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
   };
 
   return (
-    <div className="mb-4">
+    <div className="max-w-2xl mx-auto px-4 mb-4">
       <Card className="border-amber-300 bg-amber-50">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
