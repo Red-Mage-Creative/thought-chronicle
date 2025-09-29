@@ -4,19 +4,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { User, Settings as SettingsIcon, RefreshCw, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { campaignService } from "@/services/campaignService";
 import { LocalCampaign } from "@/types/campaigns";
 import { CampaignManagementModal } from "@/components/CampaignManagementModal";
-import { QuickCampaignSwitcher } from "@/components/QuickCampaignSwitcher";
+
 import { toast } from "sonner";
 
 export const AppHeader = () => {
   const { user, signOut } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showManagementModal, setShowManagementModal] = useState(false);
-  const [showSwitcherModal, setShowSwitcherModal] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<LocalCampaign | null>(null);
   const [allCampaigns, setAllCampaigns] = useState<LocalCampaign[]>([]);
 
@@ -63,7 +62,7 @@ export const AppHeader = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Left: Brand */}
           <Link 
             to="/" 
@@ -93,7 +92,7 @@ export const AppHeader = () => {
                   >
                     {getDisplayName()}
                     {currentCampaign && (
-                      <>, Campaign: <span className="text-foreground font-medium truncate max-w-[150px] inline-block align-bottom">{currentCampaign.name}</span></>
+                      <>, Campaign: <span className="text-foreground font-medium">{currentCampaign.name}</span></>
                     )}
                   </button>
                 </TooltipTrigger>
@@ -118,15 +117,6 @@ export const AppHeader = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background z-50">
-                <DropdownMenuItem onClick={() => setShowSwitcherModal(true)}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Switch Campaign
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowManagementModal(true)}>
-                  <SettingsIcon className="h-4 w-4 mr-2" />
-                  Campaign Management
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowConfirmDialog(true)}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -145,13 +135,6 @@ export const AppHeader = () => {
         description="Are you sure you want to sign out?"
         confirmText="Sign Out"
         cancelText="Cancel"
-      />
-
-      <QuickCampaignSwitcher
-        open={showSwitcherModal}
-        onOpenChange={setShowSwitcherModal}
-        campaigns={allCampaigns}
-        currentCampaignId={currentCampaign?.localId || currentCampaign?.id || null}
       />
 
       {showManagementModal && (
