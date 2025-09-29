@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings as SettingsIcon, Save, X, Pin } from "lucide-react";
+import { Settings as SettingsIcon, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -7,39 +7,34 @@ import { TagSelector } from "@/components/forms/TagSelector";
 import { Badge } from "@/components/ui/badge";
 import { EntitySuggestion } from '@/types/entities';
 import { getEntityClass } from '@/utils/entityUtils';
-
 interface SettingsProps {
   defaultTags: string[];
   onDefaultTagsChange: (tags: string[]) => void;
   existingEntities: EntitySuggestion[];
 }
-
-export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }: SettingsProps) => {
+export const Settings = ({
+  defaultTags,
+  onDefaultTagsChange,
+  existingEntities
+}: SettingsProps) => {
   const [localDefaultTags, setLocalDefaultTags] = useState<string[]>(defaultTags);
   const [isOpen, setIsOpen] = useState(false);
-
-
   const handleSave = () => {
     onDefaultTagsChange(localDefaultTags);
     setIsOpen(false);
   };
-
   const handleCancel = () => {
     setLocalDefaultTags(defaultTags);
     setIsOpen(false);
   };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+  return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <SettingsIcon className="h-4 w-4" />
           Settings
-          {defaultTags.length > 0 && (
-            <Badge variant="secondary" className="text-xs">
+          {defaultTags.length > 0 && <Badge variant="secondary" className="text-xs">
               {defaultTags.length}
-            </Badge>
-          )}
+            </Badge>}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
@@ -57,36 +52,29 @@ export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }:
               </p>
               
               <div className="space-y-3">
-                <TagSelector
-                  tags={localDefaultTags}
-                  onTagsChange={setLocalDefaultTags}
-                  suggestions={existingEntities}
-                  placeholder="Add default tags (e.g., player-thara, campaign-waterdeep)..."
-                  isDefaultTagSelector={true}
-                />
+                <TagSelector tags={localDefaultTags} onTagsChange={setLocalDefaultTags} suggestions={existingEntities} placeholder="Add default tags (e.g., player-thara, campaign-waterdeep)..." />
                 
-                {localDefaultTags.length > 0 && (
-                  <div className="p-3 bg-muted/30 border border-border rounded">
-                    <div className="text-sm text-muted-foreground mb-2">
-                      <Pin className="h-3 w-3 inline mr-1" />
-                      Default tags that will be added to every thought:
-                    </div>
+                {localDefaultTags.length > 0 && <div className="p-3 bg-muted/30 border border-border rounded">
+                    
                     <div className="flex flex-wrap gap-2">
-                      {localDefaultTags.map(tag => (
-                        <Badge 
-                          key={tag} 
-                          variant="outline" 
-                          className="entity-tag entity-default-tag text-xs"
-                        >
-                          <Pin className="h-3 w-3 mr-1" />
+                      {localDefaultTags.map(tag => <Badge key={tag} variant="outline" className={`entity-tag ${getEntityClass(tag)} text-xs`}>
                           #{tag}
-                        </Badge>
-                      ))}
+                        </Badge>)}
                     </div>
-                  </div>
-                )}
+                  </div>}
               </div>
             </div>
+
+            {defaultTags.length > 0 && <div className="border-t border-border pt-4">
+                <div className="text-sm text-muted-foreground">
+                  <strong>Current active default tags:</strong>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {defaultTags.map(tag => <Badge key={tag} variant="outline" className={`entity-tag ${getEntityClass(tag)} text-xs`}>
+                      #{tag}
+                    </Badge>)}
+                </div>
+              </div>}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
@@ -101,6 +89,5 @@ export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }:
           </div>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
