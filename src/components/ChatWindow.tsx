@@ -69,7 +69,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
   const validation = businessLogicService.validateContentLength(content);
 
   return (
-    <Card className="bg-card border-border max-w-2xl mx-auto">
+    <Card className="bg-card border-border">
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-foreground">
