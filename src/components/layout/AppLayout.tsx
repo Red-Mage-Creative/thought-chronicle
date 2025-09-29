@@ -1,6 +1,7 @@
 import { ReactNode, ReactElement, cloneElement } from 'react';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
@@ -8,9 +9,11 @@ interface AppLayoutProps {
   variant?: 'narrow' | 'wide' | 'full';
   defaultTags?: string[];
   onDefaultTagsChange?: (tags: string[]) => void;
+  showHeaderWhenUnauthenticated?: boolean;
 }
 
-export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefaultTagsChange }: AppLayoutProps) => {
+export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefaultTagsChange, showHeaderWhenUnauthenticated = false }: AppLayoutProps) => {
+  const { user } = useAuth();
   const getContainerClasses = () => {
     switch (variant) {
       case 'narrow':
@@ -24,9 +27,11 @@ export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefault
     }
   };
 
+  const shouldShowHeader = user || showHeaderWhenUnauthenticated;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <AppHeader />
+      {shouldShowHeader && <AppHeader />}
       <main className="flex-1">
         <div className="container">
           <div className={getContainerClasses()}>
