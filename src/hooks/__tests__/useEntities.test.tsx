@@ -81,7 +81,9 @@ describe('useEntities', () => {
       type: 'character',
       syncStatus: 'pending',
       modifiedLocally: new Date(),
-      createdLocally: new Date()
+      createdLocally: new Date(),
+      campaign_id: 'test-campaign',
+      created_by: 'test-user'
     })
 
     const { result } = renderHook(() => useEntities())
