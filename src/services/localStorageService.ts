@@ -62,6 +62,11 @@ export const localStorageService = {
       parsed.thoughts?.forEach((thought: LocalThought) => {
         thought.timestamp = new Date(thought.timestamp);
         if (thought.modifiedLocally) thought.modifiedLocally = new Date(thought.modifiedLocally);
+        
+        // Data migration: ensure relatedEntities exists
+        if (!thought.relatedEntities) {
+          thought.relatedEntities = (thought as any).entities || [];
+        }
       });
       
       return { ...getDefaultStore(), ...parsed };

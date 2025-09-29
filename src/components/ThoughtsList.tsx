@@ -42,15 +42,19 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
     
     // Apply search filter
     if (searchTerm.trim()) {
-      filtered = filtered.filter(thought => 
-        thought.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        thought.relatedEntities.some(entity => entity.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      filtered = filtered.filter(thought => {
+        const entities = thought.relatedEntities || [];
+        return thought.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          entities.some(entity => entity.toLowerCase().includes(searchTerm.toLowerCase()));
+      });
     }
     
     // Apply entity filter
     if (selectedEntity) {
-      filtered = filtered.filter(thought => thought.relatedEntities.includes(selectedEntity));
+      filtered = filtered.filter(thought => {
+        const entities = thought.relatedEntities || [];
+        return entities.includes(selectedEntity);
+      });
     }
     
     return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -73,7 +77,7 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
   };
 
   // Get unique entities from all local thoughts for filter buttons
-  const uniqueEntities = Array.from(new Set(localThoughts.flatMap(t => t.relatedEntities)));
+  const uniqueEntities = Array.from(new Set(localThoughts.flatMap(t => t.relatedEntities || [])));
 
   return (
     <Card className="p-6 bg-card border-border h-full">
@@ -165,11 +169,11 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
                     {thought.content}
                   </div>
 
-                  {thought.relatedEntities.length > 0 && (
+                  {(thought.relatedEntities || []).length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {thought.relatedEntities.map(entity => (
+                      {(thought.relatedEntities || []).map((entity, index) => (
                         <Badge
-                          key={entity}
+                          key={`${thought.id}-${entity}-${index}`}
                           variant="outline"
                           className={`entity-tag ${getEntityClass(entity)} text-xs cursor-pointer hover:opacity-80`}
                           onClick={() => onEntityClick?.(entity)}
