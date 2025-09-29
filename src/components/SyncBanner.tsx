@@ -31,15 +31,34 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
     return count === 1 ? "1 change" : `${count} changes`;
   };
 
+  const getFantasyMessage = (count: number) => {
+    const messages = [
+      "Your scrolls await the chronicler's seal",
+      "Unsent tales linger in the ethereal realm",
+      "The cosmic ledger awaits your inscriptions",
+      "Ancient wisdom remains unbound to the eternal records",
+      "Your adventures echo unrecorded in the astral plane",
+      "The mystical archive thirsts for your chronicles",
+      "Temporal disturbances detected in the narrative stream",
+      "The realm's memory crystals require synchronization"
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
+  };
+
   return (
     <div className="mb-4">
       <Card className="border-amber-300 bg-amber-50">
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-4 w-4 text-amber-600" />
-            <span className="text-sm font-medium text-amber-800">
-              {formatCount(pendingCount)} pending
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-amber-800">
+                {getFantasyMessage(pendingCount)}
+              </span>
+              <span className="text-xs text-amber-700">
+                {formatCount(pendingCount)} pending
+              </span>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
