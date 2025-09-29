@@ -116,7 +116,11 @@ export default function PendingChangesPage() {
       });
     });
 
-    return changes.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return changes.sort((a, b) => {
+      const timeA = a.timestamp instanceof Date ? a.timestamp.getTime() : Date.now();
+      const timeB = b.timestamp instanceof Date ? b.timestamp.getTime() : Date.now();
+      return timeB - timeA;
+    });
   };
 
   const getActionIcon = (action: string) => {

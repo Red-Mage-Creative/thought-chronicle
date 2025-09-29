@@ -46,6 +46,11 @@ export const dataStorageService = {
         }
       });
       
+      parsed.entities?.forEach((entity: any) => {
+        if (entity.timestamp) entity.timestamp = new Date(entity.timestamp);
+        if (entity.modifiedLocally) entity.modifiedLocally = new Date(entity.modifiedLocally);
+      });
+      
       return { ...getDefaultStore(), ...parsed };
     } catch (error) {
       // Error loading from localStorage - return default store
