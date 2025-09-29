@@ -1,23 +1,40 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sword, Shield } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Sword, Eye, EyeOff, Shield } from 'lucide-react';
+import { signInSchema, signUpSchema, getPasswordStrength, type SignInFormData, type SignUpFormData } from '@/utils/validation';
 import { toast } from 'sonner';
 
-const AuthPage = () => {
+export const AuthPage = () => {
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  
+  // Sign in form state
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [signInErrors, setSignInErrors] = useState<Partial<SignInFormData>>({});
+  
+  // Sign up form state
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [accessCode, setAccessCode] = useState('');
+  const [signUpErrors, setSignUpErrors] = useState<Partial<SignUpFormData>>({});
+  
+  // Password strength
+  const passwordStrength = getPasswordStrength(signUpPassword);
 
   useEffect(() => {
     if (user) {
@@ -27,64 +44,84 @@ const AuthPage = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    setError(null);
+    setSignInErrors({});
 
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      setLoading(false);
+    // Validate form
+    const result = signInSchema.safeParse({ emailOrUsername, password });
+    if (!result.success) {
+      const errors: Partial<SignInFormData> = {};
+      result.error.issues.forEach((err) => {
+        if (err.path[0]) {
+          errors[err.path[0] as keyof SignInFormData] = err.message;
+        }
+      });
+      setSignInErrors(errors);
       return;
     }
 
-    const { error } = await signIn(email, password);
+    setIsLoading(true);
+    const { error } = await signIn(emailOrUsername, password);
     
     if (error) {
-      setError(error.message);
+      setError(error.message || 'Failed to sign in');
     } else {
       toast.success('Successfully signed in!');
       navigate('/');
     }
     
-    setLoading(false);
+    setIsLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
+    setError(null);
+    setSignUpErrors({});
 
-    if (!email || !password || !displayName) {
-      setError('Please fill in all fields');
-      setLoading(false);
+    // Validate form
+    const result = signUpSchema.safeParse({ 
+      email: signUpEmail, 
+      password: signUpPassword, 
+      username,
+      displayName,
+      accessCode
+    });
+    
+    if (!result.success) {
+      const errors: Partial<SignUpFormData> = {};
+      result.error.issues.forEach((err) => {
+        if (err.path[0]) {
+          errors[err.path[0] as keyof SignUpFormData] = err.message;
+        }
+      });
+      setSignUpErrors(errors);
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
-
-    const { error } = await signUp(email, password, displayName);
+    setIsLoading(true);
+    const { error } = await signUp(signUpEmail, signUpPassword, username, displayName, accessCode);
     
     if (error) {
-      if (error.message.includes('already')) {
-        setError('An account with this email already exists. Please sign in instead.');
-      } else {
-        setError(error.message);
-      }
+      setError(error.message || 'Failed to sign up');
     } else {
+      setError(null);
       toast.success('Account created successfully! Please check your email for verification.');
     }
     
-    setLoading(false);
+    setIsLoading(false);
   };
 
   const resetForm = () => {
-    setEmail('');
+    setEmailOrUsername('');
     setPassword('');
+    setSignUpEmail('');
+    setSignUpPassword('');
+    setUsername('');
     setDisplayName('');
-    setError('');
+    setAccessCode('');
+    setError(null);
+    setSignInErrors({});
+    setSignUpErrors({});
   };
 
   return (
@@ -116,34 +153,55 @@ const AuthPage = () => {
               <TabsContent value="signin" className="space-y-4 mt-6">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="emailOrUsername">Email or Username</Label>
                     <Input
-                      id="signin-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
+                      id="emailOrUsername"
+                      type="text"
+                      placeholder="Enter your email or username"
+                      value={emailOrUsername}
+                      onChange={(e) => setEmailOrUsername(e.target.value)}
                       required
                     />
+                    {signInErrors.emailOrUsername && (
+                      <p className="text-sm text-destructive">{signInErrors.emailOrUsername}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">Password</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      required
-                    />
+                    <div className="relative">
+                      <Input
+                        id="signin-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {signInErrors.password && (
+                      <p className="text-sm text-destructive">{signInErrors.password}</p>
+                    )}
                   </div>
                   {error && (
                     <Alert variant="destructive">
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign In'}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Signing in...' : 'Sign In'}
                   </Button>
                 </form>
               </TabsContent>
@@ -151,45 +209,115 @@ const AuthPage = () => {
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Display Name</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      value={displayName}
-                      onChange={(e) => setDisplayName(e.target.value)}
-                      placeholder="Enter your display name"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
+                      value={signUpEmail}
+                      onChange={(e) => setSignUpEmail(e.target.value)}
                       required
                     />
+                    {signUpErrors.email && (
+                      <p className="text-sm text-destructive">{signUpErrors.email}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-username">Username</Label>
+                    <Input
+                      id="signup-username"
+                      type="text"
+                      placeholder="Choose a unique username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    />
+                    {signUpErrors.username && (
+                      <p className="text-sm text-destructive">{signUpErrors.username}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        type={showSignUpPassword ? "text" : "password"}
+                        placeholder="Create a strong password"
+                        value={signUpPassword}
+                        onChange={(e) => setSignUpPassword(e.target.value)}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                      >
+                        {showSignUpPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {signUpPassword && (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex-1">
+                            <Progress value={(passwordStrength.score / 5) * 100} className="h-2" />
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {passwordStrength.score === 5 ? 'Strong' : 
+                             passwordStrength.score >= 3 ? 'Medium' : 'Weak'}
+                          </span>
+                        </div>
+                        {passwordStrength.feedback.length > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Missing: {passwordStrength.feedback.join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {signUpErrors.password && (
+                      <p className="text-sm text-destructive">{signUpErrors.password}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="display-name">Display Name</Label>
                     <Input
-                      id="signup-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password (min 6 characters)"
+                      id="display-name"
+                      type="text"
+                      placeholder="Enter your display name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
                       required
                     />
+                    {signUpErrors.displayName && (
+                      <p className="text-sm text-destructive">{signUpErrors.displayName}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="access-code">Access Code</Label>
+                    <Input
+                      id="access-code"
+                      type="text"
+                      placeholder="Enter the access code"
+                      value={accessCode}
+                      onChange={(e) => setAccessCode(e.target.value)}
+                      required
+                    />
+                    {signUpErrors.accessCode && (
+                      <p className="text-sm text-destructive">{signUpErrors.accessCode}</p>
+                    )}
                   </div>
                   {error && (
                     <Alert variant="destructive">
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Creating account...' : 'Sign Up'}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Creating account...' : 'Sign Up'}
                   </Button>
                 </form>
               </TabsContent>
