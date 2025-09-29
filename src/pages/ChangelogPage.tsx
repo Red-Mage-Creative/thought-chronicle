@@ -18,6 +18,14 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.0",
+  date: "2025-09-29",
+  features: ["Added comprehensive Privacy Policy page with data collection transparency", "Created Terms of Service page with user rights and responsibilities", "Implemented Cookie Controls page with granular privacy settings", "Made changelog and design system pages publicly accessible without authentication"],
+  improvements: ["Enhanced footer with conditional authentication-aware content", "Reorganized footer layout with proper legal and resource links", "Added footer to authentication page for better user experience", "Improved policy page navigation and accessibility"],
+  fixes: [],
+  docs: ["Updated design system documentation with new footer patterns", "Added policy page documentation and legal compliance features"],
+  maintenance: ["Restructured footer component with responsive three-column layout", "Updated AppLayout to support both authenticated and public pages", "Enhanced routing configuration for public accessibility"]
+}, {
   version: "1.2.1",
   date: "2025-09-29",
   features: [],

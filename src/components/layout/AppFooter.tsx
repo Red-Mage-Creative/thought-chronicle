@@ -1,69 +1,124 @@
-import { Brain, Users, Calendar, Palette, FileText } from "lucide-react";
+import { Brain, Users, Calendar, Palette, FileText, Shield, ScrollText, Cookie } from "lucide-react";
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const AppFooter = () => {
-  // Use live data from hooks for real-time updates
+  const { user } = useAuth();
+  
+  // Use live data from hooks for real-time updates (only when authenticated)
   const { thoughts } = useThoughts();
   const { entities } = useEntities();
   
-  const totalThoughts = thoughts.length;
-  const uniqueEntities = entities.length;
-  const recentThoughts = thoughts.filter(
+  const totalThoughts = user ? thoughts.length : 0;
+  const uniqueEntities = user ? entities.length : 0;
+  const recentThoughts = user ? thoughts.filter(
     t => Date.now() - t.timestamp.getTime() < 24 * 60 * 60 * 1000
-  ).length;
+  ).length : 0;
 
   return (
     <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
       <div className="container py-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <div className="text-xs">
-              <div className="font-medium">Chronicle - A TTRPG note-taking application.</div>
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-muted-foreground">
+            
+            {/* Brand & Info */}
+            <div className="text-xs space-y-3">
+              <div>
+                <div className="font-medium text-foreground mb-1">Chronicle</div>
+                <div className="text-muted-foreground">A TTRPG note-taking application</div>
+                <div className="italic mt-1">"Every adventure begins with a single thought"</div>
+              </div>
               <div className="font-medium">
                 <a 
                   href="/changelog" 
-                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
+                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline"
                 >
                   <FileText className="h-3 w-3" />
-                  Version 1.2.1
+                  Version 1.3.0
                 </a>
               </div>
-              <br />
-              <div className="italic">"Every adventure begins with a single thought"</div>
-              <br />
-              <div className="text-xs">Built with Lovable.</div>
+              <div className="text-xs text-muted-foreground/70">Built with Lovable</div>
             </div>
-            
-            <div className="text-xs text-right space-y-2">
-              <div className="flex items-center justify-end gap-4">
-                <div className="flex items-center gap-1">
-                  <Brain className="h-3 w-3 text-primary" />
-                  <span className="font-medium">{totalThoughts}</span>
-                  <span className="text-muted-foreground">thoughts</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-3 w-3 text-primary" />
-                  <span className="font-medium">{uniqueEntities}</span>
-                  <span className="text-muted-foreground">entities</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3 text-primary" />
-                  <span className="font-medium">{recentThoughts}</span>
-                  <span className="text-muted-foreground">today</span>
+
+            {/* Stats & Tips (only when logged in) */}
+            <div className="text-xs space-y-3">
+              {user && (
+                <>
+                  <div className="space-y-2">
+                    <div className="font-medium text-foreground">Your Chronicle</div>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="flex items-center gap-2">
+                        <Brain className="h-3 w-3 text-primary" />
+                        <span className="font-medium">{totalThoughts}</span>
+                        <span>thoughts</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-3 w-3 text-primary" />
+                        <span className="font-medium">{uniqueEntities}</span>
+                        <span>entities</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3 w-3 text-primary" />
+                        <span className="font-medium">{recentThoughts}</span>
+                        <span>today</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-medium text-foreground">Quick Tip</div>
+                    <div>💡 Press Ctrl+Enter to quickly save thoughts</div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Links */}
+            <div className="text-xs space-y-3">
+              <div className="space-y-2">
+                <div className="font-medium text-foreground">Resources</div>
+                <div className="flex flex-col gap-1">
+                  <a 
+                    href="/design-system" 
+                    className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline w-fit"
+                  >
+                    <Palette className="h-3 w-3" />
+                    Design System
+                  </a>
+                  <a 
+                    href="/changelog" 
+                    className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline w-fit"
+                  >
+                    <FileText className="h-3 w-3" />
+                    Changelog
+                  </a>
                 </div>
               </div>
-              <div>
-                💡 Tip: Press Ctrl+Enter to quickly save your thoughts
-              </div>
-              <div className="flex gap-4 text-xs justify-end mt-2">
-                <a 
-                  href="/design-system" 
-                  className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
-                >
-                  <Palette className="h-3 w-3" />
-                  Design System
-                </a>
+              <div className="space-y-2">
+                <div className="font-medium text-foreground">Legal</div>
+                <div className="flex flex-col gap-1">
+                  <a 
+                    href="/privacy-policy" 
+                    className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline w-fit"
+                  >
+                    <Shield className="h-3 w-3" />
+                    Privacy Policy
+                  </a>
+                  <a 
+                    href="/terms-of-service" 
+                    className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline w-fit"
+                  >
+                    <ScrollText className="h-3 w-3" />
+                    Terms of Service
+                  </a>
+                  <a 
+                    href="/cookie-controls" 
+                    className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline w-fit"
+                  >
+                    <Cookie className="h-3 w-3" />
+                    Cookie Controls
+                  </a>
+                </div>
               </div>
             </div>
           </div>

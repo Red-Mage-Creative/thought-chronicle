@@ -15,6 +15,9 @@ import HistoryPage from "./pages/HistoryPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
 import DesignSystemPage from "./pages/DesignSystemPage";
 import ChangelogPage from "./pages/ChangelogPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
+import CookieControlsPage from "./pages/CookieControlsPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import { useOfflineSync } from "./hooks/useOfflineData";
@@ -133,21 +136,41 @@ const App = () => {
               <Route 
                 path="/design-system" 
                 element={
-                  <AuthGuard>
-                    <AppLayout variant="wide">
-                      <DesignSystemPage />
-                    </AppLayout>
-                  </AuthGuard>
+                  <AppLayout variant="wide">
+                    <DesignSystemPage />
+                  </AppLayout>
                 } 
               />
               <Route 
                 path="/changelog" 
                 element={
-                  <AuthGuard>
-                    <AppLayout variant="narrow">
-                      <ChangelogPage />
-                    </AppLayout>
-                  </AuthGuard>
+                  <AppLayout variant="narrow">
+                    <ChangelogPage />
+                  </AppLayout>
+                } 
+              />
+              <Route 
+                path="/privacy-policy" 
+                element={
+                  <AppLayout variant="narrow">
+                    <PrivacyPolicyPage />
+                  </AppLayout>
+                } 
+              />
+              <Route 
+                path="/terms-of-service" 
+                element={
+                  <AppLayout variant="narrow">
+                    <TermsOfServicePage />
+                  </AppLayout>
+                } 
+              />
+              <Route 
+                path="/cookie-controls" 
+                element={
+                  <AppLayout variant="narrow">
+                    <CookieControlsPage />
+                  </AppLayout>
                 } 
               />
               <Route 
