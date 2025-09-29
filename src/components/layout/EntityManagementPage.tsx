@@ -141,48 +141,51 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
             entityCounts={entityCounts}
           />
 
-          {/* Sort Controls */}
-          <div className="flex items-center gap-2">
-            <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-              const [newSortBy, newSortOrder] = value.split('-') as [typeof sortBy, typeof sortOrder];
-              setSortBy(newSortBy);
-              setSortOrder(newSortOrder);
-            }}>
-              <SelectTrigger className="w-48">
-                <ArrowUpDown className="h-4 w-4" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alphabetical-asc">Alphabetical (A-Z)</SelectItem>
-                <SelectItem value="alphabetical-desc">Alphabetical (Z-A)</SelectItem>
-                <SelectItem value="mentions-desc">Most Mentioned</SelectItem>
-                <SelectItem value="mentions-asc">Least Mentioned</SelectItem>
-                <SelectItem value="created-desc">Recently Created</SelectItem>
-                <SelectItem value="created-asc">Oldest Created</SelectItem>
-                <SelectItem value="updated-desc">Recently Updated</SelectItem>
-                <SelectItem value="updated-asc">Oldest Updated</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Sort Controls and View Mode Toggle - Combined */}
+          <div className="flex items-center justify-between pt-4 border-t border-muted/30">
+            <div className="flex items-center gap-2">
+              <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
+                const [newSortBy, newSortOrder] = value.split('-') as [typeof sortBy, typeof sortOrder];
+                setSortBy(newSortBy);
+                setSortOrder(newSortOrder);
+              }}>
+                <SelectTrigger className="w-48">
+                  <ArrowUpDown className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alphabetical-asc">Alphabetical (A-Z)</SelectItem>
+                  <SelectItem value="alphabetical-desc">Alphabetical (Z-A)</SelectItem>
+                  <SelectItem value="mentions-desc">Most Mentioned</SelectItem>
+                  <SelectItem value="mentions-asc">Least Mentioned</SelectItem>
+                  <SelectItem value="created-desc">Recently Created</SelectItem>
+                  <SelectItem value="created-asc">Oldest Created</SelectItem>
+                  <SelectItem value="updated-desc">Recently Updated</SelectItem>
+                  <SelectItem value="updated-asc">Oldest Updated</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              <Grid3X3 className="h-4 w-4 mr-2" />
-              Cards
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              <Table2 className="h-4 w-4 mr-2" />
-              Table
-            </Button>
+            <div className="flex items-center gap-1 bg-muted/50 rounded-md p-1">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="h-8"
+              >
+                <Grid3X3 className="h-4 w-4 mr-1" />
+                Cards
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="h-8"
+              >
+                <Table2 className="h-4 w-4 mr-1" />
+                Table
+              </Button>
+            </div>
           </div>
 
         {uncategorizedCount > 0 && (
@@ -197,14 +200,12 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
             <EntityList
               entities={filteredEntities}
               onEntityClick={onEntityClick}
-              onEntityUpdate={refreshEntities}
               isLoading={isLoading}
             />
           ) : (
             <EntityTableView
               entities={filteredEntities}
               onEntityClick={onEntityClick}
-              onEntityUpdate={refreshEntities}
               isLoading={isLoading}
             />
           )}

@@ -1,7 +1,4 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -10,70 +7,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EntityWithMetrics, EntityType } from '@/types/entities';
+import { EntityWithMetrics } from '@/types/entities';
 import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
-import { EntityEditForm } from '@/components/forms/EntityEditForm';
-import { entityService } from '@/services/entityService';
-import { useToast } from '@/hooks/use-toast';
-import { Edit2, Trash2, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
+import { capitalize } from '@/utils/formatters';
+import { format } from 'date-fns';
 
 interface EntityTableViewProps {
   entities: EntityWithMetrics[];
   onEntityClick?: (entityName: string) => void;
-  onEntityUpdate?: () => void;
   isLoading?: boolean;
 }
 
-export const EntityTableView = ({ entities, onEntityClick, onEntityUpdate, isLoading }: EntityTableViewProps) => {
-  const [editingEntity, setEditingEntity] = useState<EntityWithMetrics | null>(null);
-  const { toast } = useToast();
-
-  const handleEdit = (entity: EntityWithMetrics) => {
-    setEditingEntity(entity);
-  };
-
-  const handleDelete = async (entity: EntityWithMetrics) => {
-    const entityId = entity.localId || entity.id || '';
-    if (!entityId) return;
-
-    try {
-      entityService.deleteEntity(entityId);
-      onEntityUpdate?.();
-      toast({
-        title: 'Entity deleted',
-        description: `"${entity.name}" has been removed from your registry.`
-      });
-    } catch (error) {
-      toast({
-        title: 'Delete failed',
-        description: 'Could not delete entity. Please try again.',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const handleEditSubmit = async (name: string, type: EntityType, description?: string) => {
-    if (!editingEntity) return;
-    
-    const entityId = editingEntity.localId || editingEntity.id || '';
-    if (!entityId) return;
-
-    try {
-      entityService.updateEntity(entityId, { name, type, description });
-      onEntityUpdate?.();
-      setEditingEntity(null);
-      toast({
-        title: 'Entity updated',
-        description: `"${name}" has been updated successfully.`
-      });
-    } catch (error) {
-      toast({
-        title: 'Update failed',
-        description: 'Could not update entity. Please try again.',
-        variant: 'destructive'
-      });
-    }
-  };
+export const EntityTableView = ({ entities, onEntityClick, isLoading }: EntityTableViewProps) => {
 
   if (isLoading) {
     return (
@@ -102,44 +48,38 @@ export const EntityTableView = ({ entities, onEntityClick, onEntityUpdate, isLoa
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-8"></TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-center">Mentions</TableHead>
-              <TableHead>Last Mentioned</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Updated</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead className="text-center">Mentions</TableHead>
+            <TableHead>Last Mentioned</TableHead>
+            <TableHead>Source</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead>Updated</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {entities.map((entity) => {
             const Icon = getEntityIcon(entity.type);
-            const entityClass = getEntityClass(entity.type);
             
             return (
               <TableRow 
                 key={entity.localId || entity.id || entity.name}
-                className="cursor-pointer"
+                className="cursor-pointer hover:bg-accent/50"
                 onClick={() => onEntityClick?.(entity.name)}
               >
-                <TableCell>
-                  <Icon className="h-4 w-4" />
-                </TableCell>
-                <TableCell>
-                  <div className="max-w-xs truncate font-medium">
-                    {entity.name}
+                <TableCell className="font-medium">
+                  <div>
+                    <div className="font-semibold">{entity.name}</div>
+                    {entity.description && (
+                      <div className="text-sm text-muted-foreground">{entity.description}</div>
+                    )}
                   </div>
-                  {entity.description && (
-                    <div className="text-xs text-muted-foreground max-w-xs truncate">
-                      {entity.description}
-                    </div>
-                  )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary" className={entityClass}>
-                    {entity.type}
+                  <Badge variant="secondary" className={`${getEntityClass(entity.type)} inline-flex items-center gap-1`}>
+                    <Icon className="h-3 w-3" />
+                    {capitalize(entity.type)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">
@@ -147,33 +87,23 @@ export const EntityTableView = ({ entities, onEntityClick, onEntityUpdate, isLoa
                 </TableCell>
                 <TableCell>
                   {entity.metrics.lastMentioned ? 
-                    entity.metrics.lastMentioned.toLocaleDateString() : 
+                    format(entity.metrics.lastMentioned, 'MMM d, yyyy') : 
                     'Never'
                   }
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(entity);
-                      }}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(entity);
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
+                <TableCell className="text-sm text-muted-foreground">
+                  {entity.creationSource === 'auto' ? 'Auto-created' : 'Manual'}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {entity.createdLocally ? format(entity.createdLocally, 'MMM d, yyyy') : 'Unknown'}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {entity.modifiedLocally ? format(entity.modifiedLocally, 'MMM d, yyyy') : '-'}
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-muted-foreground cursor-pointer hover:text-primary">
+                    View Details
+                  </span>
                 </TableCell>
               </TableRow>
             );
@@ -181,20 +111,6 @@ export const EntityTableView = ({ entities, onEntityClick, onEntityUpdate, isLoa
         </TableBody>
       </Table>
 
-      <Dialog open={!!editingEntity} onOpenChange={() => setEditingEntity(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Entity</DialogTitle>
-          </DialogHeader>
-          {editingEntity && (
-            <EntityEditForm
-              entity={editingEntity}
-              onSubmit={handleEditSubmit}
-              onCancel={() => setEditingEntity(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
