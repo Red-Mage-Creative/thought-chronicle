@@ -29,7 +29,13 @@ export const Settings = ({
   };
   return <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        
+        <Button variant="outline" size="sm" className="gap-2">
+          <SettingsIcon className="h-4 w-4" />
+          Settings
+          {defaultTags.length > 0 && <Badge variant="secondary" className="text-xs">
+              {defaultTags.length}
+            </Badge>}
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
