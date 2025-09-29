@@ -21,13 +21,12 @@ export const AppFooter = () => {
             <div className="text-xs">
               <div className="font-medium">Chronicle - A TTRPG note-taking application.</div>
               <div className="font-medium">
-                Version 1.2.1
                 <a 
                   href="/changelog" 
                   className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline font-medium"
                 >
                   <FileText className="h-3 w-3" />
-                  Changelog
+                  Version 1.2.1
                 </a>
               </div>
               <br />
