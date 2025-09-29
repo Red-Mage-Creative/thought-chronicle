@@ -20,7 +20,7 @@ export const AppFooter = () => {
     <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
       <div className="container py-4 sm:py-6">
         <div className="max-w-2xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-sm text-muted-foreground">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-sm text-muted-foreground place-items-center text-center md:text-left md:place-items-start">
             
             {/* Brand & Info */}
             <div className="text-xs space-y-2 sm:space-y-3">
@@ -74,7 +74,7 @@ export const AppFooter = () => {
             </div>
 
             {/* Links */}
-            <div className="text-xs space-y-2 sm:space-y-3 col-span-1 sm:col-span-2 md:col-span-1">
+            <div className="text-xs space-y-2 sm:space-y-3 col-span-1 sm:col-span-2 md:col-span-1 md:justify-self-end">
               <div className="space-y-2">
                 <div className="font-medium text-foreground">Resources</div>
                 <div className="flex flex-col gap-1">
