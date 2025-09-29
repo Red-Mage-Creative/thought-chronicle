@@ -16,7 +16,7 @@ export const AppFooter = ({ thoughts = [] }: AppFooterProps) => {
     <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
       <div className="container py-6">
         <div className="max-w-2xl mx-auto">
-          <div className="grid grid-cols-3 gap-6 text-sm text-muted-foreground">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <div className="text-xs">
               <div className="font-medium">D&D Chronicle</div>
               <div className="font-medium">Version 1.0</div>
@@ -26,8 +26,8 @@ export const AppFooter = ({ thoughts = [] }: AppFooterProps) => {
               <div className="text-xs">Built with Lovable.</div>
             </div>
             
-            <div className="flex items-center justify-center">
-              <div className="flex items-center gap-6 text-xs">
+            <div className="text-xs text-right space-y-2">
+              <div className="flex items-center justify-end gap-4">
                 <div className="flex items-center gap-1">
                   <Brain className="h-3 w-3 text-primary" />
                   <span className="font-medium">{totalThoughts}</span>
@@ -44,10 +44,9 @@ export const AppFooter = ({ thoughts = [] }: AppFooterProps) => {
                   <span className="text-muted-foreground">today</span>
                 </div>
               </div>
-            </div>
-            
-            <div className="text-xs text-right">
-              <span>💡 Tip: Press Ctrl+Enter to quickly save your thoughts</span>
+              <div>
+                💡 Tip: Press Ctrl+Enter to quickly save your thoughts
+              </div>
             </div>
           </div>
         </div>
