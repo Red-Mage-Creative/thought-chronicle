@@ -1,4 +1,4 @@
-import { Home, Users, History, Menu } from "lucide-react";
+import { Home, Users, History, Menu, Clock } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ export const Navigation = () => {
     { to: "/", icon: Home, label: "Home" },
     { to: "/entities", icon: Users, label: "Entities" },
     { to: "/history", icon: History, label: "History" },
+    { to: "/pending-changes", icon: Clock, label: "Pending" },
   ];
 
   return (

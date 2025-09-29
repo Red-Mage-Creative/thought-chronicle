@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
 import HistoryPage from "./pages/HistoryPage";
+import PendingChangesPage from "./pages/PendingChangesPage";
 import NotFound from "./pages/NotFound";
 import { useLocalThoughts, useOfflineSync } from "./hooks/useOfflineData";
 import { syncService } from "./services/syncService";
@@ -88,6 +89,10 @@ const App = () => {
                     onEntityClick={handleEntityClick} 
                   />
                 } 
+              />
+              <Route 
+                path="/pending-changes" 
+                element={<PendingChangesPage />} 
               />
               <Route path="*" element={<NotFound />} />
             </Routes>

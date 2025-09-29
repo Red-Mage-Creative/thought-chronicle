@@ -1,21 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertCircle, Upload, Eye } from "lucide-react";
+import { AlertCircle, Upload, ExternalLink } from "lucide-react";
 import { useOfflineSync } from "@/hooks/useOfflineData";
 import { useState } from "react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import { dataStorageService } from "@/services/dataStorageService";
+import { useNavigate } from "react-router-dom";
 
 interface SyncBannerProps {
   onSync: () => Promise<void>;
 }
 
 export const SyncBanner = ({ onSync }: SyncBannerProps) => {
+  const navigate = useNavigate();
   const { pendingCount } = useOfflineSync();
   const [isSyncing, setIsSyncing] = useState(false);
   const [showSyncConfirm, setShowSyncConfirm] = useState(false);
-  const [showPendingDetails, setShowPendingDetails] = useState(false);
 
   if (pendingCount === 0) return null;
 
@@ -26,11 +25,6 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
     } finally {
       setIsSyncing(false);
     }
-  };
-
-  const getPendingChangesDetails = () => {
-    const data = dataStorageService.getData();
-    return data.pendingChanges;
   };
 
   const formatCount = (count: number) => {
@@ -49,60 +43,15 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Dialog open={showPendingDetails} onOpenChange={setShowPendingDetails}>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-amber-300 text-amber-700 hover:bg-amber-100"
-                >
-                  <Eye className="mr-1 h-3 w-3" />
-                  View
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Pending Changes</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  {(() => {
-                    const details = getPendingChangesDetails();
-                    const hasChanges = details.thoughts.added.length + details.thoughts.modified.length + 
-                                     details.thoughts.deleted.length + details.entities.added.length + 
-                                     details.entities.modified.length + details.entities.deleted.length > 0;
-                    
-                    if (!hasChanges) {
-                      return <p className="text-sm text-muted-foreground">No pending changes</p>;
-                    }
-                    
-                    return (
-                      <>
-                        {(details.thoughts.added.length + details.thoughts.modified.length + details.thoughts.deleted.length) > 0 && (
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Thoughts</h4>
-                            <ul className="text-xs space-y-1 text-muted-foreground">
-                              {details.thoughts.added.length > 0 && <li>• {details.thoughts.added.length} added</li>}
-                              {details.thoughts.modified.length > 0 && <li>• {details.thoughts.modified.length} modified</li>}
-                              {details.thoughts.deleted.length > 0 && <li>• {details.thoughts.deleted.length} deleted</li>}
-                            </ul>
-                          </div>
-                        )}
-                        {(details.entities.added.length + details.entities.modified.length + details.entities.deleted.length) > 0 && (
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Entities</h4>
-                            <ul className="text-xs space-y-1 text-muted-foreground">
-                              {details.entities.added.length > 0 && <li>• {details.entities.added.length} added</li>}
-                              {details.entities.modified.length > 0 && <li>• {details.entities.modified.length} modified</li>}
-                              {details.entities.deleted.length > 0 && <li>• {details.entities.deleted.length} deleted</li>}
-                            </ul>
-                          </div>
-                        )}
-                      </>
-                    );
-                  })()}
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/pending-changes')}
+              className="border-amber-300 text-amber-700 hover:bg-amber-100"
+            >
+              <ExternalLink className="mr-1 h-3 w-3" />
+              View Details
+            </Button>
             
             <Button 
               onClick={() => setShowSyncConfirm(true)}
