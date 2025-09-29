@@ -13,7 +13,7 @@ import { LocalThought } from '@/types/thoughts';
 import { Search, RefreshCw, Plus, Calendar } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/use-toast';
-import { format, isToday, isYesterday, isThisWeek, isThisMonth, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format, isToday, isYesterday, isThisWeek, isThisMonth, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 interface HistoryPageProps {
   onEntityClick?: (entityName: string) => void;
@@ -77,6 +77,7 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
     
     // Filter by date based on when the thought was actually created
     const thoughtDate = new Date(thought.timestamp);
+    const now = new Date();
     let matchesDate = true;
     
     switch (selectedDateFilter) {
@@ -87,13 +88,18 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
         matchesDate = isYesterday(thoughtDate);
         break;
       case 'last7':
-        matchesDate = thoughtDate >= subDays(new Date(), 7);
+        const sevenDaysAgo = startOfDay(subDays(now, 7));
+        matchesDate = thoughtDate >= sevenDaysAgo;
         break;
       case 'thisWeek':
-        matchesDate = isThisWeek(thoughtDate);
+        const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // Monday start
+        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+        matchesDate = thoughtDate >= weekStart && thoughtDate <= weekEnd;
         break;
       case 'thisMonth':
-        matchesDate = isThisMonth(thoughtDate);
+        const monthStart = startOfMonth(now);
+        const monthEnd = endOfMonth(now);
+        matchesDate = thoughtDate >= monthStart && thoughtDate <= monthEnd;
         break;
       case 'all':
       default:
