@@ -15,13 +15,13 @@ export interface LocalEntity extends BuildshipEntity {
 
 export interface PendingChanges {
   thoughts: {
-    added: LocalThought[];
-    modified: LocalThought[];
+    added: string[];
+    modified: string[];
     deleted: string[];
   };
   entities: {
-    added: LocalEntity[];
-    modified: LocalEntity[];
+    added: string[];
+    modified: string[];
     deleted: string[];
   };
 }
@@ -96,7 +96,7 @@ export const localStorageService = {
     };
     
     data.thoughts.unshift(localThought);
-    data.pendingChanges.thoughts.added.push(localThought);
+    data.pendingChanges.thoughts.added.push(localThought.localId!);
     this.saveData(data);
     this.optimizePendingChanges();
     return localThought;
@@ -113,7 +113,7 @@ export const localStorageService = {
     };
     
     data.entities.push(localEntity);
-    data.pendingChanges.entities.added.push(localEntity);
+    data.pendingChanges.entities.added.push(localEntity.localId!);
     this.saveData(data);
     this.optimizePendingChanges();
     return localEntity;
@@ -136,7 +136,7 @@ export const localStorageService = {
     
     // Merge with local pending changes
     const allThoughts = [
-      ...data.pendingChanges.thoughts.added,
+      ...data.thoughts.filter(t => data.pendingChanges.thoughts.added.includes(t.localId || t.id || '')),
       ...serverThoughts.filter(st => !data.pendingChanges.thoughts.deleted.includes(st.id))
     ];
     
@@ -182,20 +182,19 @@ export const localStorageService = {
 
   // Helper method to optimize changes for a specific entity type
   optimizeEntityChanges<T extends { id?: string; localId?: string }>(
-    added: T[],
-    modified: T[],
+    added: string[],
+    modified: string[],
     deleted: string[]
-  ): { added: T[]; modified: T[]; deleted: string[] } {
-    const finalAdded: T[] = [];
-    const finalModified: T[] = [];
+  ): { added: string[]; modified: string[]; deleted: string[] } {
+    const finalAdded: string[] = [];
+    const finalModified: string[] = [];
     const finalDeleted: string[] = [];
 
     // Track which items we've processed
     const processedIds = new Set<string>();
 
     // Process added items
-    for (const item of added) {
-      const itemId = item.id || item.localId;
+    for (const itemId of added) {
       if (!itemId) continue;
 
       // Check if this added item was later deleted
@@ -207,23 +206,21 @@ export const localStorageService = {
       }
 
       // Check if this added item was later modified
-      const modifiedIndex = modified.findIndex(m => (m.id || m.localId) === itemId);
-      if (modifiedIndex >= 0) {
-        // Add then modify = keep only the final added state with modifications
-        const modifiedItem = modified[modifiedIndex];
-        finalAdded.push(modifiedItem);
+      const wasModified = modified.includes(itemId);
+      if (wasModified) {
+        // Add then modify = keep only the final added state
+        finalAdded.push(itemId);
         processedIds.add(itemId);
         continue;
       }
 
       // No changes after add, keep the add
-      finalAdded.push(item);
+      finalAdded.push(itemId);
       processedIds.add(itemId);
     }
 
     // Process modified items (that weren't already handled above)
-    for (const item of modified) {
-      const itemId = item.id || item.localId;
+    for (const itemId of modified) {
       if (!itemId || processedIds.has(itemId)) continue;
 
       // Check if this modified item was later deleted
@@ -236,7 +233,7 @@ export const localStorageService = {
       }
 
       // Keep the modification
-      finalModified.push(item);
+      finalModified.push(itemId);
       processedIds.add(itemId);
     }
 
