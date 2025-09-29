@@ -140,7 +140,7 @@ export default function PendingChangesPage() {
   const changes = getPendingChangesDetails();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div>
       <div className="mb-6">
         <div className="flex items-center gap-4 mb-4">
           <Button 

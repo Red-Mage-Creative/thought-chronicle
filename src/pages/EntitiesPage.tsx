@@ -1,5 +1,4 @@
 import { EntityManagementPage } from "@/components/layout/EntityManagementPage";
-import { MainLayout } from "@/components/layout/MainLayout";
 
 interface EntitiesPageProps {
   onEntityClick?: (entity: string) => void;
@@ -7,9 +6,7 @@ interface EntitiesPageProps {
 
 const EntitiesPage = ({ onEntityClick }: EntitiesPageProps) => {
   return (
-    <MainLayout>
-      <EntityManagementPage onEntityClick={onEntityClick} />
-    </MainLayout>
+    <EntityManagementPage onEntityClick={onEntityClick} />
   );
 };
 

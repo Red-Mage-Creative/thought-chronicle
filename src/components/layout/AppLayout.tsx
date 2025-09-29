@@ -1,17 +1,34 @@
 import { ReactNode } from 'react';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
+import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: ReactNode;
+  variant?: 'narrow' | 'wide' | 'full';
 }
 
-export const AppLayout = ({ children }: AppLayoutProps) => {
+export const AppLayout = ({ children, variant = 'narrow' }: AppLayoutProps) => {
+  const getContainerClasses = () => {
+    switch (variant) {
+      case 'narrow':
+        return 'max-w-2xl mx-auto px-4 py-6 space-y-6';
+      case 'wide':
+        return 'max-w-7xl mx-auto px-4 py-6 space-y-6';
+      case 'full':
+        return 'w-full px-4 py-6 space-y-6';
+      default:
+        return 'max-w-2xl mx-auto px-4 py-6 space-y-6';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AppHeader />
       <main className="flex-1">
-        {children}
+        <div className={cn(getContainerClasses())}>
+          {children}
+        </div>
       </main>
       <AppFooter />
     </div>

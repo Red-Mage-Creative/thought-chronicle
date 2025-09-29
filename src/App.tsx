@@ -68,35 +68,52 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppLayout>
-            <Routes>
+          <Routes>
               <Route 
                 path="/" 
-                element={<Index />} 
+                element={
+                  <AppLayout variant="narrow">
+                    <Index />
+                  </AppLayout>
+                } 
               />
               <Route 
                 path="/entities" 
                 element={
-                  <EntitiesPage 
-                    onEntityClick={handleEntityClick} 
-                  />
+                  <AppLayout variant="narrow">
+                    <EntitiesPage 
+                      onEntityClick={handleEntityClick} 
+                    />
+                  </AppLayout>
                 } 
               />
               <Route 
                 path="/history" 
                 element={
-                  <HistoryPage 
-                    onEntityClick={handleEntityClick} 
-                  />
+                  <AppLayout variant="narrow">
+                    <HistoryPage 
+                      onEntityClick={handleEntityClick} 
+                    />
+                  </AppLayout>
                 } 
               />
               <Route 
                 path="/pending-changes" 
-                element={<PendingChangesPage />} 
+                element={
+                  <AppLayout variant="wide">
+                    <PendingChangesPage />
+                  </AppLayout>
+                } 
               />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppLayout>
+              <Route 
+                path="*" 
+                element={
+                  <AppLayout variant="narrow">
+                    <NotFound />
+                  </AppLayout>
+                } 
+              />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
