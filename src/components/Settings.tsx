@@ -54,14 +54,7 @@ export const Settings = ({
               <div className="space-y-3">
                 <TagSelector tags={localDefaultTags} onTagsChange={setLocalDefaultTags} suggestions={existingEntities} placeholder="Add default tags (e.g., player-thara, campaign-waterdeep)..." />
                 
-                {localDefaultTags.length > 0 && <div className="p-3 bg-muted/30 border border-border rounded">
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {localDefaultTags.map(tag => <Badge key={tag} variant="outline" className={`entity-tag ${getEntityClass(tag)} text-xs`}>
-                          #{tag}
-                        </Badge>)}
-                    </div>
-                  </div>}
+                {localDefaultTags.length > 0}
               </div>
             </div>
 
