@@ -62,27 +62,9 @@ export const AppHeader = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Left: Brand */}
-          <Link 
-            to="/" 
-            className="font-bold text-lg text-foreground hover:text-primary transition-colors"
-          >
-            D&D Chronicle
-          </Link>
-
-          {/* Center: Navigation */}
-          <nav className="flex items-center gap-2">
-            <Link to="/entities">
-              <Button variant="ghost" size="sm">Entities</Button>
-            </Link>
-            <Link to="/history">
-              <Button variant="ghost" size="sm">History</Button>
-            </Link>
-          </nav>
-
-          {/* Right: User Info & Settings */}
-          <div className="flex items-center gap-2">
+        <div className="max-w-2xl mx-auto px-4 h-20 grid grid-cols-3 grid-rows-2 gap-2 items-center">
+          {/* Row 1, Column 3: User Info & Settings */}
+          <div className="grid-row-1 col-start-3 flex items-center gap-2 justify-self-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -124,6 +106,24 @@ export const AppHeader = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          {/* Row 2, Column 1: Brand */}
+          <Link 
+            to="/" 
+            className="row-start-2 col-start-1 font-bold text-lg text-foreground hover:text-primary transition-colors"
+          >
+            D&D Chronicle
+          </Link>
+
+          {/* Row 2, Columns 2-3: Navigation */}
+          <nav className="row-start-2 col-start-2 col-span-2 flex items-center gap-2">
+            <Link to="/entities">
+              <Button variant="ghost" size="sm">Entities</Button>
+            </Link>
+            <Link to="/history">
+              <Button variant="ghost" size="sm">History</Button>
+            </Link>
+          </nav>
         </div>
       </div>
 
