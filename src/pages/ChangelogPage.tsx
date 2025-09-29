@@ -19,7 +19,7 @@ const changelog: ChangelogEntry[] = [{
   features: ["Enhanced entity tags with type-specific icons in thought list", "Clickable entity tags with navigation to entity details page"],
   improvements: ["Added visual feedback with hover effects on entity tags", "Improved entity type recognition using smart inference patterns"],
   fixes: [],
-  docs: []
+  docs: ["Added comprehensive Rule 4: Testing Standards & Integrity to development guidelines", "Established strict no-spoofed-tests policy with real testing requirements"]
 }, {
   version: "1.0.0",
   date: "2024-12-29",

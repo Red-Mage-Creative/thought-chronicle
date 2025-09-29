@@ -60,3 +60,30 @@
 - Key Props: Always use stable, unique keys for lists
 - Avoid Inline Objects: Don't create objects in render (extract to variables/useMemo)
 - Bundle Size: Prefer tree-shakeable imports (import { Button } from '@/components/ui/button')
+
+## Rule 4: Testing Standards & Integrity
+### 4.1 Core Testing Principles
+- **NO SPOOFED TESTS**: Tests must NEVER be faked, spoofed, or artificially made to pass
+- **Real Testing Only**: All tests must validate actual functionality with real data and real user interactions
+- **Honest Failures**: If a test fails, fix the code or the test logic - never fake a passing result
+- **Meaningful Assertions**: Every test must assert something meaningful about the application's behavior
+
+### 4.2 Testing Types & Coverage
+- **Unit Tests**: Test individual functions, utilities, and components in isolation
+- **Integration Tests**: Test component interactions and data flow between services
+- **End-to-End Tests**: Test complete user workflows from start to finish
+- **Accessibility Tests**: Validate keyboard navigation, screen reader compatibility, and ARIA labels
+- **Performance Tests**: Validate loading times and responsiveness under realistic conditions
+
+### 4.3 Test Organization & Naming
+- **Descriptive Names**: Test names should clearly describe what is being tested and expected outcome
+- **Arrange-Act-Assert**: Structure tests with clear setup, action, and verification phases
+- **Test Files**: Co-locate test files with components (component.test.tsx) or group in __tests__ directories
+- **Mock Strategy**: Mock external dependencies but test actual component logic and user interactions
+
+### 4.4 Quality Standards
+- **Test Reliability**: Tests must consistently pass or fail based on actual code behavior
+- **Test Independence**: Each test should be able to run independently without relying on other tests
+- **Realistic Data**: Use realistic test data that represents actual user scenarios
+- **Error Scenarios**: Test both happy paths and error conditions thoroughly
+- **Regression Prevention**: Add tests for every bug fix to prevent future regressions
