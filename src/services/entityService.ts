@@ -39,6 +39,7 @@ export const entityService = {
     data.entities.push(entity);
     data.pendingChanges.entities.added.push(entity.localId!);
     dataStorageService.saveData(data);
+    dataStorageService.optimizePendingChanges();
     
     return entity;
   },
@@ -83,7 +84,18 @@ export const entityService = {
 
   deleteEntity(entityId: string): void {
     const data = dataStorageService.getData();
+    const entity = data.entities.find(e => e.localId === entityId || e.id === entityId);
+    
     data.entities = data.entities.filter(e => e.localId !== entityId && e.id !== entityId);
+    
+    // Track for sync if it has server ID
+    if (entity?.id) {
+      data.pendingChanges.entities.deleted.push(entity.id);
+    } else if (entity?.localId) {
+      data.pendingChanges.entities.deleted.push(entity.localId);
+    }
+    
     dataStorageService.saveData(data);
+    dataStorageService.optimizePendingChanges();
   }
 };

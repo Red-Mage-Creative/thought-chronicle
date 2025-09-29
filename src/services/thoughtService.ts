@@ -35,6 +35,7 @@ export const thoughtService = {
     data.thoughts.unshift(thought);
     data.pendingChanges.thoughts.added.push(thought.localId!);
     dataStorageService.saveData(data);
+    dataStorageService.optimizePendingChanges();
     
     return thought;
   },
@@ -74,6 +75,7 @@ export const thoughtService = {
     }
     
     dataStorageService.saveData(data);
+    dataStorageService.optimizePendingChanges();
     return updatedThought;
   },
 
@@ -88,9 +90,12 @@ export const thoughtService = {
       // Track for sync if it has server ID
       if (thought.id) {
         data.pendingChanges.thoughts.deleted.push(thought.id);
+      } else if (thought.localId) {
+        data.pendingChanges.thoughts.deleted.push(thought.localId);
       }
       
       dataStorageService.saveData(data);
+      dataStorageService.optimizePendingChanges();
     }
   },
 
