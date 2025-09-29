@@ -89,19 +89,11 @@ export const ThoughtForm = ({
             {isEditMode ? 'Edit Thought' : 'Record a Thought'}
           </CardTitle>
           {showSettings && onDefaultTagsChange && (
-            <div className="flex items-center gap-2">
-              {defaultTags.length > 0 && (
-                <Badge variant="secondary" className="text-xs">
-                  <Pin className="h-3 w-3 mr-1" />
-                  {defaultTags.length} default
-                </Badge>
-              )}
-              <Settings
-                defaultTags={defaultTags}
-                onDefaultTagsChange={onDefaultTagsChange}
-                existingEntities={existingEntities}
-              />
-            </div>
+            <Settings
+              defaultTags={defaultTags}
+              onDefaultTagsChange={onDefaultTagsChange}
+              existingEntities={existingEntities}
+            />
           )}
         </div>
       </CardHeader>
