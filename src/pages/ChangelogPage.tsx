@@ -14,6 +14,13 @@ interface ChangelogEntry {
   chores?: string[];
 }
 const changelog: ChangelogEntry[] = [{
+  version: "1.1.0",
+  date: "2025-09-29",
+  features: ["Enhanced entity tags with type-specific icons in thought list", "Clickable entity tags with navigation to entity details page"],
+  improvements: ["Added visual feedback with hover effects on entity tags", "Improved entity type recognition using smart inference patterns"],
+  fixes: [],
+  docs: []
+}, {
   version: "1.0.0",
   date: "2024-12-29",
   features: ["Entity registry with comprehensive card and table views", "Entity details page with full management capabilities", "Advanced sorting options (alphabetical, mentions, creation/update dates)", "Thought management system with entity linking and suggestions", "Real-time data synchronization between thoughts and entities", "Responsive design system with D&D fantasy theme", "Entity type system (Player, NPC, Location, Item, Organization)", "Search and filtering capabilities across entities", "Uncategorized entity detection and categorization", "Keyboard shortcuts for improved productivity"],

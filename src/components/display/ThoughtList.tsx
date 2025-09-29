@@ -4,7 +4,8 @@ import { LocalThought } from '@/types/thoughts';
 
 import { Clock, Calendar, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getEntityClass } from '@/utils/entityUtils';
+import { getEntityClass, getEntityIcon, inferEntityType } from '@/utils/entityUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface ThoughtListProps {
   thoughts: LocalThought[];
@@ -22,6 +23,14 @@ export const ThoughtList = ({
   onDeleteThought, 
   isLoading 
 }: ThoughtListProps) => {
+  const navigate = useNavigate();
+  
+  const handleEntityClick = (entityName: string) => {
+    // Navigate to entity details page
+    navigate(`/entities/${encodeURIComponent(entityName)}`);
+    // Also call the original handler for any other functionality
+    onEntityClick?.(entityName);
+  };
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -64,16 +73,22 @@ export const ThoughtList = ({
             </p>
             
             <div className="flex flex-wrap gap-2 mb-3">
-              {thought.relatedEntities.map((entity) => (
-                <Badge
-                  key={entity}
-                  variant="secondary"
-                  className={`cursor-pointer hover:opacity-80 ${getEntityClass(entity)}`}
-                  onClick={() => onEntityClick?.(entity)}
-                >
-                  {entity}
-                </Badge>
-              ))}
+              {thought.relatedEntities.map((entity) => {
+                const entityType = inferEntityType(entity);
+                const Icon = getEntityIcon(entityType);
+                
+                return (
+                  <Badge
+                    key={entity}
+                    variant="secondary"
+                    className={`cursor-pointer hover:opacity-80 transition-all hover:scale-105 ${getEntityClass(entity)}`}
+                    onClick={() => handleEntityClick(entity)}
+                  >
+                    <Icon className="h-3 w-3 mr-1" />
+                    {entity}
+                  </Badge>
+                );
+              })}
             </div>
             
             <div className="flex items-center justify-between text-xs text-muted-foreground">
