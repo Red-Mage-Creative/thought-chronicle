@@ -59,7 +59,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (configError) {
         console.error('Access code validation error:', configError);
-        return { error: { message: 'Unable to validate access code. Please try again.' } };
+        const isNetworkError = configError.message?.includes('NetworkError') || configError.message?.includes('Failed to fetch');
+        const errorMessage = isNetworkError 
+          ? 'Network issue while validating access code. Please try again.'
+          : 'Unable to validate access code. Please try again.';
+        return { error: { message: errorMessage } };
       }
 
       if (!configData) {

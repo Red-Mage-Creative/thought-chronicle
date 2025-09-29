@@ -18,6 +18,14 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.2.1",
+  date: "2025-09-29",
+  features: [],
+  improvements: [],
+  fixes: ["Fixed Content Security Policy to allow Supabase domains for authentication"],
+  docs: [],
+  maintenance: []
+}, {
   version: "1.2.0",
   date: "2025-09-29",
   features: ["Enhanced authentication flow with improved access code validation", "Added case-insensitive access code handling", "Implemented username-based login support"],
