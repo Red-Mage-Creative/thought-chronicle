@@ -40,6 +40,7 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
     --entity-location: 270 60% 40%;
     --entity-item: 45 80% 45%;
     --entity-organization: 345 65% 40%;
+    --entity-uncategorized: 40 70% 45%;
 
     --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -94,6 +95,10 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
   
   .entity-organization {
     @apply bg-red-50 border-red-300 text-red-700;
+  }
+  
+  .entity-uncategorized {
+    @apply bg-orange-50 border-orange-300 text-orange-700;
   }
 
   .fantasy-scrollbar {

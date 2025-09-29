@@ -1,4 +1,4 @@
-import { Users, MapPin, Package, Shield, Scroll } from 'lucide-react';
+import { Users, MapPin, Package, Shield, HelpCircle } from 'lucide-react';
 import { EntityType } from '@/types/entities';
 
 // Standardized entity types
@@ -7,6 +7,7 @@ export const ENTITY_TYPES = {
   LOCATION: 'location' as const,
   ORGANIZATION: 'organization' as const,
   ITEM: 'item' as const,
+  UNCATEGORIZED: 'uncategorized' as const,
 } as const;
 
 // Entity type mapping for icons
@@ -15,6 +16,7 @@ export const ENTITY_ICONS = {
   [ENTITY_TYPES.LOCATION]: MapPin,
   [ENTITY_TYPES.ORGANIZATION]: Shield,
   [ENTITY_TYPES.ITEM]: Package,
+  [ENTITY_TYPES.UNCATEGORIZED]: HelpCircle,
   // Legacy support
   player: Users,
   npc: Users,
@@ -32,6 +34,7 @@ export const ENTITY_CLASSES = {
   [ENTITY_TYPES.LOCATION]: 'entity-tag entity-location',
   [ENTITY_TYPES.ORGANIZATION]: 'entity-tag entity-organization',
   [ENTITY_TYPES.ITEM]: 'entity-tag entity-item',
+  [ENTITY_TYPES.UNCATEGORIZED]: 'entity-tag entity-uncategorized',
   // Legacy support
   player: 'entity-player',
   npc: 'entity-npc',
@@ -58,6 +61,7 @@ export const TYPE_INFERENCE_PATTERNS = {
   [ENTITY_TYPES.ITEM]: [
     'sword', 'shield', 'ring', 'potion', 'scroll', 'armor', 'weapon', 'staff', 'artifact'
   ],
+  [ENTITY_TYPES.UNCATEGORIZED]: [],
 } as const;
 
 export type EntityTypeKey = keyof typeof ENTITY_TYPES;

@@ -3,15 +3,27 @@ import { Badge } from '@/components/ui/badge';
 import { EntityWithMetrics, EntityType } from '@/types/entities';
 import { Users, Calendar, Hash } from 'lucide-react';
 import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
+import { EntityCategorize } from '@/components/ui/entity-categorize';
+import { entityService } from '@/services/entityService';
 
 interface EntityListProps {
   entities: EntityWithMetrics[];
   onEntityClick?: (entityName: string) => void;
+  onEntityUpdate?: () => void;
   isLoading?: boolean;
 }
 
 
-export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListProps) => {
+export const EntityList = ({ entities, onEntityClick, onEntityUpdate, isLoading }: EntityListProps) => {
+  const handleCategorize = async (entityId: string, newType: EntityType) => {
+    try {
+      // Update entity type through entity service
+      entityService.updateEntity(entityId, { type: newType });
+      onEntityUpdate?.();
+    } catch (error) {
+      console.error('Failed to categorize entity:', error);
+    }
+  };
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -82,6 +94,16 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
                 <p className="text-xs text-muted-foreground line-clamp-2">
                   {entity.description}
                 </p>
+              )}
+              {entity.type === 'uncategorized' && (
+                <div className="pt-2 border-t border-orange-200">
+                  <EntityCategorize
+                    entityName={entity.name}
+                    currentType={entity.type}
+                    onCategorize={(newType) => handleCategorize(entity.localId || entity.id || '', newType)}
+                    size="sm"
+                  />
+                </div>
               )}
             </CardContent>
           </Card>

@@ -36,8 +36,8 @@ export const inferEntityType = (name: string): EntityType => {
     }
   }
   
-  // Default to character for D&D content
-  return ENTITY_TYPES.CHARACTER;
+  // Default to uncategorized when uncertain
+  return ENTITY_TYPES.UNCATEGORIZED;
 };
 
 /**
@@ -58,7 +58,7 @@ export const normalizeEntityType = (type: string): EntityType => {
     'faction': ENTITY_TYPES.ORGANIZATION,
   };
   
-  return typeMapping[lower] || (lower as EntityType) || ENTITY_TYPES.CHARACTER;
+  return typeMapping[lower] || (lower as EntityType) || ENTITY_TYPES.UNCATEGORIZED;
 };
 
 /**

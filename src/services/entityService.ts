@@ -74,6 +74,41 @@ export const entityService = {
     }));
   },
 
+  updateEntity(entityId: string, updates: Partial<Pick<LocalEntity, 'name' | 'type' | 'description'>>): LocalEntity {
+    const data = dataStorageService.getData();
+    const entityIndex = data.entities.findIndex(e => e.localId === entityId || e.id === entityId);
+    
+    if (entityIndex === -1) {
+      throw new Error('Entity not found');
+    }
+    
+    const entity = data.entities[entityIndex];
+    const updatedEntity = {
+      ...entity,
+      ...updates,
+      modifiedLocally: new Date(),
+      syncStatus: 'pending' as const
+    };
+    
+    data.entities[entityIndex] = updatedEntity;
+    
+    // Track modification for sync
+    const syncId = entity.id || entity.localId!;
+    if (!data.pendingChanges.entities.modified.includes(syncId)) {
+      data.pendingChanges.entities.modified.push(syncId);
+    }
+    
+    // Optimize pending changes in memory before saving
+    data.pendingChanges.entities = dataStorageService.optimizeEntityChanges(
+      data.pendingChanges.entities.added,
+      data.pendingChanges.entities.modified,
+      data.pendingChanges.entities.deleted
+    );
+    
+    dataStorageService.saveData(data);
+    return updatedEntity;
+  },
+
   deleteEntity(entityId: string): void {
     const data = dataStorageService.getData();
     const entity = data.entities.find(e => e.localId === entityId || e.id === entityId);

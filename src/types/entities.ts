@@ -1,4 +1,4 @@
-export type EntityType = 'character' | 'location' | 'organization' | 'item';
+export type EntityType = 'character' | 'location' | 'organization' | 'item' | 'uncategorized';
 
 export interface BaseEntity {
   id?: string;

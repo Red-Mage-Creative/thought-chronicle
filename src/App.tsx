@@ -13,6 +13,7 @@ import PendingChangesPage from "./pages/PendingChangesPage";
 import NotFound from "./pages/NotFound";
 import { useOfflineSync } from "./hooks/useOfflineData";
 import { syncService } from "./services/syncService";
+import { dataMigrationService } from "./services/dataMigrationService";
 import { toast } from "sonner";
 
 
@@ -23,6 +24,11 @@ const App = () => {
   const [defaultTags, setDefaultTags] = useState<string[]>([]);
   
   const { refreshSyncStatus } = useOfflineSync();
+  
+  // Run data migrations on app start
+  useEffect(() => {
+    dataMigrationService.runMigrations();
+  }, []);
   const { thoughts: allThoughts } = useThoughts();
 
   // Load default tags from localStorage on mount

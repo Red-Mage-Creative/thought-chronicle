@@ -11,6 +11,7 @@ import { EntityType } from '@/types/entities';
 import { Search, Plus, RefreshCw } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/use-toast';
+import { UncategorizedNotice } from '@/components/ui/uncategorized-notice';
 
 interface EntityManagementPageProps {
   onEntityClick?: (entityName: string) => void;
@@ -67,7 +68,8 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
       return a.name.localeCompare(b.name);
     });
 
-  const uniqueTypes: EntityType[] = ['character', 'location', 'organization', 'item'];
+  const uniqueTypes: EntityType[] = ['character', 'location', 'organization', 'item', 'uncategorized'];
+  const uncategorizedCount = entitiesWithMetrics.filter(e => e.type === 'uncategorized').length;
 
   return (
     <>
@@ -123,9 +125,12 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
             })}
           </div>
 
-          <EntityList 
+          <UncategorizedNotice count={uncategorizedCount} className="my-4" />
+
+          <EntityList
             entities={filteredEntities} 
             onEntityClick={onEntityClick}
+            onEntityUpdate={refreshEntities}
             isLoading={isLoading}
           />
         </CardContent>

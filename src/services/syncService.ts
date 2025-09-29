@@ -11,15 +11,22 @@ export const syncService = {
   async syncToServer(): Promise<SyncResult> {
     try {
       const data = dataStorageService.getData();
-      const { thoughts } = data.pendingChanges;
+      const { thoughts, entities } = data.pendingChanges;
+      
+      // Filter out uncategorized entities - they should not sync to server
+      const categorizableEntities = data.entities.filter(entity => 
+        entity.type !== 'uncategorized' && entities.added.includes(entity.localId!)
+      );
+      const syncableEntityIds = categorizableEntities.map(entity => entity.localId!);
       
       // For now, we'll simulate uploading to server
       // In a real implementation, you would:
       // 1. Upload thoughts.added to Buildship
       // 2. Update thoughts.modified on Buildship
       // 3. Delete thoughts.deleted from Buildship
+      // 4. Upload only categorized entities to Buildship
       
-      const totalChanges = thoughts.added.length + thoughts.modified.length + thoughts.deleted.length;
+      const totalChanges = thoughts.added.length + thoughts.modified.length + thoughts.deleted.length + syncableEntityIds.length;
       
       if (totalChanges === 0) {
         return {

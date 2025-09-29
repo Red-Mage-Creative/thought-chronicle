@@ -29,13 +29,14 @@ export const EntityFilters = ({
       {uniqueTypes.map((type) => {
         const count = entityCounts[type];
         const Icon = getEntityIcon(type);
+        const isUncategorized = type === 'uncategorized';
         return (
           <Button
             key={type}
             variant={selectedType === type ? "default" : "outline"}
             size="sm"
             onClick={() => onTypeChange(type)}
-            className="capitalize"
+            className={`capitalize ${isUncategorized ? 'text-orange-600 border-orange-300 hover:bg-orange-50' : ''}`}
           >
             <Icon className="h-3 w-3 mr-1" />
             {capitalize(type)} ({count})
