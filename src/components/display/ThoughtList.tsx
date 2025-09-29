@@ -80,8 +80,7 @@ export const ThoughtList = ({
                 return (
                   <Badge
                     key={entity}
-                    variant="secondary"
-                    className={`cursor-pointer hover:opacity-80 transition-all hover:scale-105 ${getEntityClass(entity)}`}
+                    className={`cursor-pointer hover:opacity-80 transition-all hover:scale-105 ${getEntityClass(entityType)}`}
                     onClick={() => handleEntityClick(entity)}
                   >
                     <Icon className="h-3 w-3 mr-1" />

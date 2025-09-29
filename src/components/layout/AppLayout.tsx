@@ -29,7 +29,7 @@ export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefault
       <AppHeader />
       <main className="flex-1">
         <div className="container">
-          <div className="max-w-2xl mx-auto py-6 space-y-6">
+          <div className={getContainerClasses()}>
             {defaultTags && onDefaultTagsChange ? 
               cloneElement(children as ReactElement, { defaultTags, onDefaultTagsChange }) : 
               children

@@ -513,6 +513,121 @@ export default function DesignSystemPage() {
             </div>
           </section>
 
+          {/* Navigation Patterns */}
+          <section>
+            <h2 className="text-3xl font-semibold text-foreground mb-6">Navigation Patterns</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Active Navigation States</h3>
+                <div className="flex gap-2 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2 py-2 px-3 text-sm font-medium bg-accent text-accent-foreground rounded-md">
+                    <Users className="h-4 w-4" />
+                    <span>Active Page</span>
+                  </div>
+                  <div className="flex items-center gap-2 py-2 px-3 text-sm font-medium text-foreground hover:bg-muted rounded-md">
+                    <Calendar className="h-4 w-4" />
+                    <span>Inactive Page</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Card Interaction Patterns */}
+          <section>
+            <h2 className="text-3xl font-semibold text-foreground mb-6">Card Interaction Patterns</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Clickable Cards</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="cursor-pointer hover:bg-accent/10 transition-colors">
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-foreground mb-2">Standard Hover</h4>
+                      <p className="text-muted-foreground text-sm">Subtle background highlight on hover</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold text-foreground mb-2">Non-Interactive</h4>
+                      <p className="text-muted-foreground text-sm">No hover effects for static content</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Loading & Empty States */}
+          <section>
+            <h2 className="text-3xl font-semibold text-foreground mb-6">Loading & Empty States</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Loading Skeletons</h3>
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <div className="h-4 bg-muted rounded w-full" />
+                          <div className="h-4 bg-muted rounded w-3/4" />
+                          <div className="h-3 bg-muted rounded w-1/2" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Empty States</h3>
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                    <Clock className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h4 className="text-lg font-semibold text-foreground mb-2">No Items Found</h4>
+                    <p className="text-muted-foreground">
+                      This is how empty states should be displayed with an icon and descriptive text.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+
+          {/* Stats & Metrics Display */}
+          <section>
+            <h2 className="text-3xl font-semibold text-foreground mb-6">Stats & Metrics Display</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-3">Statistics Cards</h3>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="text-center">
+                        <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-foreground">156</div>
+                        <div className="text-sm text-muted-foreground">Total Items</div>
+                      </div>
+                      <div className="text-center">
+                        <Clock className="h-8 w-8 text-accent mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-foreground">42</div>
+                        <div className="text-sm text-muted-foreground">Recent Activity</div>
+                      </div>
+                      <div className="text-center">
+                        <Calendar className="h-8 w-8 text-secondary mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-foreground">7</div>
+                        <div className="text-sm text-muted-foreground">This Week</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+
           {/* Layout Components */}
           <section className="space-y-6">
             <h2 className="text-3xl font-semibold">Layout Components</h2>

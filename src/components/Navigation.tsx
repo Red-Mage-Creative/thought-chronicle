@@ -22,11 +22,11 @@ export const Navigation = () => {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-2 py-2 px-3 text-sm font-medium transition-colors ${
+              `flex items-center gap-2 py-2 px-3 text-sm font-medium transition-colors rounded-md ${
                 index > 0 ? "border-l border-border" : ""
               } ${
                 isActive 
-                  ? "bg-primary text-primary-foreground" 
+                  ? "bg-accent text-accent-foreground" 
                   : "text-foreground hover:bg-muted"
               }`
             }
@@ -54,7 +54,7 @@ export const Navigation = () => {
                   to={to}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-3 text-foreground hover:bg-muted/50 transition-colors rounded-md ${
-                      isActive ? "bg-primary text-primary-foreground" : ""
+                      isActive ? "bg-accent text-accent-foreground" : ""
                     }`
                   }
                   onClick={() => setOpen(false)}
