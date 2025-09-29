@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { TagSelector } from './TagSelector';
 import { Settings } from '@/components/Settings';
 import { EntitySuggestion } from '@/types/entities';
+import { Pin } from 'lucide-react';
 
 interface ThoughtFormProps {
   onSubmit: (content: string, tags: string[], gameDate?: string) => Promise<void>;
@@ -87,11 +89,19 @@ export const ThoughtForm = ({
             {isEditMode ? 'Edit Thought' : 'Record a Thought'}
           </CardTitle>
           {showSettings && onDefaultTagsChange && (
-            <Settings
-              defaultTags={defaultTags}
-              onDefaultTagsChange={onDefaultTagsChange}
-              existingEntities={existingEntities}
-            />
+            <div className="flex items-center gap-2">
+              {defaultTags.length > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  <Pin className="h-3 w-3 mr-1" />
+                  {defaultTags.length} default
+                </Badge>
+              )}
+              <Settings
+                defaultTags={defaultTags}
+                onDefaultTagsChange={onDefaultTagsChange}
+                existingEntities={existingEntities}
+              />
+            </div>
           )}
         </div>
       </CardHeader>
@@ -116,22 +126,28 @@ export const ThoughtForm = ({
 
         <div className="space-y-2">
           <Label>Tags (Characters, Locations, Items, etc.)</Label>
+          {defaultTags.length > 0 && (
+            <div className="mb-2 p-3 bg-primary/5 border border-primary/20 rounded-md">
+              <div className="flex items-center gap-2 mb-2">
+                <Pin className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Primed Tags (will be auto-added)</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {defaultTags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/30">
+                    <Pin className="h-3 w-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
           <TagSelector
             tags={tags}
             onTagsChange={setTags}
             suggestions={suggestions}
-            placeholder="Add tags..."
+            placeholder="Add additional tags..."
           />
-          {defaultTags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              <span className="text-sm text-muted-foreground">Default tags:</span>
-              {defaultTags.map((tag) => (
-                <span key={tag} className="entity-tag entity-player text-xs">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="space-y-2">

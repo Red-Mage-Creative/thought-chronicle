@@ -69,7 +69,7 @@ const App = () => {
               <Route 
                 path="/" 
                 element={
-                  <AppLayout variant="narrow" thoughts={allThoughts} defaultTags={defaultTags} onDefaultTagsChange={handleDefaultTagsChange}>
+                  <AppLayout variant="narrow" defaultTags={defaultTags} onDefaultTagsChange={handleDefaultTagsChange}>
                     <Index />
                   </AppLayout>
                 } 
@@ -77,7 +77,7 @@ const App = () => {
               <Route 
                 path="/entities" 
                 element={
-                  <AppLayout variant="narrow" thoughts={allThoughts}>
+                  <AppLayout variant="narrow">
                     <EntitiesPage 
                       onEntityClick={handleEntityClick} 
                     />
@@ -87,7 +87,7 @@ const App = () => {
               <Route 
                 path="/history" 
                 element={
-                  <AppLayout variant="narrow" thoughts={allThoughts}>
+                  <AppLayout variant="narrow">
                     <HistoryPage 
                       onEntityClick={handleEntityClick} 
                     />
@@ -97,7 +97,7 @@ const App = () => {
               <Route 
                 path="/pending-changes" 
                 element={
-                  <AppLayout variant="narrow" thoughts={allThoughts}>
+                  <AppLayout variant="narrow">
                     <PendingChangesPage />
                   </AppLayout>
                 } 
@@ -105,7 +105,7 @@ const App = () => {
               <Route 
                 path="*" 
                 element={
-                  <AppLayout variant="narrow" thoughts={allThoughts}>
+                  <AppLayout variant="narrow">
                     <NotFound />
                   </AppLayout>
                 } 

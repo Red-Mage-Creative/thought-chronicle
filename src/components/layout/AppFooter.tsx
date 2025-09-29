@@ -1,13 +1,14 @@
 import { Brain, Users, Calendar } from "lucide-react";
-import { LocalThought } from '@/types/thoughts';
+import { useThoughts } from '@/hooks/useThoughts';
+import { useEntities } from '@/hooks/useEntities';
 
-interface AppFooterProps {
-  thoughts?: LocalThought[];
-}
-
-export const AppFooter = ({ thoughts = [] }: AppFooterProps) => {
+export const AppFooter = () => {
+  // Use live data from hooks for real-time updates
+  const { thoughts } = useThoughts();
+  const { entities } = useEntities();
+  
   const totalThoughts = thoughts.length;
-  const uniqueEntities = new Set(thoughts.flatMap(t => t.relatedEntities)).size;
+  const uniqueEntities = entities.length;
   const recentThoughts = thoughts.filter(
     t => Date.now() - t.timestamp.getTime() < 24 * 60 * 60 * 1000
   ).length;

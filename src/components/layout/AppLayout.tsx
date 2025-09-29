@@ -2,17 +2,15 @@ import { ReactNode, ReactElement, cloneElement } from 'react';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
 import { cn } from '@/lib/utils';
-import { LocalThought } from '@/types/thoughts';
 
 interface AppLayoutProps {
   children: ReactNode;
   variant?: 'narrow' | 'wide' | 'full';
-  thoughts?: LocalThought[];
   defaultTags?: string[];
   onDefaultTagsChange?: (tags: string[]) => void;
 }
 
-export const AppLayout = ({ children, variant = 'narrow', thoughts, defaultTags, onDefaultTagsChange }: AppLayoutProps) => {
+export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefaultTagsChange }: AppLayoutProps) => {
   const getContainerClasses = () => {
     switch (variant) {
       case 'narrow':
@@ -39,7 +37,7 @@ export const AppLayout = ({ children, variant = 'narrow', thoughts, defaultTags,
           </div>
         </div>
       </main>
-      <AppFooter thoughts={thoughts} />
+      <AppFooter />
     </div>
   );
 };
