@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useThoughts } from "@/hooks/useThoughts";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -23,6 +24,7 @@ const App = () => {
   
   const { thoughts, addThought } = useLocalThoughts();
   const { refreshSyncStatus } = useOfflineSync();
+  const { thoughts: allThoughts } = useThoughts();
 
   // Load default tags from localStorage on mount
   useEffect(() => {
@@ -72,7 +74,7 @@ const App = () => {
               <Route 
                 path="/" 
                 element={
-                  <AppLayout variant="narrow">
+                  <AppLayout variant="narrow" thoughts={allThoughts}>
                     <Index />
                   </AppLayout>
                 } 
@@ -80,7 +82,7 @@ const App = () => {
               <Route 
                 path="/entities" 
                 element={
-                  <AppLayout variant="narrow">
+                  <AppLayout variant="narrow" thoughts={allThoughts}>
                     <EntitiesPage 
                       onEntityClick={handleEntityClick} 
                     />
@@ -90,7 +92,7 @@ const App = () => {
               <Route 
                 path="/history" 
                 element={
-                  <AppLayout variant="narrow">
+                  <AppLayout variant="narrow" thoughts={allThoughts}>
                     <HistoryPage 
                       onEntityClick={handleEntityClick} 
                     />
@@ -100,7 +102,7 @@ const App = () => {
               <Route 
                 path="/pending-changes" 
                 element={
-                  <AppLayout variant="narrow">
+                  <AppLayout variant="narrow" thoughts={allThoughts}>
                     <PendingChangesPage />
                   </AppLayout>
                 } 
@@ -108,7 +110,7 @@ const App = () => {
               <Route 
                 path="*" 
                 element={
-                  <AppLayout variant="narrow">
+                  <AppLayout variant="narrow" thoughts={allThoughts}>
                     <NotFound />
                   </AppLayout>
                 } 

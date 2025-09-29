@@ -2,13 +2,15 @@ import { ReactNode } from 'react';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
 import { cn } from '@/lib/utils';
+import { LocalThought } from '@/types/thoughts';
 
 interface AppLayoutProps {
   children: ReactNode;
   variant?: 'narrow' | 'wide' | 'full';
+  thoughts?: LocalThought[];
 }
 
-export const AppLayout = ({ children, variant = 'narrow' }: AppLayoutProps) => {
+export const AppLayout = ({ children, variant = 'narrow', thoughts }: AppLayoutProps) => {
   const getContainerClasses = () => {
     switch (variant) {
       case 'narrow':
@@ -32,7 +34,7 @@ export const AppLayout = ({ children, variant = 'narrow' }: AppLayoutProps) => {
           </div>
         </div>
       </main>
-      <AppFooter />
+      <AppFooter thoughts={thoughts} />
     </div>
   );
 };

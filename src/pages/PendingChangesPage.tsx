@@ -57,7 +57,7 @@ export default function PendingChangesPage() {
         id,
         type: 'thought',
         action: 'added',
-        name: thought?.content.substring(0, 50) + '...' || 'Unknown thought',
+        name: thought?.content.substring(0, 30) + '...' || 'Unknown thought',
         timestamp: thought?.modifiedLocally || new Date()
       });
     });
@@ -68,7 +68,7 @@ export default function PendingChangesPage() {
         id,
         type: 'thought',
         action: 'modified',
-        name: thought?.content.substring(0, 50) + '...' || 'Unknown thought',
+        name: thought?.content.substring(0, 30) + '...' || 'Unknown thought',
         timestamp: thought?.modifiedLocally || new Date()
       });
     });
@@ -209,35 +209,35 @@ export default function PendingChangesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Modified</TableHead>
-                  <TableHead>ID</TableHead>
+                  <TableHead className="w-16 text-xs">Type</TableHead>
+                  <TableHead className="w-20 text-xs">Action</TableHead>
+                  <TableHead className="text-xs">Name</TableHead>
+                  <TableHead className="w-32 text-xs">Modified</TableHead>
+                  <TableHead className="w-24 text-xs">ID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {changes.map((change, index) => (
-                  <TableRow key={`${change.type}-${change.action}-${change.id}-${index}`}>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">
+                  <TableRow key={`${change.type}-${change.action}-${change.id}-${index}`} className="text-xs">
+                    <TableCell className="py-2">
+                      <Badge variant="outline" className="capitalize text-xs px-1 py-0">
                         {change.type}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div className={`inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium border ${getActionColor(change.action)}`}>
+                    <TableCell className="py-2">
+                      <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium border ${getActionColor(change.action)}`}>
                         {getActionIcon(change.action)}
                         {change.action}
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium py-2 text-xs">
                       {change.name}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {change.timestamp.toLocaleString()}
+                    <TableCell className="text-muted-foreground py-2 text-xs">
+                      {change.timestamp.toLocaleDateString()} {change.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
-                      {change.id.substring(0, 12)}...
+                    <TableCell className="font-mono text-xs text-muted-foreground py-2">
+                      {change.id.substring(0, 8)}...
                     </TableCell>
                   </TableRow>
                 ))}

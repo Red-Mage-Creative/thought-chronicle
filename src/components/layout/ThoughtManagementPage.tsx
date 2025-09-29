@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ThoughtForm } from '@/components/forms/ThoughtForm';
-import { StatsCard } from '@/components/StatsCard';
 import { SyncBanner } from '@/components/SyncBanner';
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
@@ -54,19 +53,11 @@ export const ThoughtManagementPage = ({
         <SyncBanner onSync={handleSync} />
       )}
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <ThoughtForm
-            onSubmit={handleThoughtSubmit}
-            suggestions={getSuggestions()}
-            defaultTags={defaultTags}
-          />
-        </div>
-        
-        <div className="space-y-6">
-          <StatsCard thoughts={thoughts} />
-        </div>
-      </div>
+      <ThoughtForm
+        onSubmit={handleThoughtSubmit}
+        suggestions={getSuggestions()}
+        defaultTags={defaultTags}
+      />
     </>
   );
 };
