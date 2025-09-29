@@ -133,12 +133,16 @@ export const ThoughtForm = ({
                 <span className="text-sm font-medium text-primary">Primed Tags (will be auto-added)</span>
               </div>
               <div className="flex flex-wrap gap-1">
-                {defaultTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/30">
-                    <Pin className="h-3 w-3 mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
+                 {defaultTags.map((tag) => (
+                   <Badge 
+                     key={tag} 
+                     variant="outline" 
+                     className="entity-tag entity-default-tag text-xs"
+                   >
+                     <Pin className="h-3 w-3 mr-1" />
+                     #{tag}
+                   </Badge>
+                 ))}
               </div>
             </div>
           )}

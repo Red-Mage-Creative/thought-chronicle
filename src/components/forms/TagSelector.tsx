@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Pin } from 'lucide-react';
 import { EntitySuggestion } from '@/types/entities';
 import { getEntityClass } from '@/utils/entityUtils';
 
@@ -11,9 +11,10 @@ interface TagSelectorProps {
   onTagsChange: (tags: string[]) => void;
   suggestions: EntitySuggestion[];
   placeholder?: string;
+  isDefaultTagSelector?: boolean;
 }
 
-export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags..." }: TagSelectorProps) => {
+export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags...", isDefaultTagSelector = false }: TagSelectorProps) => {
   const [inputValue, setInputValue] = useState('');
   const [filteredSuggestions, setFilteredSuggestions] = useState<EntitySuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -134,17 +135,20 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
             const entityClass = suggestion ? getEntityClass(suggestion.type) : 'entity-tag entity-npc';
             
             return (
-              <Badge key={index} variant="secondary" className={entityClass}>
-                {tag}
-                <Button
+              <Badge 
+                key={index} 
+                variant="outline" 
+                className={`entity-tag ${isDefaultTagSelector ? 'entity-default-tag' : entityClass} text-sm`}
+              >
+                {isDefaultTagSelector && <Pin className="h-3 w-3 mr-1" />}
+                #{tag}
+                <button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="ml-1 h-auto p-0 text-current hover:bg-transparent"
                   onClick={() => removeTag(index)}
+                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
-                </Button>
+                </button>
               </Badge>
             );
           })}

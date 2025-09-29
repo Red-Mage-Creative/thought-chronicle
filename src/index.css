@@ -101,6 +101,14 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
     @apply bg-orange-50 border-orange-300 text-orange-700;
   }
 
+  .entity-default-tag {
+    @apply bg-purple-100 border-purple-400 text-purple-800;
+  }
+
+  .dark .entity-default-tag {
+    @apply bg-purple-950/30 border-purple-700/50 text-purple-300;
+  }
+
   .fantasy-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) hsl(var(--background));

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Settings as SettingsIcon, Save, X } from "lucide-react";
+import { Settings as SettingsIcon, Save, X, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -62,18 +62,23 @@ export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }:
                   onTagsChange={setLocalDefaultTags}
                   suggestions={existingEntities}
                   placeholder="Add default tags (e.g., player-thara, campaign-waterdeep)..."
+                  isDefaultTagSelector={true}
                 />
                 
                 {localDefaultTags.length > 0 && (
                   <div className="p-3 bg-muted/30 border border-border rounded">
-                    <div className="text-sm text-muted-foreground mb-2">Preview - these tags will be added to every thought:</div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      <Pin className="h-3 w-3 inline mr-1" />
+                      Default tags that will be added to every thought:
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {localDefaultTags.map(tag => (
                         <Badge 
                           key={tag} 
                           variant="outline" 
-                          className={`entity-tag ${getEntityClass(tag)} text-xs`}
+                          className="entity-tag entity-default-tag text-xs"
                         >
+                          <Pin className="h-3 w-3 mr-1" />
                           #{tag}
                         </Badge>
                       ))}
@@ -82,25 +87,6 @@ export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }:
                 )}
               </div>
             </div>
-
-            {defaultTags.length > 0 && (
-              <div className="border-t border-border pt-4">
-                <div className="text-sm text-muted-foreground">
-                  <strong>Current active default tags:</strong>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {defaultTags.map(tag => (
-                    <Badge 
-                      key={tag} 
-                      variant="outline" 
-                      className={`entity-tag ${getEntityClass(tag)} text-xs`}
-                    >
-                      #{tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
