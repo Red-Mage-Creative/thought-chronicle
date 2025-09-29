@@ -19,20 +19,32 @@ export const entityService = {
     type?: EntityType, 
     description?: string
   ): LocalEntity {
+    console.log('🔍 [DEBUG] entityService.createEntity called', {
+      name,
+      type,
+      description
+    });
+
     const data = dataStorageService.getData();
+    console.log('🔍 [DEBUG] Current entities count:', data.entities.length);
     
     // Check for duplicates (case-insensitive)
     const existing = data.entities.find(e => e.name.toLowerCase() === name.toLowerCase());
     if (existing) {
+      console.log('🔍 [DEBUG] Entity already exists:', existing);
       throw new Error(`Entity "${name}" already exists`);
     }
     
+    const inferredType = type || inferEntityType(name);
+    console.log('🔍 [DEBUG] Entity type (inferred if needed):', inferredType);
+
     const entity = dataStorageService.addEntity({
       name,
-      type: type || inferEntityType(name),
+      type: inferredType,
       description
     });
     
+    console.log('🔍 [DEBUG] Entity created successfully:', entity);
     return entity;
   },
 

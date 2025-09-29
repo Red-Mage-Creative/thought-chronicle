@@ -23,9 +23,21 @@ export const ThoughtManagementPage = ({
   const { toast } = useToast();
 
   const handleThoughtSubmit = async (content: string, tags: string[], gameDate?: string) => {
+    console.log('🔍 [DEBUG] handleThoughtSubmit called', {
+      content: content.substring(0, 50) + '...',
+      tags,
+      gameDate,
+      defaultTags
+    });
+
     try {
       // Separate manual tags from default tags for proper entity creation
       const manualTags = tags.filter(tag => !defaultTags.includes(tag));
+      console.log('🔍 [DEBUG] Separated tags:', {
+        manualTags,
+        defaultTags,
+        allTags: tags
+      });
       
       const result = await businessLogicService.processThoughtCreation(
         content,
@@ -33,6 +45,8 @@ export const ThoughtManagementPage = ({
         defaultTags,
         gameDate
       );
+
+      console.log('🔍 [DEBUG] processThoughtCreation result:', result);
       
       // Show entity creation notification if entities were created
       if (result.newEntitiesCreated > 0) {
@@ -44,14 +58,17 @@ export const ThoughtManagementPage = ({
           title: 'Entities created',
           description: message
         });
+        console.log('🔍 [DEBUG] Showed success toast for new entities');
       }
       
       // Refresh related data
+      console.log('🔍 [DEBUG] Refreshing data...');
       refreshThoughts();
       refreshEntities();
       refreshSyncStatus();
+      console.log('🔍 [DEBUG] Data refresh completed');
     } catch (error) {
-      console.error('Error creating thought:', error);
+      console.error('🔍 [DEBUG] Error in handleThoughtSubmit:', error);
       throw error; // Re-throw to let ThoughtForm handle the error display
     }
   };

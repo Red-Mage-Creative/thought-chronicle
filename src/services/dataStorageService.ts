@@ -89,7 +89,14 @@ export const dataStorageService = {
 
   // Add a new entity locally
   addEntity(entity: Omit<LocalEntity, 'localId' | 'syncStatus'>): LocalEntity {
+    console.log('🔍 [DEBUG] dataStorageService.addEntity called', entity);
+    
     const data = this.getData();
+    console.log('🔍 [DEBUG] Current data state before adding entity:', {
+      entitiesCount: data.entities.length,
+      thoughtsCount: data.thoughts.length
+    });
+
     const localEntity: LocalEntity = {
       ...entity,
       localId: generateLocalId(),
@@ -97,8 +104,13 @@ export const dataStorageService = {
       modifiedLocally: new Date()
     };
     
+    console.log('🔍 [DEBUG] Generated local entity:', localEntity);
+    
     data.entities.push(localEntity);
+    console.log('🔍 [DEBUG] Entity added to data array, new count:', data.entities.length);
+    
     data.pendingChanges.entities.added.push(localEntity.localId!);
+    console.log('🔍 [DEBUG] Added to pending changes:', localEntity.localId);
     
     // Optimize pending changes in memory before saving
     data.pendingChanges.entities = this.optimizeEntityChanges(
@@ -107,7 +119,14 @@ export const dataStorageService = {
       data.pendingChanges.entities.deleted
     );
     
+    console.log('🔍 [DEBUG] Saving data to localStorage...');
     this.saveData(data);
+    console.log('🔍 [DEBUG] Data saved to localStorage');
+    
+    // Verify the save worked
+    const verifyData = this.getData();
+    console.log('🔍 [DEBUG] Verification - entities count after save:', verifyData.entities.length);
+    
     return localEntity;
   },
 
