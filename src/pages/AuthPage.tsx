@@ -297,20 +297,23 @@ export const AuthPage = () => {
                       <p className="text-sm text-destructive">{signUpErrors.displayName}</p>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="access-code">Access Code</Label>
-                    <Input
-                      id="access-code"
-                      type="text"
-                      placeholder="Enter the access code"
-                      value={accessCode}
-                      onChange={(e) => setAccessCode(e.target.value)}
-                      required
-                    />
-                    {signUpErrors.accessCode && (
-                      <p className="text-sm text-destructive">{signUpErrors.accessCode}</p>
-                    )}
-                  </div>
+                   <div className="space-y-2">
+                     <Label htmlFor="access-code">Access Code</Label>
+                     <Input
+                       id="access-code"
+                       type="text"
+                       placeholder="Enter the access code (case insensitive)"
+                       value={accessCode}
+                       onChange={(e) => setAccessCode(e.target.value)}
+                       required
+                     />
+                     <p className="text-xs text-muted-foreground">
+                       Note: Access codes are not case sensitive and spaces are ignored
+                     </p>
+                     {signUpErrors.accessCode && (
+                       <p className="text-sm text-destructive">{signUpErrors.accessCode}</p>
+                     )}
+                   </div>
                   {error && (
                     <Alert variant="destructive">
                       <AlertDescription>{error}</AlertDescription>

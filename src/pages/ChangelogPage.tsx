@@ -18,6 +18,14 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.2.0",
+  date: "2025-09-29",
+  features: ["Enhanced authentication flow with improved access code validation", "Added case-insensitive access code handling", "Implemented username-based login support"],
+  improvements: ["Normalized access code validation to handle case sensitivity and whitespace", "Enhanced error handling with better debugging capabilities", "Improved user feedback for authentication failures"],
+  fixes: ["Fixed 'Unable to validate access code' error during signup", "Resolved username login functionality", "Fixed profile creation trigger to include email"],
+  docs: ["Updated authentication documentation with new features"],
+  maintenance: ["Added email column to profiles table", "Updated authentication context with robust error handling", "Improved database migration for user profile management"]
+}, {
   version: "1.1.0",
   date: "2025-09-29",
   features: ["Enhanced entity tags with type-specific icons in thought list", "Clickable entity tags with navigation to entity details page"],

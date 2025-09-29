@@ -48,19 +48,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, username: string, displayName: string, accessCode: string) => {
     try {
-      // Validate access code
+      // Normalize and validate access code
+      const normalizedAccessCode = accessCode.trim().toLowerCase();
+      
       const { data: configData, error: configError } = await supabase
         .from('app_config')
         .select('value')
         .eq('key', 'signup_access_code')
-        .single();
+        .maybeSingle();
 
-      if (configError || !configData) {
+      if (configError) {
+        console.error('Access code validation error:', configError);
         return { error: { message: 'Unable to validate access code. Please try again.' } };
       }
 
-      if (configData.value !== accessCode) {
+      if (!configData) {
+        console.error('No access code configuration found');
+        return { error: { message: 'Access code validation is not configured. Please contact support.' } };
+      }
+
+      const normalizedStoredCode = configData.value.trim().toLowerCase();
+      if (normalizedStoredCode !== normalizedAccessCode) {
         return { error: { message: 'Invalid access code. Please check and try again.' } };
+      }
+
+      // Check if username is already taken
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (existingProfile) {
+        return { error: { message: 'Username is already taken. Please choose a different one.' } };
       }
 
       const redirectUrl = `${window.location.origin}/`;
@@ -78,6 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       return { error };
     } catch (err) {
+      console.error('Signup error:', err);
       return { error: { message: 'An unexpected error occurred during signup.' } };
     }
   };
@@ -89,29 +110,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       let email = emailOrUsername;
 
       if (!isEmail) {
-        // Get email from username
+        // Get email from username via profiles table
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('id')
+          .select('email')
           .eq('username', emailOrUsername)
-          .single();
+          .maybeSingle();
 
-        if (profileError || !profileData) {
+        if (profileError) {
+          console.error('Profile lookup error:', profileError);
+          return { error: { message: 'Error looking up username. Please try again.' } };
+        }
+
+        if (!profileData || !profileData.email) {
           return { error: { message: 'Username not found. Please check and try again.' } };
         }
 
-        // Get email from auth.users using the profile ID
-        // Since we can't query auth.users directly, we'll try to sign in with username as email
-        // If that fails, we'll show a helpful error message
-        const { error: attemptError } = await supabase.auth.signInWithPassword({
-          email: emailOrUsername,
-          password
-        });
-
-        if (attemptError) {
-          return { error: { message: 'Invalid username or password. Please try again.' } };
-        }
-        return { error: null };
+        email = profileData.email;
       }
 
       const { error } = await supabase.auth.signInWithPassword({
@@ -120,6 +135,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       return { error };
     } catch (err) {
+      console.error('Sign in error:', err);
       return { error: { message: 'An unexpected error occurred during sign in.' } };
     }
   };
