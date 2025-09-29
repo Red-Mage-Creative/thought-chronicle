@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, ScrollText } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { campaignService } from "@/services/campaignService";
 import { LocalCampaign } from "@/types/campaigns";
@@ -63,8 +63,8 @@ export const AppHeader = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container">
         <div className="max-w-2xl mx-auto px-4 h-20 grid grid-cols-3 grid-rows-2 gap-2 items-center">
-          {/* Row 1, Column 3: User Info & Settings */}
-          <div className="grid-row-1 col-start-3 flex items-center gap-2 justify-self-end">
+          {/* Row 1, Columns 2-3: User Info & Settings */}
+          <div className="grid-row-1 col-start-2 col-span-2 flex items-center gap-2 justify-self-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -110,13 +110,14 @@ export const AppHeader = () => {
           {/* Row 2, Column 1: Brand */}
           <Link 
             to="/" 
-            className="row-start-2 col-start-1 font-bold text-lg text-foreground hover:text-primary transition-colors"
+            className="row-start-2 col-start-1 font-bold text-lg text-foreground hover:text-primary transition-colors flex items-center gap-2"
           >
+            <ScrollText className="h-5 w-5" />
             D&D Chronicle
           </Link>
 
           {/* Row 2, Columns 2-3: Navigation */}
-          <nav className="row-start-2 col-start-2 col-span-2 flex items-center gap-2">
+          <nav className="row-start-2 col-start-2 col-span-2 flex items-center gap-2 justify-end">
             <Link to="/entities">
               <Button variant="ghost" size="sm">Entities</Button>
             </Link>
