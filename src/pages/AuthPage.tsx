@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Sword, Eye, EyeOff, Shield, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Sword, Eye, EyeOff, Shield, AlertTriangle, CheckCircle, X } from 'lucide-react';
 import { signInSchema, signUpSchema, getPasswordStrength, type SignInFormData, type SignUpFormData } from '@/utils/validation';
 import { assessPasswordSecurity } from '@/utils/passwordSecurity';
 import { toast } from 'sonner';
@@ -38,6 +38,7 @@ export const AuthPage = () => {
   // Password security assessment
   const [passwordSecurity, setPasswordSecurity] = useState<any>(null);
   const [isCheckingPassword, setIsCheckingPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   // Debounced password security check
   useEffect(() => {
@@ -270,6 +271,8 @@ export const AuthPage = () => {
                           placeholder="Create a strong password"
                           value={signUpPassword}
                           onChange={(e) => setSignUpPassword(e.target.value)}
+                          onFocus={() => setPasswordFocused(true)}
+                          onBlur={() => setPasswordFocused(false)}
                           required
                         />
                         <Button
@@ -286,52 +289,89 @@ export const AuthPage = () => {
                           )}
                         </Button>
                       </div>
-                      {signUpPassword && (
-                        <div className="space-y-3">
-                          <div className="flex items-center space-x-2">
-                            <div className="flex-1">
-                              <Progress 
-                                value={passwordSecurity ? (passwordSecurity.strength.score / 5) * 100 : 0} 
-                                className="h-2" 
-                              />
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {passwordSecurity ? (
-                                passwordSecurity.strength.score === 5 ? 'Strong' : 
-                                passwordSecurity.strength.score >= 3 ? 'Medium' : 'Weak'
-                              ) : 'Checking...'}
-                            </span>
+                      {passwordFocused && (
+                        <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
+                          <div className="flex items-center space-x-1">
+                            <Shield className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium">Password Protection</span>
+                            <span className="text-xs text-muted-foreground">- powered by HaveIBeenPwned</span>
                           </div>
                           
-                          {/* Security status indicator */}
-                          {passwordSecurity && (
-                            <div className="flex items-center space-x-2">
-                              {passwordSecurity.breach.isBreached ? (
-                                <div className="flex items-center space-x-1 text-destructive">
-                                  <AlertTriangle className="h-3 w-3" />
-                                  <span className="text-xs">Found in {passwordSecurity.breach.breachCount?.toLocaleString()} breaches</span>
-                                </div>
+                          <ul className="space-y-1 text-sm">
+                            <li className="flex items-center space-x-2">
+                              {signUpPassword.length >= 8 ? (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
                               ) : (
-                                <div className="flex items-center space-x-1 text-green-600">
-                                  <CheckCircle className="h-3 w-3" />
-                                  <span className="text-xs">Not found in known breaches</span>
-                                </div>
+                                <X className="h-4 w-4 text-muted-foreground" />
                               )}
+                              <span className={signUpPassword.length >= 8 ? "text-green-600" : "text-muted-foreground"}>
+                                At least 8 characters
+                              </span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              {/[A-Z]/.test(signUpPassword) ? (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className={/[A-Z]/.test(signUpPassword) ? "text-green-600" : "text-muted-foreground"}>
+                                One uppercase letter (A-Z)
+                              </span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              {/[a-z]/.test(signUpPassword) ? (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className={/[a-z]/.test(signUpPassword) ? "text-green-600" : "text-muted-foreground"}>
+                                One lowercase letter (a-z)
+                              </span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              {/\d/.test(signUpPassword) ? (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className={/\d/.test(signUpPassword) ? "text-green-600" : "text-muted-foreground"}>
+                                One number (0-9)
+                              </span>
+                            </li>
+                            <li className="flex items-center space-x-2">
+                              {/[!@#$%^&*(),.?":{}|<>]/.test(signUpPassword) ? (
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <X className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className={/[!@#$%^&*(),.?":{}|<>]/.test(signUpPassword) ? "text-green-600" : "text-muted-foreground"}>
+                                One special character (!@#$%^&*)
+                              </span>
+                            </li>
+                          </ul>
+
+                          {/* Breach checking status */}
+                          {signUpPassword.length >= 8 && (
+                            <div className="pt-2 border-t">
+                              {isCheckingPassword ? (
+                                <div className="flex items-center space-x-2 text-muted-foreground">
+                                  <div className="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full"></div>
+                                  <span className="text-xs">Checking against known breaches...</span>
+                                </div>
+                              ) : passwordSecurity ? (
+                                passwordSecurity.breach.isBreached ? (
+                                  <div className="flex items-center space-x-2 text-destructive">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <span className="text-sm">Found in {passwordSecurity.breach.breachCount?.toLocaleString()} breaches</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center space-x-2 text-green-600">
+                                    <CheckCircle className="h-4 w-4" />
+                                    <span className="text-sm">Not found in known breaches</span>
+                                  </div>
+                                )
+                              ) : null}
                             </div>
-                          )}
-                          
-                          {/* Checking indicator */}
-                          {isCheckingPassword && (
-                            <div className="flex items-center space-x-1 text-muted-foreground">
-                              <div className="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full"></div>
-                              <span className="text-xs">Checking password security...</span>
-                            </div>
-                          )}
-                          
-                          {passwordSecurity?.recommendations.length > 0 && (
-                            <p className="text-xs text-muted-foreground">
-                              {passwordSecurity.recommendations.join(', ')}
-                            </p>
                           )}
                         </div>
                       )}
