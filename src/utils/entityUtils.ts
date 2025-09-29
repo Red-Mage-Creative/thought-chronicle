@@ -74,3 +74,32 @@ export const isValidEntityType = (type: string): type is EntityType => {
 export const getAllEntityTypes = (): EntityType[] => {
   return Object.values(ENTITY_TYPES);
 };
+
+/**
+ * Generate a unique local ID for entities and thoughts
+ */
+export const generateLocalId = (): string => 
+  `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+/**
+ * Create entities from tag names with proper type inference
+ */
+export const createEntitiesFromTags = (
+  tagNames: string[], 
+  existingEntityNames: string[]
+): Array<{ name: string; type: EntityType; description: string }> => {
+  const newEntities: Array<{ name: string; type: EntityType; description: string }> = [];
+  
+  tagNames.forEach(tagName => {
+    if (!existingEntityNames.includes(tagName.toLowerCase())) {
+      const entityType = inferEntityType(tagName);
+      newEntities.push({
+        name: tagName,
+        type: entityType,
+        description: `Auto-created from tag: ${tagName}`
+      });
+    }
+  });
+  
+  return newEntities;
+};

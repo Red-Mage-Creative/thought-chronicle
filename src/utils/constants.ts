@@ -61,3 +61,27 @@ export const TYPE_INFERENCE_PATTERNS = {
 } as const;
 
 export type EntityTypeKey = keyof typeof ENTITY_TYPES;
+
+// Magic strings and constants
+export const STORAGE_KEYS = {
+  LOCAL_DATA: 'dnd_chronicle_data',
+  DEFAULT_TAGS: 'dnd_chronicle_default_tags',
+} as const;
+
+export const VALIDATION = {
+  MAX_CONTENT_LENGTH: 500,
+  MAX_CONTENT_DISPLAY_LENGTH: 600,
+  MAX_SUGGESTIONS: 5,
+  MAX_FILTER_ENTITIES: 8,
+} as const;
+
+export const MESSAGES = {
+  ENTITY_CREATED_SINGLE: 'Created 1 new entity',
+  ENTITY_CREATED_MULTIPLE: (count: number) => `Created ${count} new entities`,
+  SYNC_SUCCESS: 'Archives updated successfully',
+  SYNC_ERROR: 'Failed to refresh chronicles',
+  NO_ENTITIES_FOUND: 'No entities found. Start writing chronicles to create entities!',
+  NO_THOUGHTS_FOUND: 'No thoughts found',
+  SEARCH_PLACEHOLDER: 'Search entities...',
+  TAG_PLACEHOLDER: 'Add additional entity tags...',
+} as const;

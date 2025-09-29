@@ -1,9 +1,7 @@
 import { LocalEntity, EntityType, EntityWithMetrics } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
-import { inferEntityType } from '@/utils/entityUtils';
-
-const generateLocalId = (): string => `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+import { inferEntityType, generateLocalId } from '@/utils/entityUtils';
 
 export const entityService = {
   getAllEntities(): LocalEntity[] {
@@ -42,7 +40,6 @@ export const entityService = {
     data.pendingChanges.entities.added.push(entity.localId!);
     dataStorageService.saveData(data);
     
-    console.log(`Created entity: ${name} (${entity.type})`);
     return entity;
   },
 

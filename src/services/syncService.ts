@@ -41,7 +41,7 @@ export const syncService = {
         syncedCount: totalChanges
       };
     } catch (error) {
-      console.error('Sync failed:', error);
+      // Sync failed - could add retry logic
       return {
         success: false,
         message: "Failed to sync to the Archive. Please try again.",
@@ -67,7 +67,7 @@ export const syncService = {
         syncedCount: thoughts.length + entities.length
       };
     } catch (error) {
-      console.error('Refresh failed:', error);
+      // Refresh failed - could add retry logic
       return {
         success: false,
         message: "Failed to refresh from the Archive. Please check your connection.",

@@ -161,7 +161,18 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
         </div>
 
         <EntityGrid
-          entities={filteredEntities}
+          entities={filteredEntities.map(entity => ({
+            id: entity.name,
+            localId: entity.name,
+            name: entity.name,
+            type: entity.type as any, // Type cast for compatibility
+            description: '',
+            syncStatus: 'synced' as const,
+            metrics: {
+              count: entity.count,
+              lastMentioned: entity.lastMentioned
+            }
+          }))}
           onEntityClick={onEntityClick}
         />
       </div>

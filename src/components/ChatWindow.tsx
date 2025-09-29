@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Send, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,9 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TagSelector } from "@/components/forms/TagSelector";
 import { Settings } from "@/components/Settings";
+import { businessLogicService } from "@/services/businessLogicService";
 import { useLocalThoughts, useLocalEntities, useOfflineSync } from "@/hooks/useOfflineData";
-import { LocalThought, LocalEntity } from "@/services/localStorageService";
 import { toast } from "sonner";
+import { VALIDATION, MESSAGES } from "@/utils/constants";
+import { useEntitySuggestions } from "@/hooks/useEntitySuggestions";
 
 interface ChatWindowProps {
   defaultTags: string[];
@@ -20,112 +22,41 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
   const [gameDate, setGameDate] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   
-  const { addThought, thoughts: localThoughts } = useLocalThoughts();
-  const { entities, addEntity, refreshFromStorage } = useLocalEntities();
+  const { thoughts: localThoughts } = useLocalThoughts();
+  const { entities, refreshFromStorage } = useLocalEntities();
   const { refreshSyncStatus } = useOfflineSync();
+  const entitySuggestions = useEntitySuggestions(entities, localThoughts);
 
-  // Create combined suggestions from local entities and mentioned-only entities
-  const entitySuggestions = useMemo(() => {
-    const entityMap = new Map<string, { name: string; type: string }>();
-    
-    // Add all formal entities
-    entities.forEach(entity => {
-      entityMap.set(entity.name.toLowerCase(), {
-        name: entity.name,
-        type: entity.type
-      });
-    });
-    
-    // Add mentioned-only entities from thoughts
-    localThoughts.forEach(thought => {
-      const thoughtEntities = thought.relatedEntities || [];
-      thoughtEntities.forEach(entityName => {
-        const key = entityName.toLowerCase();
-        if (!entityMap.has(key)) {
-          entityMap.set(key, {
-            name: entityName,
-            type: 'character' // Default type for mentioned-only entities
-          });
-        }
-      });
-    });
-    
-    return Array.from(entityMap.values()).map(entity => ({
-      name: entity.name,
-      type: entity.type as any // Temporary cast for compatibility
-    }));
-  }, [entities, localThoughts]);
-
-  const createEntitiesFromTags = (tagNames: string[]): LocalEntity[] => {
-    const newEntities: LocalEntity[] = [];
-    const existingEntityNames = entities.map(e => e.name.toLowerCase());
-    
-    tagNames.forEach(tagName => {
-      if (!existingEntityNames.includes(tagName.toLowerCase())) {
-        // Determine entity type based on tag name (simple heuristic)
-        let entityType = 'character';
-        if (tagName.toLowerCase().includes('city') || tagName.toLowerCase().includes('town')) {
-          entityType = 'location';
-        } else if (tagName.toLowerCase().includes('guild') || tagName.toLowerCase().includes('org')) {
-          entityType = 'organization';
-        } else if (tagName.toLowerCase().includes('sword') || tagName.toLowerCase().includes('item')) {
-          entityType = 'item';
-        }
-        
-        // Actually create the entity in localStorage
-        const createdEntity = addEntity({
-          name: tagName,
-          type: entityType,
-          description: `Auto-created from tag: ${tagName}`,
-          lastMentioned: new Date(),
-          count: 0
-        });
-        
-        newEntities.push(createdEntity);
-        console.log(`Created entity: ${tagName} (${entityType})`);
+  const handleSubmit = async () => {
+    try {
+      const result = await businessLogicService.processThoughtCreation(
+        content,
+        tags,
+        defaultTags,
+        gameDate
+      );
+      
+      // Show notification for newly created entities
+      if (result.newEntitiesCreated > 0) {
+        const message = businessLogicService.formatEntityCreationMessage(
+          result.newEntitiesCreated,
+          result.entityNames
+        );
+        toast.success(message);
       }
-    });
-    
-    return newEntities;
-  };
-
-  const handleSubmit = () => {
-    if (content.trim().length === 0) return;
-    
-    // Combine manual tags with default tags
-    const allTags = [...new Set([...defaultTags, ...tags])];
-    
-    // Create entities for new tags
-    const newEntities = createEntitiesFromTags(allTags);
-    
-    // Show notification for newly created entities
-    if (newEntities.length > 0) {
-      const entityNames = newEntities.map(e => e.name).join(', ');
-      toast.success(`Created ${newEntities.length} new entit${newEntities.length === 1 ? 'y' : 'ies'}: ${entityNames}`);
+      
+      // Refresh sync status and entity cache
+      refreshSyncStatus();
+      refreshFromStorage();
+      
+      // Clear form
+      setContent("");
+      setTags([]);
+      setGameDate("");
+      
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create thought");
     }
-    
-    // Create thought in MongoDB-compatible format
-    const thoughtData = {
-      id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      content: content.trim(),
-      relatedEntities: allTags,
-      timestamp: new Date(),
-      gameDate: gameDate || undefined
-    };
-
-    // Add thought to local storage
-    addThought(thoughtData);
-    
-    // Refresh sync status to update pending count
-    refreshSyncStatus();
-    
-    // Clear form
-    setContent("");
-    setTags([]);
-    setGameDate("");
-    
-    // Refresh entity cache
-    refreshFromStorage();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -135,9 +66,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
     }
   };
 
-
-  const characterCount = content.length;
-  const isOverLimit = characterCount > 500;
+  const validation = businessLogicService.validateContentLength(content);
 
   return (
     <Card className="bg-card border-border max-w-2xl mx-auto">
@@ -162,13 +91,12 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
               onKeyDown={handleKeyPress}
               placeholder="Record your thoughts about your D&D session..."
               className="min-h-[120px] bg-input border-border text-foreground placeholder:text-muted-foreground resize-none fantasy-scrollbar"
-              maxLength={600}
+              maxLength={VALIDATION.MAX_CONTENT_DISPLAY_LENGTH}
             />
-            <div className={`absolute bottom-2 right-2 text-xs ${isOverLimit ? 'text-destructive' : 'text-muted-foreground'}`}>
-              {characterCount}/500
+            <div className={`absolute bottom-2 right-2 text-xs ${validation.isOverLimit ? 'text-destructive' : 'text-muted-foreground'}`}>
+              {validation.characterCount}/{VALIDATION.MAX_CONTENT_LENGTH}
             </div>
           </div>
-
 
           <div className="space-y-3">
             <div>
@@ -177,7 +105,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
                 tags={tags}
                 onTagsChange={setTags}
                 suggestions={entitySuggestions}
-                placeholder="Add additional entity tags..."
+                placeholder={MESSAGES.TAG_PLACEHOLDER}
               />
               {defaultTags.length > 0 && (
                 <div className="mt-2 p-2 bg-muted/20 border border-border rounded text-xs">
@@ -202,7 +130,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
             />
             <Button
               onClick={handleSubmit}
-              disabled={!content.trim() || isOverLimit}
+              disabled={!validation.isValid}
               className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
             >
               <Send className="h-4 w-4 mr-2" />

@@ -18,7 +18,7 @@ export const useEntities = () => {
       setEntities(allEntities);
       setEntitiesWithMetrics(withMetrics);
     } catch (error) {
-      console.error('Error refreshing entities:', error);
+      // Error handling - could add toast here in the future
     } finally {
       setIsLoading(false);
     }
@@ -38,7 +38,7 @@ export const useEntities = () => {
       refreshEntities();
       return entity;
     } catch (error) {
-      console.error('Error creating entity:', error);
+      // Error handling - let component handle the error
       throw error;
     }
   };

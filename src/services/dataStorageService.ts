@@ -42,7 +42,7 @@ export const dataStorageService = {
       
       return { ...getDefaultStore(), ...parsed };
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      // Error loading from localStorage - return default store
       return getDefaultStore();
     }
   },
@@ -51,7 +51,7 @@ export const dataStorageService = {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      // Error saving to localStorage - could implement retry logic
     }
   },
 
@@ -59,7 +59,7 @@ export const dataStorageService = {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
+      // Error clearing localStorage
     }
   }
 };

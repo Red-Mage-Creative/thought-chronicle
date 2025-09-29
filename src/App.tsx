@@ -13,13 +13,6 @@ import { useLocalThoughts, useOfflineSync } from "./hooks/useOfflineData";
 import { syncService } from "./services/syncService";
 import { toast } from "sonner";
 
-interface Thought {
-  id: string;
-  content: string;
-  relatedEntities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
 
 const queryClient = new QueryClient();
 
@@ -38,7 +31,7 @@ const App = () => {
     }
   }, []);
 
-  const handleThoughtAdded = (newThought: Thought) => {
+  const handleThoughtAdded = (newThought: any) => {
     addThought({
       id: newThought.id,
       content: newThought.content,

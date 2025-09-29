@@ -1,16 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { getEntityIcon } from '@/utils/entityUtils';
 import { formatDate, formatEntityCount, capitalize } from '@/utils/formatters';
-
-interface EntityWithMetrics {
-  name: string;
-  type: string;
-  count: number;
-  lastMentioned: Date;
-}
+import { MESSAGES } from '@/utils/constants';
+import { StandardEntityWithMetrics } from '@/types/standard';
 
 interface EntityGridProps {
-  entities: EntityWithMetrics[];
+  entities: StandardEntityWithMetrics[];
   onEntityClick?: (entityName: string) => void;
 }
 
@@ -18,7 +13,7 @@ export const EntityGrid = ({ entities, onEntityClick }: EntityGridProps) => {
   if (entities.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-8">
-        No entities found. Start writing chronicles to create entities!
+              {MESSAGES.NO_ENTITIES_FOUND}
       </p>
     );
   }
@@ -38,7 +33,7 @@ export const EntityGrid = ({ entities, onEntityClick }: EntityGridProps) => {
               <div>
                 <h3 className="font-medium">{entity.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Last mentioned: {formatDate(entity.lastMentioned)}
+                  Last mentioned: {entity.metrics.lastMentioned ? formatDate(entity.metrics.lastMentioned) : 'Never'}
                 </p>
               </div>
             </div>
@@ -47,7 +42,7 @@ export const EntityGrid = ({ entities, onEntityClick }: EntityGridProps) => {
                 {capitalize(entity.type)}
               </Badge>
               <Badge variant="outline">
-                {formatEntityCount(entity.count)}
+                {formatEntityCount(entity.metrics.count)}
               </Badge>
             </div>
           </div>

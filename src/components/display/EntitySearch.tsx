@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { MESSAGES } from '@/utils/constants';
 
 interface EntitySearchProps {
   searchTerm: string;
@@ -10,7 +11,7 @@ interface EntitySearchProps {
 export const EntitySearch = ({ 
   searchTerm, 
   onSearchChange, 
-  placeholder = "Search entities..." 
+  placeholder = MESSAGES.SEARCH_PLACEHOLDER
 }: EntitySearchProps) => {
   return (
     <div className="relative">

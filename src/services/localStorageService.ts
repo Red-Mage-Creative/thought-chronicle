@@ -71,7 +71,7 @@ export const localStorageService = {
       
       return { ...getDefaultStore(), ...parsed };
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      // Error loading from localStorage - return default store
       return getDefaultStore();
     }
   },
@@ -81,7 +81,7 @@ export const localStorageService = {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      // Error saving to localStorage
     }
   },
 
@@ -98,7 +98,6 @@ export const localStorageService = {
     data.thoughts.unshift(localThought);
     data.pendingChanges.thoughts.added.push(localThought);
     this.saveData(data);
-    console.log('Added thought, pending count:', this.getPendingChangesCount());
     return localThought;
   },
 

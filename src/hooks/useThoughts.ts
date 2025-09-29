@@ -12,7 +12,7 @@ export const useThoughts = () => {
       const allThoughts = thoughtService.getAllThoughts();
       setThoughts(allThoughts);
     } catch (error) {
-      console.error('Error refreshing thoughts:', error);
+      // Error handling - could add toast here in the future
     } finally {
       setIsLoading(false);
     }
@@ -32,7 +32,7 @@ export const useThoughts = () => {
       refreshThoughts();
       return thought;
     } catch (error) {
-      console.error('Error creating thought:', error);
+      // Error handling - let component handle the error
       throw error;
     }
   };

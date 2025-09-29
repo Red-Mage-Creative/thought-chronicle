@@ -1,8 +1,7 @@
 import { LocalThought } from '@/types/thoughts';
 import { dataStorageService } from './dataStorageService';
 import { entityService } from './entityService';
-
-const generateLocalId = (): string => `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+import { generateLocalId } from '@/utils/entityUtils';
 
 export const thoughtService = {
   getAllThoughts(): LocalThought[] {
@@ -37,7 +36,6 @@ export const thoughtService = {
     data.pendingChanges.thoughts.added.push(thought.localId!);
     dataStorageService.saveData(data);
     
-    console.log(`Created thought with ${validatedEntities.length} entities:`, validatedEntities);
     return thought;
   },
 

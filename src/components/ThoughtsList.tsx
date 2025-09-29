@@ -8,14 +8,7 @@ import { useLocalThoughts } from "@/hooks/useOfflineData";
 import { syncService } from "@/services/syncService";
 import { toast } from "sonner";
 import { getEntityClass } from '@/utils/entityUtils';
-
-interface Thought {
-  id: string;
-  content: string;
-  relatedEntities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
+import { MESSAGES } from '@/utils/constants';
 
 interface ThoughtsListProps {
   onEntityClick?: (entity: string) => void;
@@ -58,12 +51,12 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
     try {
       const result = await syncService.refreshFromServer();
       if (result.success) {
-        toast.success("Archives updated successfully");
+        toast.success(MESSAGES.SYNC_SUCCESS);
       } else {
         toast.error(result.message);
       }
     } catch (error) {
-      toast.error("Failed to refresh chronicles");
+      toast.error(MESSAGES.SYNC_ERROR);
     } finally {
       setIsRefreshing(false);
     }
@@ -131,7 +124,7 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
           {filteredThoughts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No thoughts found</p>
+              <p>{MESSAGES.NO_THOUGHTS_FOUND}</p>
               <p className="text-xs mt-1">
                 {searchTerm || selectedEntity ? "Try adjusting your search" : "Start adding thoughts to see them here"}
               </p>
