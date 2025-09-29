@@ -4,11 +4,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { User, LogOut, ScrollText } from "lucide-react";
+import { User, LogOut, ScrollText, Download } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { campaignService } from "@/services/campaignService";
 import { LocalCampaign } from "@/types/campaigns";
 import { CampaignManagementModal } from "@/components/CampaignManagementModal";
+import { dataExportService } from "@/services/dataExportService";
 
 import { toast } from "sonner";
 
@@ -16,6 +17,7 @@ export const AppHeader = () => {
   const { user, signOut } = useAuth();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showManagementModal, setShowManagementModal] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<LocalCampaign | null>(null);
   const [allCampaigns, setAllCampaigns] = useState<LocalCampaign[]>([]);
 
@@ -59,6 +61,17 @@ export const AppHeader = () => {
     loadCampaignData();
   };
 
+  const handleExportData = () => {
+    try {
+      const exportData = dataExportService.exportCurrentCampaign();
+      dataExportService.downloadExport(exportData);
+      toast.success('Data exported successfully');
+    } catch (error) {
+      toast.error('Failed to export data');
+    }
+    setShowExportDialog(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container">
@@ -99,6 +112,11 @@ export const AppHeader = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background z-50">
+                <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Data
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowConfirmDialog(true)}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -135,6 +153,16 @@ export const AppHeader = () => {
         title="Sign Out"
         description="Are you sure you want to sign out?"
         confirmText="Sign Out"
+        cancelText="Cancel"
+      />
+
+      <ConfirmationDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        onConfirm={handleExportData}
+        title="Download Data"
+        description="This will download your current campaign data as a JSON file. This includes all thoughts, entities, and campaign information for backup purposes."
+        confirmText="Download"
         cancelText="Cancel"
       />
 

@@ -18,6 +18,14 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "0.5.0",
+  date: "2025-09-29",
+  features: ["Added data export functionality to download campaign data as JSON backup files", "Implemented user-friendly export dialog with confirmation and success feedback"],
+  improvements: ["Enhanced user dropdown menu with data export option", "Added comprehensive data cleaning for export (removes internal sync fields)", "Improved data backup capabilities for offline storage"],
+  fixes: [],
+  docs: ["Updated design system documentation with export functionality patterns"],
+  maintenance: ["Created dedicated dataExportService following clean code principles", "Added proper TypeScript interfaces for export data structure"]
+}, {
   version: "0.4.0",
   date: "2025-09-29",
   features: ["Implemented client-side leaked password protection using HaveIBeenPwned API with k-anonymity model", "Added real-time password security assessment during registration", "Enhanced password strength indicators with breach detection status"],
