@@ -1,23 +1,16 @@
-import { ChatWindow } from "@/components/ChatWindow";
-import { StatsCard } from "@/components/StatsCard";
-import { useLocalThoughts } from "@/hooks/useOfflineData";
+import { ThoughtManagementPage } from "@/components/layout/ThoughtManagementPage";
+import { useState } from "react";
 
-interface IndexProps {
-  defaultTags: string[];
-  onDefaultTagsChange: (tags: string[]) => void;
-}
-
-const Index = ({ defaultTags, onDefaultTagsChange }: IndexProps) => {
-  const { thoughts } = useLocalThoughts();
+const Index = () => {
+  const [defaultTags, setDefaultTags] = useState<string[]>([]);
 
   return (
-    <>
-      <StatsCard thoughts={thoughts} />
-      <ChatWindow 
+    <div className="min-h-screen bg-background">
+      <ThoughtManagementPage
         defaultTags={defaultTags}
-        onDefaultTagsChange={onDefaultTagsChange}
+        onDefaultTagsChange={setDefaultTags}
       />
-    </>
+    </div>
   );
 };
 

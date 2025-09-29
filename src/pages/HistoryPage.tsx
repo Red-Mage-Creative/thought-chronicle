@@ -1,12 +1,4 @@
-import { ThoughtsList } from "@/components/ThoughtsList";
-
-interface Thought {
-  id: string;
-  content: string;
-  entities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
+import { HistoryPage as HistoryPageLayout } from "@/components/layout/HistoryPage";
 
 interface HistoryPageProps {
   onEntityClick?: (entity: string) => void;
@@ -14,7 +6,7 @@ interface HistoryPageProps {
 
 const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
   return (
-    <ThoughtsList onEntityClick={onEntityClick} />
+    <HistoryPageLayout onEntityClick={onEntityClick} />
   );
 };
 

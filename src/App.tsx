@@ -95,21 +95,13 @@ const App = () => {
               </div>
             </header>
 
-            {/* Sync Banner */}
-            <SyncBanner onSync={handleSync} />
-
             {/* Main Layout */}
-            <main className="flex-1 container py-8">
-              <div className="max-w-2xl mx-auto">
+            <main className="flex-1">
+              <div className="w-full">
                     <Routes>
                       <Route 
                         path="/" 
-                        element={
-                          <Index 
-                            defaultTags={defaultTags}
-                            onDefaultTagsChange={handleDefaultTagsChange}
-                          />
-                        } 
+                        element={<Index />} 
                       />
                   <Route 
                     path="/entities" 

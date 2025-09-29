@@ -1,16 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, Users, Calendar } from "lucide-react";
 
-interface Thought {
-  id: string;
-  content: string;
-  relatedEntities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
+import { LocalThought } from '@/types/thoughts';
 
 interface StatsCardProps {
-  thoughts: Thought[];
+  thoughts: LocalThought[];
 }
 
 export const StatsCard = ({ thoughts }: StatsCardProps) => {

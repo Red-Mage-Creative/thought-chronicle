@@ -1,0 +1,125 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { TagSelector } from './TagSelector';
+import { EntitySuggestion } from '@/types/entities';
+
+interface ThoughtFormProps {
+  onSubmit: (content: string, tags: string[], gameDate?: string) => Promise<void>;
+  suggestions: EntitySuggestion[];
+  defaultTags?: string[];
+}
+
+export const ThoughtForm = ({ onSubmit, suggestions, defaultTags = [] }: ThoughtFormProps) => {
+  const [content, setContent] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [gameDate, setGameDate] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const allTags = [...defaultTags, ...tags];
+  const isContentValid = content.trim().length > 0 && content.length <= 2000;
+
+  const handleSubmit = async () => {
+    if (!isContentValid) return;
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(content, allTags, gameDate || undefined);
+      
+      // Clear form
+      setContent('');
+      setTags([]);
+      setGameDate('');
+      
+      toast({
+        title: 'Thought recorded',
+        description: 'Your thought has been saved successfully.'
+      });
+    } catch (error) {
+      console.error('Error submitting thought:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save thought. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && e.ctrlKey && isContentValid) {
+      handleSubmit();
+    }
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-foreground">Record a Thought</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="content">What happened in your campaign?</Label>
+          <Textarea
+            id="content"
+            placeholder="Describe the events, encounters, or discoveries..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyPress}
+            className="min-h-24 resize-none"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Press Ctrl+Enter to submit</span>
+            <span className={content.length > 2000 ? 'text-destructive' : ''}>
+              {content.length}/2000
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Tags (Characters, Locations, Items, etc.)</Label>
+          <TagSelector
+            tags={tags}
+            onTagsChange={setTags}
+            suggestions={suggestions}
+            placeholder="Add tags..."
+          />
+          {defaultTags.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              <span className="text-sm text-muted-foreground">Default tags:</span>
+              {defaultTags.map((tag) => (
+                <span key={tag} className="entity-tag entity-player text-xs">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="gameDate">Game Date (optional)</Label>
+          <Input
+            id="gameDate"
+            placeholder="e.g., Day 15 of Flamerule, 1492 DR"
+            value={gameDate}
+            onChange={(e) => setGameDate(e.target.value)}
+          />
+        </div>
+
+        <Button
+          onClick={handleSubmit}
+          disabled={!isContentValid || isSubmitting}
+          className="w-full"
+        >
+          {isSubmitting ? 'Recording...' : 'Record Thought'}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};

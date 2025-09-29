@@ -1,12 +1,4 @@
-import { EntityDashboard } from "@/components/EntityDashboard";
-
-interface Thought {
-  id: string;
-  content: string;
-  entities: string[];
-  timestamp: Date;
-  gameDate?: string;
-}
+import { EntityManagementPage } from "@/components/layout/EntityManagementPage";
 
 interface EntitiesPageProps {
   onEntityClick?: (entity: string) => void;
@@ -14,7 +6,7 @@ interface EntitiesPageProps {
 
 const EntitiesPage = ({ onEntityClick }: EntitiesPageProps) => {
   return (
-    <EntityDashboard onEntityClick={onEntityClick} />
+    <EntityManagementPage onEntityClick={onEntityClick} />
   );
 };
 
