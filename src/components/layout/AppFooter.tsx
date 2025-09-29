@@ -19,7 +19,7 @@ export const AppFooter = () => {
         <div className="max-w-2xl mx-auto">
           <div className="flex justify-between text-sm text-muted-foreground">
             <div className="text-xs">
-              <div className="font-medium">D&D Chronicle</div>
+              <div className="font-medium">Chronicle - A TTRPG note-taking application.</div>
               <div className="font-medium">Version 1.2.1</div>
               <br />
               <div className="italic">"Every adventure begins with a single thought"</div>
