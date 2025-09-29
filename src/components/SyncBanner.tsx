@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AlertCircle, Upload, Scroll } from "lucide-react";
 import { useOfflineSync } from "@/hooks/useOfflineData";
 import { useState } from "react";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 
 interface SyncBannerProps {
   onSync: () => Promise<void>;
@@ -11,6 +12,7 @@ interface SyncBannerProps {
 export const SyncBanner = ({ onSync }: SyncBannerProps) => {
   const { pendingCount } = useOfflineSync();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showSyncConfirm, setShowSyncConfirm] = useState(false);
 
   if (pendingCount === 0) return null;
 
@@ -50,7 +52,7 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
         </div>
         
         <Button 
-          onClick={handleSync}
+          onClick={() => setShowSyncConfirm(true)}
           disabled={isSyncing}
           className="bg-amber-600 hover:bg-amber-700 text-white"
         >
@@ -59,6 +61,16 @@ export const SyncBanner = ({ onSync }: SyncBannerProps) => {
         </Button>
       </div>
       </Card>
+      
+      <ConfirmationDialog
+        open={showSyncConfirm}
+        onOpenChange={setShowSyncConfirm}
+        title="Send to Archive"
+        description={`This will sync ${getFantasyMessage(pendingCount).toLowerCase()} to your MongoDB database. This may use your free cluster resources. Are you sure you want to continue?`}
+        confirmText="Yes, Send to Archive"
+        cancelText="Cancel"
+        onConfirm={handleSync}
+      />
     </div>
   );
 };

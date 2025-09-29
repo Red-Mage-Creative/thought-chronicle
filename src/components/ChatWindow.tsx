@@ -8,6 +8,7 @@ import { TagInput } from "@/components/TagInput";
 import { Settings } from "@/components/Settings";
 import { useLocalThoughts, useLocalEntities, useOfflineSync } from "@/hooks/useOfflineData";
 import { LocalThought, LocalEntity } from "@/services/localStorageService";
+import { toast } from "sonner";
 
 interface ChatWindowProps {
   defaultTags: string[];
@@ -49,6 +50,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
         });
         
         newEntities.push(createdEntity);
+        console.log(`Created entity: ${tagName} (${entityType})`);
       }
     });
     
@@ -63,6 +65,12 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
     
     // Create entities for new tags
     const newEntities = createEntitiesFromTags(allTags);
+    
+    // Show notification for newly created entities
+    if (newEntities.length > 0) {
+      const entityNames = newEntities.map(e => e.name).join(', ');
+      toast.success(`Created ${newEntities.length} new entit${newEntities.length === 1 ? 'y' : 'ies'}: ${entityNames}`);
+    }
     
     // Create thought in MongoDB-compatible format
     const thoughtData = {

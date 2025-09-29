@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, RefreshCw, Users, MapPin, Package, Shield, Scroll } from "lucide-react";
+import { Search, RefreshCw, Users, MapPin, Package, Shield, Scroll, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useLocalEntities, useLocalThoughts } from "@/hooks/useOfflineData";
 import { syncService } from "@/services/syncService";
 import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { AddEntityModal } from "@/components/AddEntityModal";
 
 interface EntityDashboardProps {
   onEntityClick?: (entity: string) => void;
@@ -49,6 +51,8 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showRefreshConfirm, setShowRefreshConfirm] = useState(false);
+  const [showAddEntity, setShowAddEntity] = useState(false);
 
   const { entities: localEntities, refreshFromStorage } = useLocalEntities();
   const { thoughts: localThoughts } = useLocalThoughts();
@@ -124,6 +128,10 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
     }
   };
 
+  const handleEntityAdded = () => {
+    refreshFromStorage();
+  };
+
   const uniqueTypes = Array.from(new Set(entitiesWithMetrics.map(e => e.type)));
 
   return (
@@ -131,15 +139,24 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Entity Registry</h2>
-          <Button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            variant="outline"
-            size="sm"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowAddEntity(true)}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Entity
+            </Button>
+            <Button
+              onClick={() => setShowRefreshConfirm(true)}
+              disabled={isRefreshing}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-4 mb-6">
@@ -217,6 +234,22 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
           )}
         </div>
       </div>
+
+      <ConfirmationDialog
+        open={showRefreshConfirm}
+        onOpenChange={setShowRefreshConfirm}
+        title="Refresh from Server"
+        description="This will fetch the latest data from your MongoDB database. This may use your free cluster resources. Are you sure you want to continue?"
+        confirmText="Yes, Refresh"
+        cancelText="Cancel"
+        onConfirm={handleRefresh}
+      />
+
+      <AddEntityModal
+        open={showAddEntity}
+        onOpenChange={setShowAddEntity}
+        onEntityAdded={handleEntityAdded}
+      />
     </Card>
   );
 };
