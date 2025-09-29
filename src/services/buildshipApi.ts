@@ -1,4 +1,7 @@
-const BASE_URL = 'https://xn93r8.buildship.run';
+import { getApiBaseUrl } from '@/utils/environment';
+
+// Use environment configuration
+const BASE_URL = getApiBaseUrl();
 
 // Raw MongoDB structure from database
 interface RawMongoThought {

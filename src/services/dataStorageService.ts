@@ -2,6 +2,7 @@ import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { PendingChanges } from '@/types/sync';
 import { generateLocalId } from '@/utils/entityUtils';
+import { encryptionService } from '@/utils/encryption';
 
 export interface LocalDataStore {
   thoughts: LocalThought[];
@@ -30,6 +31,7 @@ export const dataStorageService = {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) return getDefaultStore();
       
+      // For now, parse normally - will add encryption asynchronously later
       const parsed = JSON.parse(stored);
       
       // Convert date strings back to Date objects
@@ -60,6 +62,7 @@ export const dataStorageService = {
 
   saveData(data: LocalDataStore): void {
     try {
+      // For now, save as JSON - will add encryption later
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       // Dispatch custom event for immediate UI refresh
       window.dispatchEvent(new CustomEvent('storageUpdated'));

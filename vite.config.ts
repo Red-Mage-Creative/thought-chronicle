@@ -15,4 +15,11 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Define environment variables for different environments
+  define: {
+    // Default API URL for development
+    __BUILDSHIP_API_URL__: JSON.stringify(
+      process.env.VITE_BUILDSHIP_API_URL || 'https://xn93r8.buildship.run'
+    ),
+  },
 }));

@@ -9,6 +9,7 @@ import { useSyncState } from '@/hooks/useSyncState';
 import { syncService } from '@/services/syncService';
 import { businessLogicService } from '@/services/businessLogicService';
 import { useToast } from '@/hooks/use-toast';
+import { secureLog } from '@/utils/secureLogging';
 
 interface ThoughtManagementPageProps {
   defaultTags?: string[];
@@ -25,20 +26,20 @@ export const ThoughtManagementPage = ({
   const { toast } = useToast();
 
   const handleThoughtSubmit = async (content: string, tags: string[], gameDate?: string) => {
-    console.log('🔍 [DEBUG] handleThoughtSubmit called', {
-      content: content.substring(0, 50) + '...',
-      tags,
-      gameDate,
-      defaultTags
+    secureLog.debug('handleThoughtSubmit called', {
+      contentLength: content.length,
+      tagCount: tags.length,
+      hasGameDate: !!gameDate,
+      defaultTagCount: defaultTags.length
     });
 
     try {
       // Separate manual tags from default tags for proper entity creation
       const manualTags = tags.filter(tag => !defaultTags.includes(tag));
-      console.log('🔍 [DEBUG] Separated tags:', {
-        manualTags,
-        defaultTags,
-        allTags: tags
+      secureLog.debug('Separated tags', {
+        manualTagCount: manualTags.length,
+        defaultTagCount: defaultTags.length,
+        totalTagCount: tags.length
       });
       
       const result = await businessLogicService.processThoughtCreation(
@@ -48,7 +49,10 @@ export const ThoughtManagementPage = ({
         gameDate
       );
 
-      console.log('🔍 [DEBUG] processThoughtCreation result:', result);
+      secureLog.debug('processThoughtCreation result', {
+        newEntitiesCreated: result.newEntitiesCreated,
+        entityCount: result.entityNames?.length || 0
+      });
       
       // Show entity creation notification if entities were created
       if (result.newEntitiesCreated > 0) {
@@ -60,17 +64,17 @@ export const ThoughtManagementPage = ({
           title: 'Entities created',
           description: message
         });
-        console.log('🔍 [DEBUG] Showed success toast for new entities');
+        secureLog.debug('Showed success toast for new entities');
       }
       
       // Refresh related data
-      console.log('🔍 [DEBUG] Refreshing data...');
+      secureLog.debug('Refreshing data...');
       refreshThoughts();
       refreshEntities();
       refreshSyncStatus();
-      console.log('🔍 [DEBUG] Data refresh completed');
+      secureLog.debug('Data refresh completed');
     } catch (error) {
-      console.error('🔍 [DEBUG] Error in handleThoughtSubmit:', error);
+      secureLog.error('Error in handleThoughtSubmit:', error);
       throw error; // Re-throw to let ThoughtForm handle the error display
     }
   };
@@ -84,7 +88,7 @@ export const ThoughtManagementPage = ({
         description: 'Your data has been synchronized with the server.'
       });
     } catch (error) {
-      console.error('Sync failed:', error);
+      secureLog.error('Sync failed:', error);
       toast({
         title: 'Sync failed',
         description: 'Could not sync to server. Check your connection.',
