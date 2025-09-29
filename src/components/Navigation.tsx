@@ -11,7 +11,6 @@ export const Navigation = () => {
     { to: "/", icon: Home, label: "Home" },
     { to: "/entities", icon: Users, label: "Entities" },
     { to: "/history", icon: History, label: "History" },
-    { to: "/pending-changes", icon: Clock, label: "Pending" },
   ];
 
   return (
