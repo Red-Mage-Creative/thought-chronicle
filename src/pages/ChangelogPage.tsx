@@ -22,9 +22,9 @@ const changelog: ChangelogEntry[] = [{
   date: "2025-09-29",
   features: ["Added comprehensive Privacy Policy page with data collection transparency", "Created Terms of Service page with user rights and responsibilities", "Implemented Cookie Controls page with granular privacy settings", "Made changelog and design system pages publicly accessible without authentication"],
   improvements: ["Enhanced footer with conditional authentication-aware content", "Reorganized footer layout with proper legal and resource links", "Added footer to authentication page for better user experience", "Improved policy page navigation and accessibility"],
-  fixes: [],
+  fixes: ["CRITICAL: Fixed registration security code public exposure vulnerability", "CRITICAL: Fixed customer email addresses public exposure vulnerability", "Secured app_config table with admin-only access policies", "Implemented role-based access control with proper RLS policies"],
   docs: ["Updated design system documentation with new footer patterns", "Added policy page documentation and legal compliance features"],
-  maintenance: ["Restructured footer component with responsive three-column layout", "Updated AppLayout to support both authenticated and public pages", "Enhanced routing configuration for public accessibility"]
+  maintenance: ["Restructured footer component with responsive three-column layout", "Updated AppLayout to support both authenticated and public pages", "Enhanced routing configuration for public accessibility", "Created secure edge function for access code validation", "Implemented secure database functions for profile data access", "Added comprehensive user roles system with admin/user/moderator support"]
 }, {
   version: "0.2.1",
   date: "2025-09-29",

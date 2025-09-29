@@ -65,14 +65,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { error: { message: 'Invalid access code. Please check and try again.' } };
       }
 
-      // Check if username is already taken
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .maybeSingle();
+      // Check if username is already taken using secure function
+      const { data: isTaken, error: usernameError } = await supabase.rpc('is_username_taken', {
+        check_username: username
+      });
 
-      if (existingProfile) {
+      if (usernameError) {
+        console.error('Username check error:', usernameError);
+        return { error: { message: 'Error checking username availability. Please try again.' } };
+      }
+
+      if (isTaken) {
         return { error: { message: 'Username is already taken. Please choose a different one.' } };
       }
 
@@ -100,30 +103,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Check if input is email or username
       const isEmail = emailOrUsername.includes('@');
-      let email = emailOrUsername;
-
+      
       if (!isEmail) {
-        // Get email from username via profiles table
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('username', emailOrUsername)
-          .maybeSingle();
+        // Get email from username using secure function
+        const { data: email, error: emailError } = await supabase.rpc('get_email_by_username', {
+          lookup_username: emailOrUsername
+        });
 
-        if (profileError) {
-          console.error('Profile lookup error:', profileError);
+        if (emailError) {
+          console.error('Email lookup error:', emailError);
           return { error: { message: 'Error looking up username. Please try again.' } };
         }
 
-        if (!profileData || !profileData.email) {
+        if (!email) {
           return { error: { message: 'Username not found. Please check and try again.' } };
         }
 
-        email = profileData.email;
+        emailOrUsername = email;
       }
 
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: emailOrUsername,
         password
       });
       return { error };
