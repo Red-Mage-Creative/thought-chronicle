@@ -64,7 +64,6 @@ export const ThoughtForm = ({
         description: isEditMode ? 'Your thought has been updated successfully.' : 'Your thought has been saved successfully.'
       });
     } catch (error) {
-      console.error('Error submitting thought:', error);
       toast({
         title: 'Error',
         description: 'Failed to save thought. Please try again.',

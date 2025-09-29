@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, User, Clock } from 'lucide-react';
-import { LocalEntity, EntityWithMetrics } from '@/types/entities';
+import { LocalEntity, EntityWithMetrics, EntityType } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { entityService } from '@/services/entityService';
 import { thoughtService } from '@/services/thoughtService';
@@ -85,7 +85,7 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
     loadEntityData();
   }, [entityName, navigate, toast]);
 
-  const handleEdit = async (name: string, type: any, description?: string) => {
+  const handleEdit = async (name: string, type: EntityType, description?: string) => {
     if (!entity) return;
 
     try {

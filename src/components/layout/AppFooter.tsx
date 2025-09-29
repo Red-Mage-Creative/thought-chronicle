@@ -20,7 +20,7 @@ export const AppFooter = () => {
           <div className="flex justify-between text-sm text-muted-foreground">
             <div className="text-xs">
               <div className="font-medium">D&D Chronicle</div>
-              <div className="font-medium">Version 1.0</div>
+              <div className="font-medium">Version 1.1.0</div>
               <br />
               <div className="italic">"Every adventure begins with a single thought"</div>
               <br />

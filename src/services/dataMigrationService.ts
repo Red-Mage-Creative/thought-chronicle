@@ -41,7 +41,6 @@ export const dataMigrationService = {
     
     if (hasChanges) {
       dataStorageService.saveData(data);
-      console.log('Migrated entities to use uncategorized type where appropriate');
     }
   },
 
@@ -52,7 +51,7 @@ export const dataMigrationService = {
     try {
       this.migrateToUncategorizedEntities();
     } catch (error) {
-      console.error('Migration failed:', error);
+      // Silently handle migration errors to avoid blocking app startup
     }
   }
 };

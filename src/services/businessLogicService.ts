@@ -45,7 +45,7 @@ export const businessLogicService = {
     
     return Array.from(entityMap.values()).map(entity => ({
       name: entity.name,
-      type: entity.type as any // Cast for type compatibility
+      type: entity.type as EntitySuggestion['type'] // Proper type cast
     }));
   },
 
@@ -58,13 +58,7 @@ export const businessLogicService = {
     defaultTags: string[],
     gameDate?: string
   ): Promise<ThoughtCreationResult> {
-    console.log('🔍 [DEBUG] processThoughtCreation started', {
-      content: content.substring(0, 50) + '...',
-      manualTags,
-      defaultTags,
-      gameDate
-    });
-
+    // Validate content
     if (content.trim().length === 0) {
       throw new Error('Content cannot be empty');
     }
@@ -75,33 +69,24 @@ export const businessLogicService = {
 
     // Combine manual tags with default tags (remove duplicates)
     const allTags = [...new Set([...defaultTags, ...manualTags])];
-    console.log('🔍 [DEBUG] Combined tags:', allTags);
     
     // Get existing entity names for duplicate checking
     const existingEntities = entityService.getAllEntities();
     const existingEntityNames = existingEntities.map(e => e.name.toLowerCase());
-    console.log('🔍 [DEBUG] Existing entity names:', existingEntityNames);
     
     // Create new entities for tags that don't exist
     const newEntityData = createEntitiesFromTags(allTags, existingEntityNames);
-    console.log('🔍 [DEBUG] New entities to create:', newEntityData);
     
     const createdEntities = [];
     for (const data of newEntityData) {
       try {
-        console.log('🔍 [DEBUG] Attempting to create entity:', data);
         const entity = entityService.createEntity(data.name, data.type, data.description);
-        console.log('🔍 [DEBUG] Successfully created entity:', entity);
         createdEntities.push(entity);
       } catch (error) {
-        console.warn('🔍 [DEBUG] Failed to create entity:', data.name, error);
+        // Skip entities that already exist or fail to create
+        continue;
       }
     }
-    
-    console.log('🔍 [DEBUG] Entity creation summary:', {
-      newEntitiesCreated: createdEntities.length,
-      entityNames: createdEntities.map(e => e.name)
-    });
     
     // Create the thought with proper ID generation
     const thoughtData = {
@@ -112,22 +97,17 @@ export const businessLogicService = {
       gameDate: gameDate || undefined
     };
 
-    console.log('🔍 [DEBUG] Creating thought with data:', thoughtData);
     const thought = thoughtService.createThought(
       thoughtData.content,
       thoughtData.relatedEntities,
       thoughtData.gameDate
     );
-    console.log('🔍 [DEBUG] Created thought:', thought);
     
-    const result = {
+    return {
       thought,
       newEntitiesCreated: createdEntities.length,
       entityNames: createdEntities.map(e => e.name)
     };
-    
-    console.log('🔍 [DEBUG] processThoughtCreation completed:', result);
-    return result;
   },
 
   /**

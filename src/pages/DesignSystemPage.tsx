@@ -321,32 +321,34 @@ export default function DesignSystemPage() {
                 <Separator />
                 <div className="space-y-3">
                   <h4 className="font-medium">Entity Type Tags</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Entity tags are clickable and include type-specific icons. They navigate to the entity details page on click.
+                  </p>
                   <div className="flex gap-2 flex-wrap">
-                    <div className="flex items-center gap-1 entity-tag entity-player">
+                    <div className="flex items-center gap-1 entity-tag entity-player cursor-pointer hover:opacity-80 transition-opacity">
                       <User className="h-3 w-3" />
-                      Player
+                      Character
                     </div>
-                    <div className="flex items-center gap-1 entity-tag entity-npc">
-                      <Users className="h-3 w-3" />
-                      NPC
-                    </div>
-                    <div className="flex items-center gap-1 entity-tag entity-location">
+                    <div className="flex items-center gap-1 entity-tag entity-location cursor-pointer hover:opacity-80 transition-opacity">
                       <MapPin className="h-3 w-3" />
                       Location
                     </div>
-                    <div className="flex items-center gap-1 entity-tag entity-item">
+                    <div className="flex items-center gap-1 entity-tag entity-item cursor-pointer hover:opacity-80 transition-opacity">
                       <Sword className="h-3 w-3" />
                       Item
                     </div>
-                    <div className="flex items-center gap-1 entity-tag entity-organization">
+                    <div className="flex items-center gap-1 entity-tag entity-organization cursor-pointer hover:opacity-80 transition-opacity">
                       <Building className="h-3 w-3" />
                       Organization
                     </div>
-                    <div className="flex items-center gap-1 entity-tag entity-uncategorized">
+                    <div className="flex items-center gap-1 entity-tag entity-uncategorized cursor-pointer hover:opacity-80 transition-opacity">
                       <Tag className="h-3 w-3" />
                       Uncategorized
                     </div>
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Icons are automatically inferred based on entity type using the getEntityIcon utility function.
+                  </p>
                 </div>
               </CardContent>
             </Card>
