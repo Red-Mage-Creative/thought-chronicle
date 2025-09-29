@@ -96,7 +96,7 @@ export const createEntitiesFromTags = (
       newEntities.push({
         name: tagName,
         type: entityType,
-        description: `Auto-created from tag: ${tagName}`
+        description: 'Created from message tagging.'
       });
     }
   });

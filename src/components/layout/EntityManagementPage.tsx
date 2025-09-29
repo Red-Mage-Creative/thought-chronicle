@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EntityList } from '@/components/display/EntityList';
+import { EntityTableView } from '@/components/display/EntityTableView';
 import { EntityForm } from '@/components/forms/EntityForm';
 import { useEntities } from '@/hooks/useEntities';
 import { EntityType } from '@/types/entities';
-import { Search, Plus, RefreshCw } from 'lucide-react';
+import { Search, Plus, RefreshCw, Grid, List } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/use-toast';
 import { UncategorizedNotice } from '@/components/ui/uncategorized-notice';
@@ -23,6 +24,7 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
   const [selectedType, setSelectedType] = useState<EntityType | 'all'>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const { toast } = useToast();
 
   const handleRefresh = async () => {
@@ -68,8 +70,12 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
       return a.name.localeCompare(b.name);
     });
 
-  const uniqueTypes: EntityType[] = ['character', 'location', 'organization', 'item', 'uncategorized'];
+  const uniqueTypes: EntityType[] = ['character', 'location', 'organization', 'item'];
   const uncategorizedCount = entitiesWithMetrics.filter(e => e.type === 'uncategorized').length;
+
+  const handleShowUncategorized = () => {
+    setSelectedType('uncategorized');
+  };
 
   return (
     <>
@@ -112,6 +118,7 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
             </Badge>
             {uniqueTypes.map((type) => {
               const count = entitiesWithMetrics.filter(e => e.type === type).length;
+              if (count === 0) return null;
               return (
                 <Badge
                   key={type}
@@ -125,14 +132,48 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
             })}
           </div>
 
-          <UncategorizedNotice count={uncategorizedCount} className="my-4" />
-
-          <EntityList
-            entities={filteredEntities} 
-            onEntityClick={onEntityClick}
-            onEntityUpdate={refreshEntities}
-            isLoading={isLoading}
+          <UncategorizedNotice 
+            count={uncategorizedCount} 
+            className="my-4" 
+            onShowUncategorized={handleShowUncategorized}
           />
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+              >
+                <Grid className="h-4 w-4 mr-2" />
+                Cards
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+              >
+                <List className="h-4 w-4 mr-2" />
+                Table
+              </Button>
+            </div>
+          </div>
+
+          {viewMode === 'cards' ? (
+            <EntityList
+              entities={filteredEntities} 
+              onEntityClick={onEntityClick}
+              onEntityUpdate={refreshEntities}
+              isLoading={isLoading}
+            />
+          ) : (
+            <EntityTableView
+              entities={filteredEntities} 
+              onEntityClick={onEntityClick}
+              onEntityUpdate={refreshEntities}
+              isLoading={isLoading}
+            />
+          )}
         </CardContent>
       </Card>
 
