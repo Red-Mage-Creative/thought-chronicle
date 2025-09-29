@@ -126,31 +126,12 @@ export const ThoughtForm = ({
 
         <div className="space-y-2">
           <Label>Tags (Characters, Locations, Items, etc.)</Label>
-          {defaultTags.length > 0 && (
-            <div className="mb-2 p-3 bg-primary/5 border border-primary/20 rounded-md">
-              <div className="flex items-center gap-2 mb-2">
-                <Pin className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Primed Tags (will be auto-added)</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                 {defaultTags.map((tag) => (
-                   <Badge 
-                     key={tag} 
-                     variant="outline" 
-                     className="entity-tag entity-default-tag text-xs"
-                   >
-                     <Pin className="h-3 w-3 mr-1" />
-                     #{tag}
-                   </Badge>
-                 ))}
-              </div>
-            </div>
-          )}
           <TagSelector
             tags={tags}
             onTagsChange={setTags}
             suggestions={suggestions}
             placeholder="Add additional tags..."
+            defaultTags={defaultTags}
           />
         </div>
 

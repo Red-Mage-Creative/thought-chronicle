@@ -12,9 +12,10 @@ interface TagSelectorProps {
   suggestions: EntitySuggestion[];
   placeholder?: string;
   isDefaultTagSelector?: boolean;
+  defaultTags?: string[];
 }
 
-export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags...", isDefaultTagSelector = false }: TagSelectorProps) => {
+export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags...", isDefaultTagSelector = false, defaultTags = [] }: TagSelectorProps) => {
   const [inputValue, setInputValue] = useState('');
   const [filteredSuggestions, setFilteredSuggestions] = useState<EntitySuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -128,8 +129,21 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
 
   return (
     <div className="space-y-2">
-      {tags.length > 0 && (
+      {(defaultTags.length > 0 || tags.length > 0) && (
         <div className="flex flex-wrap gap-1">
+          {/* Show default tags first with pin icons */}
+          {defaultTags.map((tag, index) => (
+            <Badge 
+              key={`default-${index}`} 
+              variant="outline" 
+              className="entity-tag entity-default-tag text-sm"
+            >
+              <Pin className="h-3 w-3 mr-1" />
+              #{tag}
+            </Badge>
+          ))}
+          
+          {/* Show regular tags */}
           {tags.map((tag, index) => {
             const suggestion = suggestions.find(s => s.name.toLowerCase() === tag.toLowerCase());
             const entityClass = suggestion ? getEntityClass(suggestion.type) : 'entity-tag entity-npc';
