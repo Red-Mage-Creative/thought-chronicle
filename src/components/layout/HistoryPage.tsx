@@ -13,7 +13,7 @@ import { LocalThought } from '@/types/thoughts';
 import { Search, RefreshCw, Plus, Calendar } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/use-toast';
-import { format, isToday, isYesterday, isThisWeek, isThisMonth, subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { subDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 interface HistoryPageProps {
   onEntityClick?: (entityName: string) => void;
@@ -72,42 +72,53 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
     });
   };
 
-  const filteredThoughts = thoughts.filter(thought => {
-    const matchesSearch = thought.content.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Filter by date based on when the thought was actually created
-    const thoughtDate = new Date(thought.timestamp);
+  // Helper to validate Date
+  const isValidDate = (d: unknown): d is Date =>
+    d instanceof Date && !Number.isNaN(d.getTime());
+
+  // Map selected filter to a date range
+  const getDateRange = (filter: string): { start: Date; end: Date } | null => {
     const now = new Date();
-    let matchesDate = true;
-    
-    switch (selectedDateFilter) {
+
+    switch (filter) {
       case 'today':
-        matchesDate = isToday(thoughtDate);
-        break;
-      case 'yesterday':
-        matchesDate = isYesterday(thoughtDate);
-        break;
+        return { start: startOfDay(now), end: endOfDay(now) };
+      case 'yesterday': {
+        const yesterday = subDays(now, 1);
+        return { start: startOfDay(yesterday), end: endOfDay(yesterday) };
+      }
       case 'last7':
-        const sevenDaysAgo = startOfDay(subDays(now, 7));
-        matchesDate = thoughtDate >= sevenDaysAgo;
-        break;
+        // inclusive: today + previous 6 days
+        return { start: startOfDay(subDays(now, 6)), end: endOfDay(now) };
       case 'thisWeek':
-        const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // Monday start
-        const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
-        matchesDate = thoughtDate >= weekStart && thoughtDate <= weekEnd;
-        break;
+        return {
+          start: startOfWeek(now, { weekStartsOn: 1 }),
+          end: endOfWeek(now, { weekStartsOn: 1 }),
+        };
       case 'thisMonth':
-        const monthStart = startOfMonth(now);
-        const monthEnd = endOfMonth(now);
-        matchesDate = thoughtDate >= monthStart && thoughtDate <= monthEnd;
-        break;
+        return { start: startOfMonth(now), end: endOfMonth(now) };
       case 'all':
       default:
-        matchesDate = true;
-        break;
+        return null;
     }
-    
-    return matchesSearch && matchesDate;
+  };
+
+  const filteredThoughts = thoughts.filter((thought) => {
+    const contentMatch = thought.content
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const range = getDateRange(selectedDateFilter);
+    if (!range) return contentMatch;
+
+    // Safely coerce and validate the timestamp
+    const ts = isValidDate(thought.timestamp)
+      ? thought.timestamp
+      : new Date(thought.timestamp as any);
+
+    if (!isValidDate(ts)) return false;
+
+    return contentMatch && ts >= range.start && ts <= range.end;
   });
 
   // Define date filter options
