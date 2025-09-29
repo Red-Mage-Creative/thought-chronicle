@@ -8,6 +8,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { useThoughts } from "@/hooks/useThoughts";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
+import EntityDetailsPage from "./pages/EntityDetailsPage";
 import HistoryPage from "./pages/HistoryPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
 import NotFound from "./pages/NotFound";
@@ -79,6 +80,16 @@ const App = () => {
                 element={
                   <AppLayout variant="narrow">
                     <EntitiesPage 
+                      onEntityClick={handleEntityClick} 
+                    />
+                  </AppLayout>
+                } 
+              />
+              <Route 
+                path="/entities/:entityName" 
+                element={
+                  <AppLayout variant="narrow">
+                    <EntityDetailsPage 
                       onEntityClick={handleEntityClick} 
                     />
                   </AppLayout>

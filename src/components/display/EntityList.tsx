@@ -63,7 +63,7 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
                 >
                   <div className="space-y-3 flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-lg truncate flex-1">{entity.name}</h3>
+                      <h3 className="font-semibold text-lg break-words flex-1">{entity.name}</h3>
                     </div>
 
                     <div className="mb-2">
