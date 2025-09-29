@@ -33,7 +33,8 @@ export const useEntities = () => {
       const entity = entityService.createEntity(
         name, 
         type as any, 
-        description
+        description,
+        'manual'
       );
       refreshEntities();
       return entity;

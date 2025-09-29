@@ -11,6 +11,8 @@ export interface LocalEntity extends BaseEntity {
   localId?: string;
   modifiedLocally?: Date;
   syncStatus: 'pending' | 'synced' | 'conflict';
+  creationSource?: 'manual' | 'auto';
+  createdLocally?: Date;
 }
 
 export interface EntityMetrics {

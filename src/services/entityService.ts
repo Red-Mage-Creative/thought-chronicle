@@ -17,7 +17,8 @@ export const entityService = {
   createEntity(
     name: string, 
     type?: EntityType, 
-    description?: string
+    description?: string,
+    creationSource: 'manual' | 'auto' = 'manual'
   ): LocalEntity {
     console.log('🔍 [DEBUG] entityService.createEntity called', {
       name,
@@ -41,7 +42,8 @@ export const entityService = {
     const entity = dataStorageService.addEntity({
       name,
       type: inferredType,
-      description
+      description,
+      creationSource
     });
     
     console.log('🔍 [DEBUG] Entity created successfully:', entity);

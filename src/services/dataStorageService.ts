@@ -93,7 +93,7 @@ export const dataStorageService = {
   },
 
   // Add a new entity locally
-  addEntity(entity: Omit<LocalEntity, 'localId' | 'syncStatus'>): LocalEntity {
+  addEntity(entity: Omit<LocalEntity, 'localId' | 'syncStatus' | 'createdLocally'>): LocalEntity {
     console.log('🔍 [DEBUG] dataStorageService.addEntity called', entity);
     
     const data = this.getData();
@@ -106,7 +106,8 @@ export const dataStorageService = {
       ...entity,
       localId: generateLocalId(),
       syncStatus: 'pending',
-      modifiedLocally: new Date()
+      modifiedLocally: new Date(),
+      createdLocally: new Date()
     };
     
     console.log('🔍 [DEBUG] Generated local entity:', localEntity);

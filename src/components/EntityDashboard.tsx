@@ -156,7 +156,6 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
             selectedType={selectedType}
             onTypeChange={setSelectedType}
             entityCounts={entityCounts}
-            totalCount={entitiesWithMetrics.length}
           />
         </div>
 

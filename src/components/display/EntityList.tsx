@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EntityWithMetrics, EntityType } from '@/types/entities';
-import { Users, Calendar, Hash, Edit2, Trash2 } from 'lucide-react';
+import { Users, Edit, Trash2 } from 'lucide-react';
 import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
 import { EntityEditForm } from '@/components/forms/EntityEditForm';
 import { entityService } from '@/services/entityService';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { capitalize } from '@/utils/formatters';
+import { format } from 'date-fns';
 
 interface EntityListProps {
   entities: EntityWithMetrics[];
@@ -17,10 +19,8 @@ interface EntityListProps {
   isLoading?: boolean;
 }
 
-
 export const EntityList = ({ entities, onEntityClick, onEntityUpdate, isLoading }: EntityListProps) => {
   const [editingEntity, setEditingEntity] = useState<EntityWithMetrics | null>(null);
-  const { toast } = useToast();
 
   const handleEdit = (entity: EntityWithMetrics) => {
     setEditingEntity(entity);
@@ -33,16 +33,9 @@ export const EntityList = ({ entities, onEntityClick, onEntityUpdate, isLoading 
     try {
       entityService.deleteEntity(entityId);
       onEntityUpdate?.();
-      toast({
-        title: 'Entity deleted',
-        description: `"${entity.name}" has been removed from your registry.`
-      });
+      toast.success(`Entity "${entity.name}" deleted successfully`);
     } catch (error) {
-      toast({
-        title: 'Delete failed',
-        description: 'Could not delete entity. Please try again.',
-        variant: 'destructive'
-      });
+      toast.error('Failed to delete entity');
     }
   };
 
@@ -56,32 +49,22 @@ export const EntityList = ({ entities, onEntityClick, onEntityUpdate, isLoading 
       entityService.updateEntity(entityId, { name, type, description });
       onEntityUpdate?.();
       setEditingEntity(null);
-      toast({
-        title: 'Entity updated',
-        description: `"${name}" has been updated successfully.`
-      });
+      toast.success(`Entity "${name}" updated successfully`);
     } catch (error) {
-      toast({
-        title: 'Update failed',
-        description: 'Could not update entity. Please try again.',
-        variant: 'destructive'
-      });
+      toast.error('Failed to update entity');
     }
   };
+
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {[...Array(6)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader className="pb-2">
+          <Card key={i} className="animate-pulse p-4">
+            <div className="space-y-3">
               <div className="h-4 bg-muted rounded w-3/4" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="h-3 bg-muted rounded w-1/2" />
-                <div className="h-3 bg-muted rounded w-2/3" />
-              </div>
-            </CardContent>
+              <div className="h-3 bg-muted rounded w-1/2" />
+              <div className="h-3 bg-muted rounded w-2/3" />
+            </div>
           </Card>
         ))}
       </div>
@@ -90,14 +73,14 @@ export const EntityList = ({ entities, onEntityClick, onEntityUpdate, isLoading 
 
   if (entities.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+      <Card className="p-8">
+        <div className="flex flex-col items-center justify-center text-center">
           <Users className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No entities found</h3>
+          <h3 className="text-lg font-semibold mb-2">No entities found</h3>
           <p className="text-muted-foreground">
             Start by creating a thought with tags, or add entities directly to your registry.
           </p>
-        </CardContent>
+        </div>
       </Card>
     );
   }
@@ -107,67 +90,70 @@ export const EntityList = ({ entities, onEntityClick, onEntityUpdate, isLoading 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {entities.map((entity) => {
           const Icon = getEntityIcon(entity.type);
-          const entityClass = getEntityClass(entity.type);
-          
+
           return (
-            <Card 
-              key={entity.localId || entity.id || entity.name} 
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => onEntityClick?.(entity.name)}
-            >
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{entity.name}</span>
-                    <Badge variant="secondary" className={`${entityClass} flex-shrink-0`}>
-                      {entity.type}
-                    </Badge>
-                  </div>
-                  <div className="flex gap-1 ml-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(entity);
-                      }}
-                      className="h-6 w-6 p-0"
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(entity);
-                      }}
-                      className="h-6 w-6 p-0"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {entity.metrics.lastMentioned && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3" />
-                    <span>Last mentioned: {entity.metrics.lastMentioned.toLocaleDateString()}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Hash className="h-3 w-3" />
-                  <span>Mentioned {entity.metrics.count} time{entity.metrics.count !== 1 ? 's' : ''}</span>
+          <Card key={entity.localId || entity.id} className="p-4 flex flex-col">
+            <div className="space-y-3 flex-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <h3 className="font-semibold text-lg truncate">{entity.name}</h3>
                 </div>
-                {entity.description && (
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {entity.description}
-                  </p>
+                <div className="flex gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(entity)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDelete(entity)}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mb-2">
+                <Badge 
+                  variant="secondary"
+                  className={`text-xs ${getEntityClass(entity.type)}`}
+                >
+                  {capitalize(entity.type)}
+                </Badge>
+              </div>
+
+              <div className="text-sm text-muted-foreground mb-2">
+                Mentioned {entity.metrics.count} time{entity.metrics.count !== 1 ? 's' : ''}
+                {entity.metrics.lastMentioned && (
+                  <span> • Last: {format(entity.metrics.lastMentioned, 'MMM d, yyyy')}</span>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+
+              {entity.description && (
+                <p className="text-sm text-muted-foreground mb-3">{entity.description}</p>
+              )}
+
+              <div className="text-xs text-muted-foreground mt-auto pt-2 border-t">
+                <div className="flex flex-col gap-1">
+                  <div>
+                    {entity.creationSource === 'auto' ? 'Created from message tagging' : 'Created manually'}
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Created: {entity.createdLocally ? format(entity.createdLocally, 'MMM d, yyyy') : 'Unknown'}</span>
+                    {entity.modifiedLocally && (
+                      <span>Updated: {format(entity.modifiedLocally, 'MMM d, yyyy')}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
           );
         })}
       </div>

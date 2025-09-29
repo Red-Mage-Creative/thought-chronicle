@@ -103,11 +103,14 @@ export const EntityTableView = ({ entities, onEntityClick, onEntityUpdate, isLoa
         <TableHeader>
           <TableRow>
             <TableHead className="w-8"></TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead className="text-center">Mentions</TableHead>
-            <TableHead>Last Mentioned</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="text-center">Mentions</TableHead>
+              <TableHead>Last Mentioned</TableHead>
+              <TableHead>Source</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

@@ -1,174 +1,208 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EntitySearch } from '@/components/display/EntitySearch';
+import { EntityFilters } from '@/components/display/EntityFilters';
 import { EntityList } from '@/components/display/EntityList';
 import { EntityTableView } from '@/components/display/EntityTableView';
 import { EntityForm } from '@/components/forms/EntityForm';
-import { useEntities } from '@/hooks/useEntities';
-import { EntityType } from '@/types/entities';
-import { Search, Plus, RefreshCw, Grid, List } from 'lucide-react';
-import { syncService } from '@/services/syncService';
-import { useToast } from '@/hooks/use-toast';
 import { UncategorizedNotice } from '@/components/ui/uncategorized-notice';
+import { useEntities } from '@/hooks/useEntities';
+import { useSyncState } from '@/hooks/useSyncState';
+import { syncService } from '@/services/syncService';
+import { toast } from 'sonner';
+import { EntityType } from '@/types/entities';
+import { RefreshCw, Plus, Grid3X3, Table2, ArrowUpDown } from 'lucide-react';
 
 interface EntityManagementPageProps {
   onEntityClick?: (entityName: string) => void;
 }
 
 export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProps) => {
-  const { entitiesWithMetrics, createEntity, refreshEntities, isLoading } = useEntities();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState<EntityType | 'all'>('all');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedType, setSelectedType] = useState<EntityType | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const { toast } = useToast();
+  const [sortBy, setSortBy] = useState<'alphabetical' | 'mentions' | 'created' | 'updated'>('alphabetical');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showUncategorized, setShowUncategorized] = useState(false);
+
+  const { entitiesWithMetrics, createEntity, refreshEntities, isLoading } = useEntities();
+  const { syncStatus } = useSyncState();
 
   const handleRefresh = async () => {
+    if (syncStatus.pendingChanges > 0) {
+      toast.warning('Sync pending changes first to avoid conflicts');
+      return;
+    }
+
     setIsRefreshing(true);
     try {
       await syncService.refreshFromServer();
       refreshEntities();
-      toast({
-        title: 'Data refreshed',
-        description: 'Successfully synchronized with server.'
-      });
+      toast.success('Data refreshed successfully');
     } catch (error) {
       console.error('Refresh failed:', error);
-      toast({
-        title: 'Refresh failed',
-        description: 'Could not sync with server. Check your connection.',
-        variant: 'destructive'
-      });
+      toast.error('Refresh failed. Check your connection.');
     } finally {
       setIsRefreshing(false);
     }
   };
 
   const handleEntityCreate = async (name: string, type: EntityType, description?: string) => {
-    await createEntity(name, type, description);
-    setIsAddModalOpen(false);
+    try {
+      await createEntity(name, type, description);
+      setShowModal(false);
+      toast.success(`Entity "${name}" created successfully`);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to create entity');
+    }
   };
 
-  const filteredEntities = entitiesWithMetrics
-    .filter(entity => {
-      const matchesSearch = entity.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = selectedType === 'all' || entity.type === selectedType;
-      return matchesSearch && matchesType;
-    })
-    .sort((a, b) => {
-      // Sort by mention count (desc), then by last mentioned (desc), then by name
-      if (a.metrics.count !== b.metrics.count) {
-        return b.metrics.count - a.metrics.count;
+  const filteredEntities = useMemo(() => {
+    return entitiesWithMetrics
+      .filter(entity => {
+        const matchesSearch = entity.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesType = !selectedType || entity.type === selectedType;
+        const matchesUncategorized = showUncategorized ? entity.type === 'uncategorized' : entity.type !== 'uncategorized';
+        return matchesSearch && matchesType && matchesUncategorized;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'alphabetical':
+            const nameCompare = a.name.localeCompare(b.name);
+            return sortOrder === 'asc' ? nameCompare : -nameCompare;
+          case 'mentions':
+            const mentionCompare = b.metrics.count - a.metrics.count;
+            return sortOrder === 'asc' ? -mentionCompare : mentionCompare;
+          case 'created':
+            const aCreated = a.createdLocally?.getTime() || 0;
+            const bCreated = b.createdLocally?.getTime() || 0;
+            const createdCompare = bCreated - aCreated;
+            return sortOrder === 'asc' ? -createdCompare : createdCompare;
+          case 'updated':
+            const aUpdated = a.modifiedLocally?.getTime() || 0;
+            const bUpdated = b.modifiedLocally?.getTime() || 0;
+            const updatedCompare = bUpdated - aUpdated;
+            return sortOrder === 'asc' ? -updatedCompare : updatedCompare;
+          default:
+            return 0;
+        }
+      });
+  }, [entitiesWithMetrics, searchTerm, selectedType, showUncategorized, sortBy, sortOrder]);
+
+  const entityCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    entitiesWithMetrics.forEach(entity => {
+      if (entity.type !== 'uncategorized') {
+        counts[entity.type] = (counts[entity.type] || 0) + 1;
       }
-      if (a.metrics.lastMentioned && b.metrics.lastMentioned) {
-        return b.metrics.lastMentioned.getTime() - a.metrics.lastMentioned.getTime();
-      }
-      return a.name.localeCompare(b.name);
     });
+    return counts;
+  }, [entitiesWithMetrics]);
 
-  const uniqueTypes: EntityType[] = ['character', 'location', 'organization', 'item'];
   const uncategorizedCount = entitiesWithMetrics.filter(e => e.type === 'uncategorized').length;
-
-  const handleShowUncategorized = () => {
-    setSelectedType('uncategorized');
-  };
 
   return (
     <>
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-foreground">Entity Registry</CardTitle>
+            <CardTitle>Entity Registry</CardTitle>
             <div className="flex gap-2">
-              <Button onClick={() => setIsAddModalOpen(true)} size="sm">
+              <Button onClick={() => setShowModal(true)} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Entity
               </Button>
-              <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} size="sm">
+              <Button 
+                variant="outline" 
+                onClick={handleRefresh} 
+                disabled={isRefreshing} 
+                size="sm"
+              >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search entities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Badge
-              variant={selectedType === 'all' ? 'default' : 'outline'}
-              className="cursor-pointer"
-              onClick={() => setSelectedType('all')}
-            >
-              All ({entitiesWithMetrics.length})
-            </Badge>
-            {uniqueTypes.map((type) => {
-              const count = entitiesWithMetrics.filter(e => e.type === type).length;
-              if (count === 0) return null;
-              return (
-                <Badge
-                  key={type}
-                  variant={selectedType === type ? 'default' : 'outline'}
-                  className="cursor-pointer capitalize"
-                  onClick={() => setSelectedType(type)}
-                >
-                  {type} ({count})
-                </Badge>
-              );
-            })}
-          </div>
-
-          <UncategorizedNotice 
-            count={uncategorizedCount} 
-            className="my-4" 
-            onShowUncategorized={handleShowUncategorized}
+        <CardContent className="space-y-6">
+          <EntitySearch 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
           />
 
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'cards' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('cards')}
-              >
-                <Grid className="h-4 w-4 mr-2" />
-                Cards
-              </Button>
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('table')}
-              >
-                <List className="h-4 w-4 mr-2" />
-                Table
-              </Button>
-            </div>
+          <EntityFilters
+            selectedType={selectedType}
+            onTypeChange={(type) => setSelectedType(type as EntityType | null)}
+            entityCounts={entityCounts}
+          />
+
+          {/* Sort Controls */}
+          <div className="flex items-center gap-2">
+            <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
+              const [newSortBy, newSortOrder] = value.split('-') as [typeof sortBy, typeof sortOrder];
+              setSortBy(newSortBy);
+              setSortOrder(newSortOrder);
+            }}>
+              <SelectTrigger className="w-48">
+                <ArrowUpDown className="h-4 w-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alphabetical-asc">Alphabetical (A-Z)</SelectItem>
+                <SelectItem value="alphabetical-desc">Alphabetical (Z-A)</SelectItem>
+                <SelectItem value="mentions-desc">Most Mentioned</SelectItem>
+                <SelectItem value="mentions-asc">Least Mentioned</SelectItem>
+                <SelectItem value="created-desc">Recently Created</SelectItem>
+                <SelectItem value="created-asc">Oldest Created</SelectItem>
+                <SelectItem value="updated-desc">Recently Updated</SelectItem>
+                <SelectItem value="updated-asc">Oldest Updated</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+            >
+              <Grid3X3 className="h-4 w-4 mr-2" />
+              Cards
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              <Table2 className="h-4 w-4 mr-2" />
+              Table
+            </Button>
+          </div>
+
+        {uncategorizedCount > 0 && (
+          <UncategorizedNotice 
+            count={uncategorizedCount} 
+            className="mb-6"
+            onShowUncategorized={() => setShowUncategorized(!showUncategorized)}
+          />
+        )}
 
           {viewMode === 'cards' ? (
             <EntityList
-              entities={filteredEntities} 
+              entities={filteredEntities}
               onEntityClick={onEntityClick}
               onEntityUpdate={refreshEntities}
               isLoading={isLoading}
             />
           ) : (
             <EntityTableView
-              entities={filteredEntities} 
+              entities={filteredEntities}
               onEntityClick={onEntityClick}
               onEntityUpdate={refreshEntities}
               isLoading={isLoading}
@@ -177,14 +211,17 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
         </CardContent>
       </Card>
 
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+      <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Entity</DialogTitle>
+            <DialogDescription>
+              Create a new entity to track characters, locations, items, or organizations in your stories.
+            </DialogDescription>
           </DialogHeader>
           <EntityForm
             onSubmit={handleEntityCreate}
-            onCancel={() => setIsAddModalOpen(false)}
+            onCancel={() => setShowModal(false)}
           />
         </DialogContent>
       </Dialog>

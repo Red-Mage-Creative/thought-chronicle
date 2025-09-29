@@ -26,6 +26,18 @@ export const dataMigrationService = {
         }
       }
     });
+
+    // Migrate entities to add new fields if missing
+    data.entities.forEach(entity => {
+      if (!entity.creationSource) {
+        entity.creationSource = entity.description?.includes('Created from message tagging') ? 'auto' : 'manual';
+        hasChanges = true;
+      }
+      if (!entity.createdLocally) {
+        entity.createdLocally = entity.modifiedLocally || new Date();
+        hasChanges = true;
+      }
+    });
     
     if (hasChanges) {
       dataStorageService.saveData(data);
