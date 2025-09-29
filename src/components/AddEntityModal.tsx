@@ -51,6 +51,17 @@ export const AddEntityModal = ({ open, onOpenChange, onEntityAdded }: AddEntityM
       return;
     }
 
+    // Check for duplicate entities (case-insensitive)
+    const data = localStorageService.getData();
+    const existingEntity = data.entities.find(entity => 
+      entity.name.toLowerCase() === name.trim().toLowerCase()
+    );
+    
+    if (existingEntity) {
+      toast.error(`Entity "${name}" already exists in the registry`);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const entityData = {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Send, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,9 +20,38 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
   const [gameDate, setGameDate] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   
-  const { addThought } = useLocalThoughts();
+  const { addThought, thoughts: localThoughts } = useLocalThoughts();
   const { entities, addEntity, refreshFromStorage } = useLocalEntities();
   const { refreshSyncStatus } = useOfflineSync();
+
+  // Create combined suggestions from local entities and mentioned-only entities
+  const combinedEntitiesForSuggestions = useMemo(() => {
+    const entityMap = new Map<string, { name: string; type: string }>();
+    
+    // Add all formal entities
+    entities.forEach(entity => {
+      entityMap.set(entity.name.toLowerCase(), {
+        name: entity.name,
+        type: entity.type
+      });
+    });
+    
+    // Add mentioned-only entities from thoughts
+    localThoughts.forEach(thought => {
+      const thoughtEntities = thought.relatedEntities || [];
+      thoughtEntities.forEach(entityName => {
+        const key = entityName.toLowerCase();
+        if (!entityMap.has(key)) {
+          entityMap.set(key, {
+            name: entityName,
+            type: 'character' // Default type for mentioned-only entities
+          });
+        }
+      });
+    });
+    
+    return Array.from(entityMap.values());
+  }, [entities, localThoughts]);
 
   const createEntitiesFromTags = (tagNames: string[]): LocalEntity[] => {
     const newEntities: LocalEntity[] = [];
@@ -118,7 +147,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
            <Settings 
             defaultTags={defaultTags}
             onDefaultTagsChange={onDefaultTagsChange}
-            existingEntities={entities.map(e => e.name)}
+            existingEntities={combinedEntitiesForSuggestions}
           />
         </div>
         
@@ -144,7 +173,7 @@ export const ChatWindow = ({ defaultTags, onDefaultTagsChange }: ChatWindowProps
                <TagInput
                 tags={tags}
                 onTagsChange={setTags}
-                existingEntities={entities}
+                existingEntities={combinedEntitiesForSuggestions}
                 placeholder="Add additional entity tags..."
               />
               {defaultTags.length > 0 && (

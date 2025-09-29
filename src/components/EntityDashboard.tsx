@@ -29,6 +29,7 @@ const getEntityIcon = (type: string) => {
   switch (type) {
     case 'player': return Users;
     case 'npc': return Users;
+    case 'character': return Users;
     case 'location': return MapPin;
     case 'item': return Package;
     case 'organization': return Shield;
@@ -40,6 +41,7 @@ const getEntityClass = (type: string): string => {
   switch (type) {
     case 'player': return 'entity-player';
     case 'npc': return 'entity-npc';
+    case 'character': return 'entity-npc';
     case 'location': return 'entity-location';
     case 'item': return 'entity-item';
     case 'organization': return 'entity-organization';
@@ -76,16 +78,27 @@ export const EntityDashboard = ({ onEntityClick }: EntityDashboardProps) => {
       });
     });
 
-    // Update counts and dates from thought mentions
+    // Add mentioned-only entities from thoughts and update counts
     localThoughts.forEach(thought => {
-      // Check relatedEntities field
-      thought.relatedEntities?.forEach(entityName => {
-        const existing = entityMap.get(entityName.toLowerCase());
+      const entities = thought.relatedEntities || [];
+      entities.forEach(entityName => {
+        const key = entityName.toLowerCase();
+        const existing = entityMap.get(key);
+        
         if (existing) {
+          // Update existing entity
           existing.count++;
           if (thought.timestamp > existing.lastMentioned) {
             existing.lastMentioned = thought.timestamp;
           }
+        } else {
+          // Add mentioned-only entity
+          entityMap.set(key, {
+            name: entityName,
+            type: categorizeEntity(entityName),
+            count: 1,
+            lastMentioned: thought.timestamp
+          });
         }
       });
     });

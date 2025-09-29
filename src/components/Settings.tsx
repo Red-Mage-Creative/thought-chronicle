@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 interface SettingsProps {
   defaultTags: string[];
   onDefaultTagsChange: (tags: string[]) => void;
-  existingEntities: string[];
+  existingEntities: { name: string; type: string }[];
 }
 
 export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }: SettingsProps) => {
@@ -66,13 +66,7 @@ export const Settings = ({ defaultTags, onDefaultTagsChange, existingEntities }:
                 <TagInput
                   tags={localDefaultTags}
                   onTagsChange={setLocalDefaultTags}
-                  existingEntities={existingEntities.map(name => ({
-                    name,
-                    type: 'character',
-                    count: 0,
-                    lastMentioned: new Date(),
-                    syncStatus: 'synced' as const
-                  }))}
+                  existingEntities={existingEntities}
                   placeholder="Add default tags (e.g., player-thara, campaign-waterdeep)..."
                 />
                 

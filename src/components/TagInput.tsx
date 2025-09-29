@@ -4,16 +4,21 @@ import { Input } from "@/components/ui/input";
 import { X, Plus } from "lucide-react";
 import { LocalEntity } from "@/services/localStorageService";
 
+interface EntityForSuggestions {
+  name: string;
+  type: string;
+}
+
 interface TagInputProps {
   tags: string[];
   onTagsChange: (tags: string[]) => void;
-  existingEntities: LocalEntity[];
+  existingEntities: EntityForSuggestions[];
   placeholder?: string;
 }
 
 export const TagInput = ({ tags, onTagsChange, existingEntities, placeholder = "Add tags..." }: TagInputProps) => {
   const [inputValue, setInputValue] = useState("");
-  const [suggestions, setSuggestions] = useState<LocalEntity[]>([]);
+  const [suggestions, setSuggestions] = useState<EntityForSuggestions[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +116,7 @@ export const TagInput = ({ tags, onTagsChange, existingEntities, placeholder = "
           <div className="absolute top-full left-0 right-0 z-10 bg-card border border-border mt-1 max-h-32 overflow-y-auto fantasy-scrollbar">
             {suggestions.map((suggestion, index) => (
               <div
-                key={suggestion.id || suggestion.name}
+                key={suggestion.name}
                 onClick={() => addTag(suggestion.name)}
                 className={`px-3 py-2 cursor-pointer text-sm flex items-center gap-2 ${
                   index === selectedSuggestion ? 'bg-muted' : 'hover:bg-muted/50'
