@@ -2,7 +2,7 @@ import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { LocalCampaign } from '@/types/campaigns';
 import { PendingChanges } from '@/types/sync';
-import { generateLocalId } from '@/utils/entityUtils';
+import { generateLocalId, isValidEntityType } from '@/utils/entityUtils';
 import { encryptionService } from '@/utils/encryption';
 
 export interface LocalDataStore {
@@ -83,6 +83,11 @@ export const dataStorageService = {
       parsed.entities?.forEach((entity: LocalEntity) => {
         if (entity.modifiedLocally) entity.modifiedLocally = new Date(entity.modifiedLocally);
         if (entity.createdLocally) entity.createdLocally = new Date(entity.createdLocally);
+        
+        // Data migration: normalize invalid entity types to uncategorized
+        if (!isValidEntityType(entity.type)) {
+          entity.type = 'uncategorized';
+        }
         
         // Data migration: ensure required fields exist
         if (!entity.campaign_id && parsed.currentCampaignId) {

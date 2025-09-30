@@ -13,6 +13,7 @@ import { useNavigationState } from '@/hooks/useNavigationState';
 import { syncService } from '@/services/syncService';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/entities';
+import { isValidEntityType } from '@/utils/entityUtils';
 import { RefreshCw, Plus, Grid3X3, Table2, ArrowUpDown } from 'lucide-react';
 
 interface EntityManagementPageProps {
@@ -86,7 +87,8 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
       .filter(entity => {
         const matchesSearch = entity.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = !selectedType || entity.type === selectedType;
-        const matchesUncategorized = showUncategorized ? entity.type === 'uncategorized' : entity.type !== 'uncategorized';
+        const isUncategorized = entity.type === 'uncategorized' || !isValidEntityType(entity.type);
+        const matchesUncategorized = showUncategorized ? isUncategorized : !isUncategorized;
         return matchesSearch && matchesType && matchesUncategorized;
       })
       .sort((a, b) => {
@@ -128,7 +130,9 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
     return counts;
   }, [entitiesWithMetrics]);
 
-  const uncategorizedCount = entitiesWithMetrics.filter(e => e.type === 'uncategorized').length;
+  const uncategorizedCount = entitiesWithMetrics.filter(e => 
+    e.type === 'uncategorized' || !isValidEntityType(e.type)
+  ).length;
 
   return (
     <>
