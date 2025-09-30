@@ -44,7 +44,7 @@ const EntityCreatePage = () => {
   };
 
   return (
-    <div className="space-y-6 pb-32">
+    <div className="space-y-6 pb-8">
       <div className="flex items-center justify-between gap-4">
         <Button
           variant="ghost"
@@ -88,19 +88,14 @@ const EntityCreatePage = () => {
         </CardContent>
       </Card>
 
-      {/* Sticky Bottom Controls */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <FormControls
-            onSave={handleSaveClick}
-            onCancel={handleCancel}
-            isSubmitting={isSubmitting}
-            isSaveDisabled={formData.isSaveDisabled}
-            saveLabel="Create Entity"
-            hasUnsavedChanges={hasUnsavedChanges}
-          />
-        </div>
-      </div>
+      <FormControls
+        onSave={handleSaveClick}
+        onCancel={handleCancel}
+        isSubmitting={isSubmitting}
+        isSaveDisabled={formData.isSaveDisabled}
+        saveLabel="Create Entity"
+        hasUnsavedChanges={hasUnsavedChanges}
+      />
     </div>
   );
 };
