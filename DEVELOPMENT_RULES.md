@@ -16,7 +16,7 @@
 - Group changes by type: feat, fix, docs, style, refactor, test, chore
 - Check the ***Current*** date and use that for the change log. Use a function if you need to find the actual current date. 
 
-### Current Version: 1.1.0
+### Current Version: 0.8.0
 
 ## Rule 3: Clean Code Principles for Component Development
 ### 3.1 Component Structure & Naming
@@ -60,6 +60,65 @@
 - Key Props: Always use stable, unique keys for lists
 - Avoid Inline Objects: Don't create objects in render (extract to variables/useMemo)
 - Bundle Size: Prefer tree-shakeable imports (import { Button } from '@/components/ui/button')
+
+## Rule 5: Data Migration & Schema Versioning
+
+### 5.1 When to Add Migrations
+Add a new migration when:
+- Adding new required fields to entities, thoughts, or campaigns
+- Changing field names or data types
+- Changing valid values for a field (e.g., entity types)
+- Adding new optional fields that need default values
+- Restructuring relationships between data types
+
+### 5.2 Migration Guidelines
+- **Sequential Versioning**: Migrations must have version numbers in ascending order
+- **Idempotent**: Migrations should be safe to run multiple times
+- **Backward Compatible**: Prefer adding optional fields over changing existing ones
+- **Test Thoroughly**: Always test migrations with real user data scenarios
+- **Document Changes**: Add clear descriptions to migration objects
+
+### 5.3 How to Add a New Migration
+
+1. Update the schema in `src/schemas/dataSchemas.ts` if needed
+2. Add migration to `src/services/migrationRegistry.ts`:
+
+```typescript
+{
+  version: '0.9.0',  // Next version number
+  name: 'add-entity-tags',  // Descriptive kebab-case name
+  description: 'Add tags array to entities',
+  up: (data) => {
+    data.entities.forEach(entity => {
+      if (!entity.tags) {
+        entity.tags = [];
+      }
+    });
+    return data;
+  },
+  // Optional: Add rollback
+  down: (data) => {
+    data.entities.forEach(entity => {
+      delete entity.tags;
+    });
+    return data;
+  }
+}
+```
+
+3. Update `schemaVersionService.CURRENT_VERSION` to match migration version
+4. Update type definitions in `src/types/entities.ts`, etc.
+5. Update schema definitions in `src/schemas/dataSchemas.ts`
+6. Add tests in `src/services/__tests__/dataMigrationService.test.ts`
+7. Update `ChangelogPage.tsx` with the new version
+8. Update `AppFooter.tsx` with the new version
+9. Update this file's "Current Version" at the top
+
+### 5.4 Schema Version Format
+- Use semantic versioning: MAJOR.MINOR.PATCH
+- PATCH (0.7.1): Bug fixes, no schema changes
+- MINOR (0.8.0): New features, backward-compatible schema changes
+- MAJOR (1.0.0): Breaking changes OR production-ready release
 
 ## Rule 4: Testing Standards & Integrity
 ### 4.1 Core Testing Principles

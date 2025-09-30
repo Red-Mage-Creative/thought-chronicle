@@ -14,6 +14,7 @@ import EntitiesPage from "./pages/EntitiesPage";
 import EntityDetailsPage from "./pages/EntityDetailsPage";
 import HistoryPage from "./pages/HistoryPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
+import MigrationHistoryPage from "./pages/MigrationHistoryPage";
 import DesignSystemPage from "./pages/DesignSystemPage";
 import ChangelogPage from "./pages/ChangelogPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
@@ -136,7 +137,17 @@ const App = () => {
                 } 
               />
               <Route 
-                path="/design-system" 
+                path="/migration-history" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <MigrationHistoryPage />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/design-system"
                 element={
                   <AppLayout variant="wide">
                     <DesignSystemPage />
