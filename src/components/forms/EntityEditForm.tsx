@@ -9,10 +9,15 @@ import { getEntityIcon } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 
 const entityTypes = [
-  { value: 'character', label: 'Character', icon: getEntityIcon('character') },
-  { value: 'location', label: 'Location', icon: getEntityIcon('location') },
-  { value: 'organization', label: 'Organization', icon: getEntityIcon('organization') },
-  { value: 'item', label: 'Item', icon: getEntityIcon('item') },
+  { value: 'pc' as const, label: 'Player Character', icon: getEntityIcon('pc') },
+  { value: 'npc' as const, label: 'NPC', icon: getEntityIcon('npc') },
+  { value: 'race' as const, label: 'Race', icon: getEntityIcon('race') },
+  { value: 'religion' as const, label: 'Religion', icon: getEntityIcon('religion') },
+  { value: 'quest' as const, label: 'Quest', icon: getEntityIcon('quest') },
+  { value: 'enemy' as const, label: 'Enemy', icon: getEntityIcon('enemy') },
+  { value: 'location' as const, label: 'Location', icon: getEntityIcon('location') },
+  { value: 'organization' as const, label: 'Organization', icon: getEntityIcon('organization') },
+  { value: 'item' as const, label: 'Item', icon: getEntityIcon('item') },
 ] as const;
 
 interface EntityEditFormProps {
@@ -23,7 +28,7 @@ interface EntityEditFormProps {
 
 export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormProps) => {
   const [name, setName] = useState(entity.name);
-  const [type, setType] = useState<EntityType>(entity.type === 'uncategorized' ? 'character' : entity.type);
+  const [type, setType] = useState<EntityType>(entity.type === 'uncategorized' ? 'npc' : entity.type);
   const [description, setDescription] = useState(entity.description || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 

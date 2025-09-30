@@ -17,7 +17,7 @@ describe('useEntities', () => {
       {
         localId: '1',
         name: 'Arthur',
-        type: 'character',
+        type: 'npc',
         syncStatus: 'synced',
         modifiedLocally: new Date(),
         createdLocally: new Date(),
@@ -43,7 +43,7 @@ describe('useEntities', () => {
       {
         localId: '1',
         name: 'Arthur',
-        type: 'character',
+        type: 'npc',
         syncStatus: 'synced',
         modifiedLocally: new Date(),
         createdLocally: new Date(),
@@ -78,7 +78,7 @@ describe('useEntities', () => {
     vi.mocked(entityService.createEntity).mockReturnValue({
       localId: '2',
       name: 'Merlin',
-      type: 'character',
+      type: 'npc',
       syncStatus: 'pending',
       modifiedLocally: new Date(),
       createdLocally: new Date(),
@@ -89,12 +89,12 @@ describe('useEntities', () => {
     const { result } = renderHook(() => useEntities())
     
     await act(async () => {
-      await result.current.createEntity('Merlin', 'character', 'Wise wizard')
+      await result.current.createEntity('Merlin', 'npc', 'Wise wizard')
     })
     
     expect(entityService.createEntity).toHaveBeenCalledWith(
       'Merlin',
-      'character',
+      'npc',
       'Wise wizard',
       'manual'
     )
@@ -109,7 +109,7 @@ describe('useEntities', () => {
     
     const suggestions = result.current.getSuggestions()
     expect(suggestions).toEqual([
-      { name: 'Arthur', type: 'character' }
+      { name: 'Arthur', type: 'npc' }
     ])
   })
 

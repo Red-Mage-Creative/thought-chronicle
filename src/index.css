@@ -35,12 +35,19 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
     --accent-foreground: 0 0% 100%;
 
     /* Entity type colors - accessible contrast */
-    --entity-player: 140 50% 35%;
-    --entity-npc: 220 70% 40%;
-    --entity-location: 270 60% 40%;
-    --entity-item: 45 80% 45%;
-    --entity-organization: 345 65% 40%;
-    --entity-uncategorized: 40 70% 45%;
+    --entity-pc: 142 76% 36%;       /* Player Characters - vibrant green */
+    --entity-npc: 217 91% 60%;      /* NPCs - professional blue */
+    --entity-race: 180 62% 40%;     /* Races - teal/cyan */
+    --entity-religion: 43 96% 56%;  /* Religions - gold/amber */
+    --entity-quest: 262 83% 58%;    /* Quests - indigo/purple */
+    --entity-enemy: 0 72% 51%;      /* Enemies - red */
+    --entity-location: 270 60% 40%; /* Locations - purple */
+    --entity-organization: 345 65% 40%; /* Organizations - rose */
+    --entity-item: 45 80% 45%;      /* Items - amber */
+    --entity-uncategorized: 40 70% 45%; /* Uncategorized - orange */
+    
+    /* Legacy support */
+    --entity-player: 142 76% 36%;
 
     --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -77,7 +84,7 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
     @apply px-2 py-1 text-xs font-medium border;
   }
   
-  .entity-player {
+  .entity-pc {
     @apply bg-green-50 border-green-300 text-green-700;
   }
   
@@ -85,20 +92,41 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
     @apply bg-blue-50 border-blue-300 text-blue-700;
   }
   
+  .entity-race {
+    @apply bg-teal-50 border-teal-300 text-teal-700;
+  }
+  
+  .entity-religion {
+    @apply bg-amber-50 border-amber-300 text-amber-700;
+  }
+  
+  .entity-quest {
+    @apply bg-indigo-50 border-indigo-300 text-indigo-700;
+  }
+  
+  .entity-enemy {
+    @apply bg-red-50 border-red-300 text-red-700;
+  }
+  
   .entity-location {
     @apply bg-purple-50 border-purple-300 text-purple-700;
   }
   
   .entity-item {
-    @apply bg-amber-50 border-amber-300 text-amber-700;
+    @apply bg-yellow-50 border-yellow-300 text-yellow-700;
   }
   
   .entity-organization {
-    @apply bg-red-50 border-red-300 text-red-700;
+    @apply bg-rose-50 border-rose-300 text-rose-700;
   }
   
   .entity-uncategorized {
     @apply bg-orange-50 border-orange-300 text-orange-700;
+  }
+  
+  /* Legacy support */
+  .entity-player {
+    @apply bg-green-50 border-green-300 text-green-700;
   }
 
   .entity-default-tag {

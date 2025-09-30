@@ -4,23 +4,26 @@ import { inferEntityType } from '@/utils/entityUtils';
 
 export const dataMigrationService = {
   /**
-   * Migrate existing entities to use uncategorized type for uncertain categorizations
+   * Migrate legacy 'character' type to 'npc' and add new entity fields
    */
-  migrateToUncategorizedEntities(): void {
+  migrateEntityTypes(): void {
     const data = dataStorageService.getData();
     let hasChanges = false;
     
-    // Look for entities that were auto-categorized as 'character' but might be uncertain
+    // Migrate legacy 'character' type to 'npc'
     data.entities.forEach(entity => {
-      // Check if this entity was likely auto-categorized incorrectly
-      // If the entity name doesn't match any strong patterns and is currently 'character', 
-      // it should probably be 'uncategorized'
-      if (entity.type === 'character' && entity.description?.includes('Auto-created from tag:')) {
+      // @ts-ignore - Allow checking for legacy 'character' type
+      if (entity.type === 'character') {
+        entity.type = ENTITY_TYPES.NPC;
+        entity.modifiedLocally = new Date();
+        hasChanges = true;
+      }
+      
+      // Re-infer type for auto-created entities that might be uncategorized
+      if (entity.creationSource === 'auto' && entity.type === ENTITY_TYPES.NPC) {
         const inferredType = inferEntityType(entity.name);
-        
-        // If inference now returns uncategorized (due to updated logic), update the entity
-        if (inferredType === ENTITY_TYPES.UNCATEGORIZED) {
-          entity.type = ENTITY_TYPES.UNCATEGORIZED;
+        if (inferredType !== ENTITY_TYPES.NPC) {
+          entity.type = inferredType;
           entity.modifiedLocally = new Date();
           hasChanges = true;
         }
@@ -49,7 +52,7 @@ export const dataMigrationService = {
    */
   runMigrations(): void {
     try {
-      this.migrateToUncategorizedEntities();
+      this.migrateEntityTypes();
     } catch (error) {
       // Silently handle migration errors to avoid blocking app startup
     }

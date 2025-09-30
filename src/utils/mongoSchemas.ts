@@ -16,8 +16,10 @@ export const MongoThoughtSchema = z.object({
 
 export const MongoEntitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  type: z.enum(['character', 'location', 'organization', 'item', 'uncategorized']),
+  type: z.enum(['pc', 'npc', 'race', 'religion', 'quest', 'enemy', 'location', 'organization', 'item', 'uncategorized']),
   description: z.string().optional(),
+  parentEntities: z.array(z.string()).optional(),
+  linkedEntities: z.array(z.string()).optional(),
   campaign_id: z.string().min(1, 'Campaign ID is required'),
   created_by: z.string().min(1, 'Creator ID is required'),
   creationSource: z.enum(['manual', 'auto']).optional(),

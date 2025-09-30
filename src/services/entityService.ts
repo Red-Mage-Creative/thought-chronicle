@@ -143,5 +143,123 @@ export const entityService = {
     );
     
     dataStorageService.saveData(data);
+  },
+
+  addParentEntity(entityId: string, parentEntityName: string): LocalEntity {
+    const data = dataStorageService.getData();
+    const entityIndex = data.entities.findIndex(e => e.localId === entityId || e.id === entityId);
+    
+    if (entityIndex === -1) {
+      throw new Error('Entity not found');
+    }
+    
+    const entity = data.entities[entityIndex];
+    const parentEntities = entity.parentEntities || [];
+    
+    if (!parentEntities.includes(parentEntityName)) {
+      entity.parentEntities = [...parentEntities, parentEntityName];
+      entity.modifiedLocally = new Date();
+      entity.syncStatus = 'pending' as const;
+      
+      const syncId = entity.id || entity.localId!;
+      if (!data.pendingChanges.entities.modified.includes(syncId)) {
+        data.pendingChanges.entities.modified.push(syncId);
+      }
+      
+      dataStorageService.saveData(data);
+    }
+    
+    return entity;
+  },
+
+  removeParentEntity(entityId: string, parentEntityName: string): LocalEntity {
+    const data = dataStorageService.getData();
+    const entityIndex = data.entities.findIndex(e => e.localId === entityId || e.id === entityId);
+    
+    if (entityIndex === -1) {
+      throw new Error('Entity not found');
+    }
+    
+    const entity = data.entities[entityIndex];
+    if (entity.parentEntities) {
+      entity.parentEntities = entity.parentEntities.filter(p => p !== parentEntityName);
+      entity.modifiedLocally = new Date();
+      entity.syncStatus = 'pending' as const;
+      
+      const syncId = entity.id || entity.localId!;
+      if (!data.pendingChanges.entities.modified.includes(syncId)) {
+        data.pendingChanges.entities.modified.push(syncId);
+      }
+      
+      dataStorageService.saveData(data);
+    }
+    
+    return entity;
+  },
+
+  addLinkedEntity(entityId: string, linkedEntityName: string): LocalEntity {
+    const data = dataStorageService.getData();
+    const entityIndex = data.entities.findIndex(e => e.localId === entityId || e.id === entityId);
+    
+    if (entityIndex === -1) {
+      throw new Error('Entity not found');
+    }
+    
+    const entity = data.entities[entityIndex];
+    const linkedEntities = entity.linkedEntities || [];
+    
+    if (!linkedEntities.includes(linkedEntityName)) {
+      entity.linkedEntities = [...linkedEntities, linkedEntityName];
+      entity.modifiedLocally = new Date();
+      entity.syncStatus = 'pending' as const;
+      
+      const syncId = entity.id || entity.localId!;
+      if (!data.pendingChanges.entities.modified.includes(syncId)) {
+        data.pendingChanges.entities.modified.push(syncId);
+      }
+      
+      dataStorageService.saveData(data);
+    }
+    
+    return entity;
+  },
+
+  removeLinkedEntity(entityId: string, linkedEntityName: string): LocalEntity {
+    const data = dataStorageService.getData();
+    const entityIndex = data.entities.findIndex(e => e.localId === entityId || e.id === entityId);
+    
+    if (entityIndex === -1) {
+      throw new Error('Entity not found');
+    }
+    
+    const entity = data.entities[entityIndex];
+    if (entity.linkedEntities) {
+      entity.linkedEntities = entity.linkedEntities.filter(l => l !== linkedEntityName);
+      entity.modifiedLocally = new Date();
+      entity.syncStatus = 'pending' as const;
+      
+      const syncId = entity.id || entity.localId!;
+      if (!data.pendingChanges.entities.modified.includes(syncId)) {
+        data.pendingChanges.entities.modified.push(syncId);
+      }
+      
+      dataStorageService.saveData(data);
+    }
+    
+    return entity;
+  },
+
+  getChildEntities(entityName: string): LocalEntity[] {
+    const data = dataStorageService.getData();
+    return data.entities.filter(e => 
+      e.parentEntities?.some(p => p.toLowerCase() === entityName.toLowerCase())
+    );
+  },
+
+  getLinkedEntities(entityName: string): LocalEntity[] {
+    const data = dataStorageService.getData();
+    return data.entities.filter(e => 
+      e.linkedEntities?.some(l => l.toLowerCase() === entityName.toLowerCase())
+    );
   }
 };

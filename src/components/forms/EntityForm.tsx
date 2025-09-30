@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { EntityType } from '@/types/entities';
-import { Users, MapPin, Building, Sword } from 'lucide-react';
+import { UserCheck, Users, Footprints, Church, ScrollText, Skull, MapPin, Shield, Package } from 'lucide-react';
 
 interface EntityFormProps {
   onSubmit: (name: string, type: EntityType, description?: string) => Promise<void>;
@@ -14,15 +14,20 @@ interface EntityFormProps {
 }
 
 const entityTypes = [
-  { value: 'character', label: 'Character', icon: Users },
-  { value: 'location', label: 'Location', icon: MapPin },
-  { value: 'organization', label: 'Organization', icon: Building },
-  { value: 'item', label: 'Item', icon: Sword }
+  { value: 'pc' as const, label: 'Player Character', icon: UserCheck },
+  { value: 'npc' as const, label: 'NPC', icon: Users },
+  { value: 'race' as const, label: 'Race', icon: Footprints },
+  { value: 'religion' as const, label: 'Religion', icon: Church },
+  { value: 'quest' as const, label: 'Quest', icon: ScrollText },
+  { value: 'enemy' as const, label: 'Enemy', icon: Skull },
+  { value: 'location' as const, label: 'Location', icon: MapPin },
+  { value: 'organization' as const, label: 'Organization', icon: Shield },
+  { value: 'item' as const, label: 'Item', icon: Package }
 ];
 
 export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
   const [name, setName] = useState('');
-  const [type, setType] = useState<EntityType>('character');
+  const [type, setType] = useState<EntityType>('npc');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -45,7 +50,7 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
       
       // Reset form
       setName('');
-      setType('character');
+      setType('npc');
       setDescription('');
       
       toast({

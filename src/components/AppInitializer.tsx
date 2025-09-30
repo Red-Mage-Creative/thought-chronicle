@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { campaignValidationService } from '@/services/campaignValidationService';
 import { campaignService } from '@/services/campaignService';
+import { dataMigrationService } from '@/services/dataMigrationService';
 import { DataMigrationModal } from './DataMigrationModal';
 
 interface AppInitializerProps {
@@ -17,6 +18,9 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
     if (user && !isInitialized) {
       // Initialize user context
       campaignService.initializeUserContext(user.id);
+
+      // Run data migrations (e.g., character -> npc)
+      dataMigrationService.runMigrations();
 
       // Run validation
       const validation = campaignValidationService.validate();

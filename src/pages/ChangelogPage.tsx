@@ -18,6 +18,30 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.2.0",
+  date: "2025-09-30",
+  features: [
+    "Added Player Characters, Races, Religions, Quests, and Enemies entity types",
+    "Added entity hierarchy system (parent entities) for organizing entities",
+    "Added entity linking system for non-hierarchical relationships between entities",
+    "Added distinct icons for each entity type (UserCheck for PCs, Footprints for Races, Church for Religions, ScrollText for Quests, Skull for Enemies)",
+    "Enhanced type inference patterns for automatic entity categorization"
+  ],
+  improvements: [
+    "Improved entity categorization with expanded type inference patterns",
+    "Enhanced entity service with relationship management methods",
+    "Added visual distinction between entity types with unique color schemes"
+  ],
+  fixes: [],
+  docs: [],
+  refactor: ["Renamed 'Character' type to 'NPC' for clarity and consistency"],
+  maintenance: [
+    "Created entity migration system for backward compatibility",
+    "Updated MongoDB schemas to support new entity types and relationships",
+    "Added relationship management methods to entity service (addParentEntity, addLinkedEntity, etc.)",
+    "Updated all UI components to support new entity types"
+  ]
+}, {
   version: "0.5.0",
   date: "2025-09-29",
   features: ["Added data export functionality to download campaign data as JSON backup files", "Implemented user-friendly export dialog with confirmation and success feedback"],
@@ -25,7 +49,8 @@ const changelog: ChangelogEntry[] = [{
   fixes: [],
   docs: ["Updated design system documentation with export functionality patterns"],
   maintenance: ["Created dedicated dataExportService following clean code principles", "Added proper TypeScript interfaces for export data structure"]
-}, {
+},
+{
   version: "0.4.0",
   date: "2025-09-29",
   features: ["Implemented client-side leaked password protection using HaveIBeenPwned API with k-anonymity model", "Added real-time password security assessment during registration", "Enhanced password strength indicators with breach detection status"],

@@ -19,7 +19,7 @@ describe('businessLogicService', () => {
   describe('createEntitySuggestions', () => {
     it('should create suggestions from entities and thoughts', () => {
       const entities = [
-        { name: 'Arthur', type: 'character' },
+        { name: 'Arthur', type: 'npc' },
         { name: 'Camelot', type: 'location' }
       ]
       const thoughts = [
@@ -30,10 +30,10 @@ describe('businessLogicService', () => {
       const result = businessLogicService.createEntitySuggestions(entities, thoughts)
 
       expect(result).toEqual([
-        { name: 'Arthur', type: 'character' },
+        { name: 'Arthur', type: 'npc' },
         { name: 'Camelot', type: 'location' },
-        { name: 'Merlin', type: 'character' },
-        { name: 'Excalibur', type: 'character' }
+        { name: 'Merlin', type: 'npc' },
+        { name: 'Excalibur', type: 'item' }
       ])
     })
 
@@ -43,7 +43,7 @@ describe('businessLogicService', () => {
     })
 
     it('should not duplicate entities', () => {
-      const entities = [{ name: 'Arthur', type: 'character' }]
+      const entities = [{ name: 'Arthur', type: 'npc' }]
       const thoughts = [{ relatedEntities: ['Arthur', 'arthur'] }] // Different case
 
       const result = businessLogicService.createEntitySuggestions(entities, thoughts)
@@ -109,7 +109,7 @@ describe('businessLogicService', () => {
       vi.mocked(entityService.createEntity).mockReturnValue({
         localId: 'entity-id',
         name: 'Test Entity',
-        type: 'character',
+        type: 'npc',
         syncStatus: 'pending',
         modifiedLocally: new Date(),
         createdLocally: new Date(),

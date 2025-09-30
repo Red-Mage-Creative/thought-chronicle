@@ -12,7 +12,7 @@ import {
  */
 export const getEntityIcon = (type: string): LucideIcon => {
   const normalizedType = type?.toLowerCase();
-  return ENTITY_ICONS[normalizedType as keyof typeof ENTITY_ICONS] || ENTITY_ICONS[ENTITY_TYPES.CHARACTER];
+  return ENTITY_ICONS[normalizedType as keyof typeof ENTITY_ICONS] || ENTITY_ICONS[ENTITY_TYPES.NPC];
 };
 
 /**
@@ -20,7 +20,7 @@ export const getEntityIcon = (type: string): LucideIcon => {
  */
 export const getEntityClass = (type: string): string => {
   const normalizedType = type?.toLowerCase();
-  return ENTITY_CLASSES[normalizedType as keyof typeof ENTITY_CLASSES] || ENTITY_CLASSES[ENTITY_TYPES.CHARACTER];
+  return ENTITY_CLASSES[normalizedType as keyof typeof ENTITY_CLASSES] || ENTITY_CLASSES[ENTITY_TYPES.NPC];
 };
 
 /**
@@ -48,8 +48,9 @@ export const normalizeEntityType = (type: string): EntityType => {
   
   // Map legacy types to standard types
   const typeMapping: Record<string, EntityType> = {
-    'player': ENTITY_TYPES.CHARACTER,
-    'npc': ENTITY_TYPES.CHARACTER,
+    'character': ENTITY_TYPES.NPC,  // Legacy 'character' becomes 'npc'
+    'player': ENTITY_TYPES.PC,
+    'npc': ENTITY_TYPES.NPC,
     'place': ENTITY_TYPES.LOCATION,
     'city': ENTITY_TYPES.LOCATION,
     'weapon': ENTITY_TYPES.ITEM,

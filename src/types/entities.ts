@@ -1,10 +1,12 @@
-export type EntityType = 'character' | 'location' | 'organization' | 'item' | 'uncategorized';
+export type EntityType = 'pc' | 'npc' | 'race' | 'religion' | 'quest' | 'enemy' | 'location' | 'organization' | 'item' | 'uncategorized';
 
 export interface BaseEntity {
   id?: string;
   name: string;
   type: EntityType;
   description?: string;
+  parentEntities?: string[];  // Array of entity IDs/names representing hierarchical parents
+  linkedEntities?: string[];  // Array of entity IDs/names representing non-hierarchical relationships
 }
 
 export interface CampaignEntity extends BaseEntity {
