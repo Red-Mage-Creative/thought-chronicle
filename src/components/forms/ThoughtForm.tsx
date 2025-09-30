@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { TagSelector } from './TagSelector';
 import { Settings } from '@/components/Settings';
@@ -89,17 +90,21 @@ export const ThoughtForm = ({
           <CardTitle className="text-foreground">
             {isEditMode ? 'Edit Thought' : 'Record a Thought'}
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={useDefaultTags ? "default" : "outline"}
-              size="sm"
-              onClick={() => setUseDefaultTags(!useDefaultTags)}
-              className="gap-2"
-            >
-              <Pin className="h-4 w-4" />
-              Use Default Tags
-            </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="use-default-tags"
+                checked={useDefaultTags}
+                onCheckedChange={setUseDefaultTags}
+              />
+              <Label 
+                htmlFor="use-default-tags" 
+                className="text-sm font-medium cursor-pointer flex items-center gap-1.5"
+              >
+                <Pin className="h-4 w-4" />
+                Use Default Tags
+              </Label>
+            </div>
             {showSettings && onDefaultTagsChange && (
               <Settings
                 defaultTags={defaultTags}
