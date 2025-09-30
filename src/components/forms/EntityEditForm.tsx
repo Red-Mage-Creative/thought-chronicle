@@ -160,7 +160,8 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Enter entity description"
           disabled={isSubmitting}
-          rows={3}
+          rows={8}
+          className="resize-y"
         />
         <p className="text-xs text-muted-foreground">
           Supports markdown: **bold**, *italic*, [links](url), lists, and more

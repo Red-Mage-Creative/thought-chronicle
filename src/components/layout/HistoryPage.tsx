@@ -1,15 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { ThoughtList } from '@/components/display/ThoughtList';
-import { ThoughtForm } from '@/components/forms/ThoughtForm';
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntities } from '@/hooks/useEntities';
-import { LocalThought } from '@/types/thoughts';
+import { useNavigationState } from '@/hooks/useNavigationState';
 import { Search, RefreshCw, Plus, Calendar } from 'lucide-react';
 import { syncService } from '@/services/syncService';
 import { useToast } from '@/hooks/use-toast';
@@ -20,15 +18,28 @@ interface HistoryPageProps {
 }
 
 export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
-  const { thoughts, createThought, updateThought, deleteThought, refreshThoughts, isLoading } = useThoughts();
-  const { getSuggestions, entities } = useEntities();
+  const { navigateWithContext, restoreContext } = useNavigationState();
+  const { thoughts, deleteThought, refreshThoughts, isLoading } = useThoughts();
+  const { entities } = useEntities();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingThought, setEditingThought] = useState<LocalThought | null>(null);
   const [deletingThoughtId, setDeletingThoughtId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Restore context when returning from edit/create page
+  useEffect(() => {
+    const restored = restoreContext('/history');
+    if (restored) {
+      if (restored.searchTerm) setSearchTerm(restored.searchTerm);
+      if (restored.selectedDateFilter) setSelectedDateFilter(restored.selectedDateFilter);
+      
+      // Restore scroll position
+      if (restored.scrollY) {
+        setTimeout(() => window.scrollTo(0, restored.scrollY), 0);
+      }
+    }
+  }, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -51,15 +62,20 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
     }
   };
 
-  const handleThoughtCreate = async (content: string, tags: string[], gameDate?: string) => {
-    await createThought(content, tags, gameDate);
-    setIsAddModalOpen(false);
+  const handleAddThought = () => {
+    navigateWithContext('/thoughts/new', {
+      searchTerm,
+      selectedDateFilter,
+      scrollY: window.scrollY
+    });
   };
 
-  const handleThoughtEdit = async (content: string, tags: string[], gameDate?: string) => {
-    if (!editingThought) return;
-    await updateThought(editingThought.localId || editingThought.id!, content, tags, gameDate);
-    setEditingThought(null);
+  const handleEditThought = (thoughtId: string) => {
+    navigateWithContext(`/thoughts/${thoughtId}/edit`, {
+      searchTerm,
+      selectedDateFilter,
+      scrollY: window.scrollY
+    });
   };
 
   const handleThoughtDelete = async () => {
@@ -138,7 +154,7 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-foreground">Campaign History</CardTitle>
           <div className="flex gap-2">
-            <Button onClick={() => setIsAddModalOpen(true)} size="sm">
+            <Button onClick={handleAddThought} size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Thought
             </Button>
@@ -182,46 +198,12 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
           thoughts={filteredThoughts}
           entities={entities}
           onEntityClick={onEntityClick}
-          onEditThought={setEditingThought}
+          onEditThought={handleEditThought}
           onDeleteThought={setDeletingThoughtId}
           isLoading={isLoading}
         />
       </CardContent>
     </Card>
-
-    {/* Add Thought Modal */}
-    <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Record New Thought</DialogTitle>
-        </DialogHeader>
-        <ThoughtForm
-          onSubmit={handleThoughtCreate}
-          suggestions={getSuggestions()}
-        />
-      </DialogContent>
-    </Dialog>
-
-    {/* Edit Thought Modal */}
-    <Dialog open={!!editingThought} onOpenChange={() => setEditingThought(null)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Thought</DialogTitle>
-        </DialogHeader>
-        {editingThought && (
-          <ThoughtForm
-            onSubmit={handleThoughtEdit}
-            suggestions={getSuggestions()}
-            initialData={{
-              content: editingThought.content,
-              relatedEntities: editingThought.relatedEntities,
-              gameDate: editingThought.gameDate
-            }}
-            isEditMode={true}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
 
     {/* Delete Confirmation Dialog */}
     <ConfirmationDialog

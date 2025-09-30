@@ -124,7 +124,7 @@ export const ThoughtForm = ({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="min-h-24 resize-none"
+            className="min-h-40 resize-y"
           />
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Press Ctrl+Enter to submit</span>

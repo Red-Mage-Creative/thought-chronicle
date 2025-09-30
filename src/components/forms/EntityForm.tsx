@@ -144,7 +144,7 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Add notes about this entity..."
-          className="min-h-20 resize-none"
+          className="min-h-32 resize-y"
           disabled={isSubmitting}
         />
         <p className="text-xs text-muted-foreground">

@@ -1,16 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EntitySearch } from '@/components/display/EntitySearch';
 import { EntityFilters } from '@/components/display/EntityFilters';
 import { EntityList } from '@/components/display/EntityList';
 import { EntityTableView } from '@/components/display/EntityTableView';
-import { EntityForm } from '@/components/forms/EntityForm';
 import { UncategorizedNotice } from '@/components/ui/uncategorized-notice';
 import { useEntities } from '@/hooks/useEntities';
 import { useSyncState } from '@/hooks/useSyncState';
+import { useNavigationState } from '@/hooks/useNavigationState';
 import { syncService } from '@/services/syncService';
 import { toast } from 'sonner';
 import { EntityType } from '@/types/entities';
@@ -21,17 +20,35 @@ interface EntityManagementPageProps {
 }
 
 export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProps) => {
+  const { navigateWithContext, restoreContext } = useNavigationState();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<EntityType | null>(null);
-  const [showModal, setShowModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [sortBy, setSortBy] = useState<'alphabetical' | 'mentions' | 'created' | 'updated' | 'lastMentioned'>('alphabetical');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showUncategorized, setShowUncategorized] = useState(false);
 
-  const { entitiesWithMetrics, createEntity, refreshEntities, isLoading } = useEntities();
+  const { entitiesWithMetrics, refreshEntities, isLoading } = useEntities();
   const { syncStatus } = useSyncState();
+
+  // Restore context when returning from edit/create page
+  useEffect(() => {
+    const restored = restoreContext('/entities');
+    if (restored) {
+      if (restored.searchTerm) setSearchTerm(restored.searchTerm);
+      if (restored.selectedType) setSelectedType(restored.selectedType as EntityType);
+      if (restored.viewMode) setViewMode(restored.viewMode as 'cards' | 'table');
+      if (restored.sortBy) setSortBy(restored.sortBy as typeof sortBy);
+      if (restored.sortOrder) setSortOrder(restored.sortOrder as 'asc' | 'desc');
+      if (restored.showUncategorized !== undefined) setShowUncategorized(restored.showUncategorized);
+      
+      // Restore scroll position
+      if (restored.scrollY) {
+        setTimeout(() => window.scrollTo(0, restored.scrollY), 0);
+      }
+    }
+  }, []);
 
   const handleRefresh = async () => {
     if (syncStatus.pendingChanges > 0) {
@@ -52,14 +69,16 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
     }
   };
 
-  const handleEntityCreate = async (name: string, type: EntityType, description?: string, attributes?: any[]) => {
-    try {
-      await createEntity(name, type, description, attributes);
-      setShowModal(false);
-      toast.success(`Entity "${name}" created successfully`);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create entity');
-    }
+  const handleAddEntity = () => {
+    navigateWithContext('/entities/new', {
+      searchTerm,
+      selectedType,
+      viewMode,
+      sortBy,
+      sortOrder,
+      showUncategorized,
+      scrollY: window.scrollY
+    });
   };
 
   const filteredEntities = useMemo(() => {
@@ -118,7 +137,7 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
           <div className="flex items-center justify-between">
             <CardTitle>Entity Registry</CardTitle>
             <div className="flex gap-2">
-              <Button onClick={() => setShowModal(true)} size="sm">
+              <Button onClick={handleAddEntity} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Entity
               </Button>
@@ -218,21 +237,6 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Entity</DialogTitle>
-            <DialogDescription>
-              Create a new entity to track characters, locations, items, or organizations in your stories.
-            </DialogDescription>
-          </DialogHeader>
-          <EntityForm
-            onSubmit={handleEntityCreate}
-            onCancel={() => setShowModal(false)}
-          />
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

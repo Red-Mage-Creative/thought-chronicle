@@ -12,7 +12,7 @@ interface ThoughtListProps {
   thoughts: LocalThought[];
   entities: LocalEntity[];
   onEntityClick?: (entityName: string) => void;
-  onEditThought?: (thought: LocalThought) => void;
+  onEditThought?: (thoughtId: string) => void;
   onDeleteThought?: (thoughtId: string) => void;
   isLoading?: boolean;
 }
@@ -127,7 +127,7 @@ export const ThoughtList = ({
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0"
-                        onClick={() => onEditThought(thought)}
+                        onClick={() => onEditThought(thought.localId || thought.id!)}
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
