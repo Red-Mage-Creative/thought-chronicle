@@ -6,7 +6,13 @@ import { LocalCampaign } from '@/types/campaigns';
 // MongoDB schemas based on our local data structures
 export const MongoThoughtSchema = z.object({
   content: z.string().min(1, 'Content is required'),
+  
+  // ID-based references (v1.3.0+)
+  relatedEntityIds: z.array(z.string()).optional(),
+  
+  // Legacy name-based references (deprecated v1.3.0)
   relatedEntities: z.array(z.string()),
+  
   timestamp: z.date(),
   gameDate: z.string().optional(),
   campaign_id: z.string().min(1, 'Campaign ID is required'),
@@ -16,10 +22,17 @@ export const MongoThoughtSchema = z.object({
 
 export const MongoEntitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  type: z.enum(['pc', 'npc', 'race', 'religion', 'quest', 'enemy', 'location', 'organization', 'item', 'uncategorized']),
+  type: z.enum(['pc', 'npc', 'race', 'religion', 'quest', 'enemy', 'location', 'organization', 'item', 'plot-thread', 'uncategorized']),
   description: z.string().optional(),
+  
+  // ID-based references (v1.3.0+)
+  parentEntityIds: z.array(z.string()).optional(),
+  linkedEntityIds: z.array(z.string()).optional(),
+  
+  // Legacy name-based references (deprecated v1.3.0)
   parentEntities: z.array(z.string()).optional(),
   linkedEntities: z.array(z.string()).optional(),
+  
   attributes: z.array(z.object({
     key: z.string(),
     value: z.string()

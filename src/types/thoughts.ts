@@ -1,7 +1,13 @@
 export interface BaseThought {
   id?: string;
   content: string;
-  relatedEntities: string[];
+  
+  // ID-based references (v1.3.0+) - Primary reference system
+  relatedEntityIds?: string[];  // Array of entity IDs
+  
+  // Legacy name-based references (deprecated in v1.3.0, kept for backward compatibility)
+  relatedEntities: string[];  // Deprecated: Use relatedEntityIds instead
+  
   timestamp: Date;
   gameDate?: string;
 }

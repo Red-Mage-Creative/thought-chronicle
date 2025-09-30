@@ -1,6 +1,7 @@
 import { LocalDataStore } from './dataStorageService';
 import { ENTITY_TYPES } from '@/utils/constants';
 import { inferEntityType } from '@/utils/entityUtils';
+import { migration_1_3_0_up, migration_1_3_0_down } from './migrations/migration_1_3_0';
 
 export interface Migration {
   version: string;        // Target version
@@ -94,5 +95,12 @@ export const migrationRegistry: Migration[] = [
       // Version 0.8.0 added: progress tracking, loading screens, error recovery UI, and validation improvements
       return data;
     }
+  },
+  {
+    version: '1.3.0',
+    name: 'id-based-entity-references',
+    description: 'Convert name-based entity references to ID-based references for improved data integrity',
+    up: migration_1_3_0_up,
+    down: migration_1_3_0_down
   }
 ];

@@ -1,7 +1,7 @@
 const SCHEMA_VERSION_KEY = 'dnd_chronicle_schema_version';
 
 export const schemaVersionService = {
-  CURRENT_VERSION: '0.8.1',
+  CURRENT_VERSION: '1.3.0',
   
   /**
    * Get the schema version stored in localStorage

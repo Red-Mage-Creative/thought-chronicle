@@ -18,8 +18,15 @@ export interface BaseEntity {
   name: string;
   type: EntityType;
   description?: string;
-  parentEntities?: string[];  // Array of entity IDs/names representing hierarchical parents
-  linkedEntities?: string[];  // Array of entity IDs/names representing non-hierarchical relationships
+  
+  // ID-based references (v1.3.0+) - Primary reference system
+  parentEntityIds?: string[];  // Array of entity IDs representing hierarchical parents
+  linkedEntityIds?: string[];  // Array of entity IDs representing non-hierarchical relationships
+  
+  // Legacy name-based references (deprecated in v1.3.0, kept for backward compatibility)
+  parentEntities?: string[];  // Deprecated: Use parentEntityIds instead
+  linkedEntities?: string[];  // Deprecated: Use linkedEntityIds instead
+  
   attributes?: EntityAttribute[];  // Array of key-value pairs
 }
 

@@ -18,6 +18,35 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.0",
+  date: "2025-09-30",
+  features: [
+    "Implemented ID-based entity references for improved data integrity",
+    "Automatic migration from name-based to ID-based references on app startup",
+    "Added backward compatibility with legacy name-based references"
+  ],
+  improvements: [
+    "Enhanced data integrity by eliminating orphaned entity references",
+    "Improved entity relationship tracking with unique identifiers",
+    "Added automatic entity creation during reference migration"
+  ],
+  fixes: [],
+  docs: [
+    "Documented ID-based reference architecture pattern",
+    "Added migration rollback capabilities for v1.3.0"
+  ],
+  refactor: [
+    "Major architectural refactor: Entity references now use IDs instead of names",
+    "Thoughts now use relatedEntityIds instead of relatedEntities",
+    "Entity relationships now use parentEntityIds and linkedEntityIds"
+  ],
+  maintenance: [
+    "Created comprehensive migration system for ID-based references",
+    "Added new type definitions for ID-based fields",
+    "Implemented migration_1_3_0 with automatic entity creation",
+    "Extended type system to support both legacy and new reference formats"
+  ]
+}, {
   version: "1.2.2",
   date: "2025-09-30",
   features: [
