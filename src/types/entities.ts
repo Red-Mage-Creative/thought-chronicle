@@ -1,4 +1,4 @@
-export type EntityType = 'pc' | 'npc' | 'race' | 'religion' | 'quest' | 'enemy' | 'location' | 'organization' | 'item' | 'uncategorized';
+export type EntityType = 'pc' | 'npc' | 'race' | 'religion' | 'quest' | 'enemy' | 'location' | 'organization' | 'item' | 'plot-thread' | 'uncategorized';
 
 export interface EntityAttribute {
   key: string;

@@ -1,4 +1,4 @@
-import { Users, MapPin, Package, Shield, HelpCircle, UserCheck, Footprints, Church, ScrollText, Skull } from 'lucide-react';
+import { Users, MapPin, Package, Shield, HelpCircle, UserCheck, Footprints, Church, ScrollText, Skull, Network } from 'lucide-react';
 import { EntityType } from '@/types/entities';
 
 // Standardized entity types
@@ -12,6 +12,7 @@ export const ENTITY_TYPES = {
   LOCATION: 'location' as const,
   ORGANIZATION: 'organization' as const,
   ITEM: 'item' as const,
+  PLOT_THREAD: 'plot-thread' as const,
   UNCATEGORIZED: 'uncategorized' as const,
 } as const;
 
@@ -26,6 +27,7 @@ export const ENTITY_ICONS = {
   [ENTITY_TYPES.LOCATION]: MapPin,
   [ENTITY_TYPES.ORGANIZATION]: Shield,
   [ENTITY_TYPES.ITEM]: Package,
+  [ENTITY_TYPES.PLOT_THREAD]: Network,
   [ENTITY_TYPES.UNCATEGORIZED]: HelpCircle,
   // Legacy support
   place: MapPin,
@@ -47,6 +49,7 @@ export const ENTITY_CLASSES = {
   [ENTITY_TYPES.LOCATION]: 'entity-location',
   [ENTITY_TYPES.ORGANIZATION]: 'entity-organization',
   [ENTITY_TYPES.ITEM]: 'entity-item',
+  [ENTITY_TYPES.PLOT_THREAD]: 'entity-plot-thread',
   [ENTITY_TYPES.UNCATEGORIZED]: 'entity-uncategorized',
   // Legacy support
   place: 'entity-location',
@@ -86,6 +89,10 @@ export const TYPE_INFERENCE_PATTERNS = {
   ],
   [ENTITY_TYPES.ITEM]: [
     'sword', 'shield', 'ring', 'potion', 'scroll', 'armor', 'weapon', 'staff', 'artifact'
+  ],
+  [ENTITY_TYPES.PLOT_THREAD]: [
+    'plot', 'thread', 'storyline', 'arc', 'to-do', 'todo', 'need to', 'ongoing', 
+    'unresolved', 'mystery', 'clue', 'lead', 'follow up', 'investigate', 'track'
   ],
   [ENTITY_TYPES.UNCATEGORIZED]: [],
 } as const;

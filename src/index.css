@@ -44,6 +44,7 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
     --entity-location: 270 60% 40%; /* Locations - purple */
     --entity-organization: 345 65% 40%; /* Organizations - rose */
     --entity-item: 45 80% 45%;      /* Items - amber */
+    --entity-plot-thread: 280 65% 55%; /* Plot Threads - violet */
     --entity-uncategorized: 40 70% 45%; /* Uncategorized - orange */
     
     /* Legacy support */
@@ -118,6 +119,10 @@ Sharp edges, high contrast, WCAG 2.2 AA compliant.
   
   .entity-organization {
     @apply bg-rose-50 border-rose-300 text-rose-700;
+  }
+  
+  .entity-plot-thread {
+    @apply bg-violet-50 border-violet-300 text-violet-700;
   }
   
   .entity-uncategorized {
