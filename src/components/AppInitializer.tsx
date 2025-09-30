@@ -4,6 +4,8 @@ import { campaignValidationService } from '@/services/campaignValidationService'
 import { campaignService } from '@/services/campaignService';
 import { dataMigrationService } from '@/services/dataMigrationService';
 import { schemaVersionService } from '@/services/schemaVersionService';
+import { schemaValidationService } from '@/services/schemaValidationService';
+import { dataStorageService } from '@/services/dataStorageService';
 import { DataMigrationModal } from './DataMigrationModal';
 import { MigrationLoadingScreen, MigrationProgress } from './MigrationLoadingScreen';
 import { MigrationErrorScreen } from './MigrationErrorScreen';
@@ -104,6 +106,47 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
               });
             }
           }
+
+          // Validate and repair entity references
+          setMigrationProgress(prev => ({
+            ...prev,
+            phase: 'validation',
+            message: 'Validating entity references...'
+          }));
+
+          const data = dataStorageService.getData();
+          const referenceValidation = schemaValidationService.validateAndRepairEntityReferences(
+            data.thoughts,
+            data.entities,
+            data.currentCampaignId || '',
+            data.currentUserId || ''
+          );
+
+          // If entities were created, save the updated data
+          if (referenceValidation.entitiesCreated.length > 0) {
+            dataStorageService.saveData(data);
+            
+            console.log('[App] Auto-created entities:', referenceValidation.entitiesCreated);
+            
+            toast({
+              title: "Data Repaired",
+              description: `Auto-created ${referenceValidation.entitiesCreated.length} missing ${referenceValidation.entitiesCreated.length === 1 ? 'entity' : 'entities'} to fix orphaned references`,
+            });
+          }
+
+          // Update migration progress with reference validation results
+          setMigrationProgress(prev => ({
+            ...prev,
+            validationProgress: {
+              ...prev.validationProgress,
+              entitiesChecked: prev.validationProgress?.entitiesChecked || 0,
+              thoughtsChecked: prev.validationProgress?.thoughtsChecked || 0,
+              campaignsChecked: prev.validationProgress?.campaignsChecked || 0,
+              issuesFixed: prev.validationProgress?.issuesFixed || 0,
+              orphanedReferences: referenceValidation.totalOrphaned,
+              entitiesAutoCreated: referenceValidation.entitiesCreated.length
+            }
+          }))
 
           // Run campaign validation
           const validation = campaignValidationService.validate();

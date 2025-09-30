@@ -18,6 +18,21 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.2.1",
+  date: "2025-09-30",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Added automatic detection and repair of orphaned entity references on app startup",
+    "Auto-creates missing entities when thoughts or entities reference non-existent entities",
+    "Improved data integrity validation during app initialization"
+  ],
+  docs: [],
+  maintenance: [
+    "Extended schemaValidationService with entity reference validation",
+    "Added EntityReferenceValidationResult interface for detailed validation reporting"
+  ]
+}, {
   version: "1.2.0",
   date: "2025-09-30",
   features: [

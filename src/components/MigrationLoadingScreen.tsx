@@ -13,6 +13,8 @@ export interface MigrationProgress {
     thoughtsChecked: number;
     campaignsChecked: number;
     issuesFixed: number;
+    orphanedReferences?: number;
+    entitiesAutoCreated?: number;
   };
   message: string;
 }
@@ -115,6 +117,12 @@ export const MigrationLoadingScreen = ({ progress }: MigrationLoadingScreenProps
                   <div className="flex justify-between text-yellow-600 dark:text-yellow-500">
                     <span>Issues Auto-Fixed:</span>
                     <span className="font-medium">{progress.validationProgress.issuesFixed}</span>
+                  </div>
+                )}
+                {progress.validationProgress.entitiesAutoCreated !== undefined && progress.validationProgress.entitiesAutoCreated > 0 && (
+                  <div className="flex justify-between text-green-600 dark:text-green-500">
+                    <span>Entities Created:</span>
+                    <span className="font-medium">{progress.validationProgress.entitiesAutoCreated}</span>
                   </div>
                 )}
               </div>

@@ -21,6 +21,26 @@ export interface ValidationSummary {
   invalidCount: number;
   issuesFixed: number;
   criticalErrors: number;
+  orphanedReferences?: number;
+  entitiesAutoCreated?: number;
+}
+
+export interface EntityReferenceValidationResult {
+  orphanedReferences: {
+    thoughtIndex: number;
+    thoughtContent: string;
+    missingEntities: string[];
+  }[];
+  orphanedParentReferences: {
+    entityName: string;
+    missingParents: string[];
+  }[];
+  orphanedLinkedReferences: {
+    entityName: string;
+    missingLinked: string[];
+  }[];
+  totalOrphaned: number;
+  entitiesCreated: string[];
 }
 
 export const schemaValidationService = {
@@ -295,5 +315,133 @@ export const schemaValidationService = {
       valid: missingFields.length === 0,
       missingFields
     };
+  },
+
+  /**
+   * Validate that all entity references point to existing entities
+   * Auto-creates missing entities as 'uncategorized'
+   */
+  validateAndRepairEntityReferences(
+    thoughts: LocalThought[], 
+    entities: LocalEntity[],
+    campaignId: string,
+    userId: string
+  ): EntityReferenceValidationResult {
+    const result: EntityReferenceValidationResult = {
+      orphanedReferences: [],
+      orphanedParentReferences: [],
+      orphanedLinkedReferences: [],
+      totalOrphaned: 0,
+      entitiesCreated: []
+    };
+    
+    // Create a case-insensitive lookup map of existing entities
+    const entityMap = new Map<string, LocalEntity>();
+    entities.forEach(entity => {
+      entityMap.set(entity.name.toLowerCase(), entity);
+    });
+    
+    // Check thoughts for orphaned entity references
+    thoughts.forEach((thought, index) => {
+      const missingEntities: string[] = [];
+      
+      thought.relatedEntities.forEach(entityName => {
+        if (!entityMap.has(entityName.toLowerCase())) {
+          missingEntities.push(entityName);
+        }
+      });
+      
+      if (missingEntities.length > 0) {
+        result.orphanedReferences.push({
+          thoughtIndex: index,
+          thoughtContent: thought.content.substring(0, 50) + '...',
+          missingEntities
+        });
+        result.totalOrphaned += missingEntities.length;
+      }
+    });
+    
+    // Check entities for orphaned parent references
+    entities.forEach(entity => {
+      const missingParents: string[] = [];
+      const missingLinked: string[] = [];
+      
+      entity.parentEntities?.forEach(parentName => {
+        if (!entityMap.has(parentName.toLowerCase())) {
+          missingParents.push(parentName);
+        }
+      });
+      
+      entity.linkedEntities?.forEach(linkedName => {
+        if (!entityMap.has(linkedName.toLowerCase())) {
+          missingLinked.push(linkedName);
+        }
+      });
+      
+      if (missingParents.length > 0) {
+        result.orphanedParentReferences.push({
+          entityName: entity.name,
+          missingParents
+        });
+        result.totalOrphaned += missingParents.length;
+      }
+      
+      if (missingLinked.length > 0) {
+        result.orphanedLinkedReferences.push({
+          entityName: entity.name,
+          missingLinked
+        });
+        result.totalOrphaned += missingLinked.length;
+      }
+    });
+    
+    // Auto-create missing entities
+    const allMissingNames = new Set<string>();
+    
+    // Collect all missing entity names
+    result.orphanedReferences.forEach(ref => {
+      ref.missingEntities.forEach(name => allMissingNames.add(name));
+    });
+    result.orphanedParentReferences.forEach(ref => {
+      ref.missingParents.forEach(name => allMissingNames.add(name));
+    });
+    result.orphanedLinkedReferences.forEach(ref => {
+      ref.missingLinked.forEach(name => allMissingNames.add(name));
+    });
+    
+    // Create each missing entity
+    allMissingNames.forEach(entityName => {
+      // Only create if it truly doesn't exist (case-insensitive check)
+      if (!entityMap.has(entityName.toLowerCase())) {
+        const newEntity: LocalEntity = {
+          localId: this.generateLocalId(),
+          name: entityName,
+          type: 'uncategorized',
+          description: 'Auto-created to resolve orphaned reference',
+          parentEntities: [],
+          linkedEntities: [],
+          attributes: [],
+          campaign_id: campaignId,
+          created_by: userId,
+          syncStatus: 'pending',
+          creationSource: 'auto',
+          createdLocally: new Date(),
+          modifiedLocally: new Date()
+        };
+        
+        entities.push(newEntity);
+        entityMap.set(entityName.toLowerCase(), newEntity);
+        result.entitiesCreated.push(entityName);
+      }
+    });
+    
+    return result;
+  },
+
+  /**
+   * Helper method to generate a local ID
+   */
+  generateLocalId(): string {
+    return `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 };
