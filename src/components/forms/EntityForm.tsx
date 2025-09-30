@@ -113,6 +113,9 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
           className="min-h-20 resize-none"
           disabled={isSubmitting}
         />
+        <p className="text-xs text-muted-foreground">
+          Supports markdown: **bold**, *italic*, [links](url), lists, and more
+        </p>
       </div>
 
       <div className="flex gap-2">

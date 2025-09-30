@@ -132,6 +132,9 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
           disabled={isSubmitting}
           rows={3}
         />
+        <p className="text-xs text-muted-foreground">
+          Supports markdown: **bold**, *italic*, [links](url), lists, and more
+        </p>
       </div>
 
       <EntityRelationshipSelector

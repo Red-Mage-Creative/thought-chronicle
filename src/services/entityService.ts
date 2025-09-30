@@ -258,8 +258,30 @@ export const entityService = {
 
   getLinkedEntities(entityName: string): LocalEntity[] {
     const data = dataStorageService.getData();
-    return data.entities.filter(e => 
+    const currentEntity = data.entities.find(e => 
+      e.name.toLowerCase() === entityName.toLowerCase()
+    );
+    
+    if (!currentEntity) return [];
+    
+    // Find entities that link TO this entity
+    const entitiesThatLinkToThis = data.entities.filter(e => 
       e.linkedEntities?.some(l => l.toLowerCase() === entityName.toLowerCase())
     );
+    
+    // Find entities that THIS entity links to
+    const entitiesLinkedByThis = currentEntity.linkedEntities
+      ? data.entities.filter(e => 
+          currentEntity.linkedEntities!.some(l => l.toLowerCase() === e.name.toLowerCase())
+        )
+      : [];
+    
+    // Combine and deduplicate by localId or id
+    const allLinked = [...entitiesThatLinkToThis, ...entitiesLinkedByThis];
+    const uniqueLinked = Array.from(
+      new Map(allLinked.map(e => [e.localId || e.id, e])).values()
+    );
+    
+    return uniqueLinked;
   }
 };

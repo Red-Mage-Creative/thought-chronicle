@@ -628,6 +628,58 @@ export default function DesignSystemPage() {
             </div>
           </section>
 
+          {/* Markdown Display */}
+          <section className="space-y-6">
+            <h2 className="text-3xl font-semibold">Markdown Display</h2>
+            <Card>
+              <CardHeader>
+                <CardTitle>MarkdownDisplay Component</CardTitle>
+                <CardDescription>
+                  Renders markdown-formatted text with custom styling for entity descriptions and other rich content.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Supported Features</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>**Bold** and *italic* text</li>
+                    <li>[Links](url) with automatic external link handling</li>
+                    <li>Ordered and unordered lists</li>
+                    <li>Headings (H1-H3)</li>
+                    <li>`Inline code` and code blocks</li>
+                    <li>&gt; Blockquotes</li>
+                  </ul>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <h4 className="font-medium">Example Output</h4>
+                  <div className="p-4 border rounded-md bg-muted/30">
+                    <div className="text-muted-foreground text-base leading-relaxed max-w-prose space-y-2">
+                      <p className="mb-4"><strong className="font-semibold">Bold text</strong> and <em className="italic">italic text</em></p>
+                      <ul className="list-disc list-inside mb-4 space-y-1">
+                        <li className="ml-4">List item one</li>
+                        <li className="ml-4">List item two</li>
+                      </ul>
+                      <p className="mb-4">
+                        <a className="text-primary hover:underline" href="https://example.com" target="_blank" rel="noopener noreferrer">
+                          External link
+                        </a>
+                      </p>
+                      <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">Inline code</code>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <h4 className="font-medium">Usage</h4>
+                  <code className="block bg-muted p-4 rounded text-sm font-mono overflow-x-auto">
+                    {`import { MarkdownDisplay } from '@/components/display/MarkdownDisplay';\n\n<MarkdownDisplay \n  content={entity.description}\n  className="text-muted-foreground text-base leading-relaxed"\n/>`}
+                  </code>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
           {/* Layout Components */}
           <section className="space-y-6">
             <h2 className="text-3xl font-semibold">Layout Components</h2>

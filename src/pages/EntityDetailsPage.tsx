@@ -16,6 +16,7 @@ import { capitalize } from '@/utils/formatters';
 import { format } from 'date-fns';
 import { EntityEditForm } from '@/components/forms/EntityEditForm';
 import { EntityRelationshipDisplay } from '@/components/display/EntityRelationshipDisplay';
+import { MarkdownDisplay } from '@/components/display/MarkdownDisplay';
 import { useToast } from '@/hooks/use-toast';
 
 interface EntityDetailsPageProps {
@@ -316,40 +317,45 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
               </div>
               
               {entity.description && (
-                <p className="text-muted-foreground text-lg">{entity.description}</p>
+                <MarkdownDisplay 
+                  content={entity.description}
+                  className="text-muted-foreground text-base leading-relaxed max-w-prose"
+                />
               )}
             </div>
           </div>
 
           {/* Entity Relationships */}
-          {(parentEntities.length > 0 || childEntities.length > 0 || linkedEntities.length > 0) && (
-            <>
-              <Separator />
-              <div className="grid md:grid-cols-3 gap-6">
-                <EntityRelationshipDisplay
-                  title="Parent Entities"
-                  icon={Network}
-                  entities={parentEntities}
-                  emptyMessage="No parent entities"
-                  onEntityClick={handleEntityClick}
-                />
-                <EntityRelationshipDisplay
-                  title="Child Entities"
-                  icon={GitBranch}
-                  entities={childEntities}
-                  emptyMessage="No child entities"
-                  onEntityClick={handleEntityClick}
-                />
-                <EntityRelationshipDisplay
-                  title="Linked Entities"
-                  icon={Link2}
-                  entities={linkedEntities}
-                  emptyMessage="No linked entities"
-                  onEntityClick={handleEntityClick}
-                />
-              </div>
-            </>
-          )}
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
+              <Network className="h-5 w-5" />
+              Entity Relationships
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <EntityRelationshipDisplay
+                title="Parent Entities"
+                icon={Network}
+                entities={parentEntities}
+                emptyMessage="No parent entities"
+                onEntityClick={handleEntityClick}
+              />
+              <EntityRelationshipDisplay
+                title="Child Entities"
+                icon={GitBranch}
+                entities={childEntities}
+                emptyMessage="No child entities"
+                onEntityClick={handleEntityClick}
+              />
+              <EntityRelationshipDisplay
+                title="Linked Entities"
+                icon={Link2}
+                entities={linkedEntities}
+                emptyMessage="No linked entities"
+                onEntityClick={handleEntityClick}
+              />
+            </div>
+          </div>
 
           <Separator />
 

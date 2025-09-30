@@ -18,7 +18,32 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
-  version: "1.2.0",
+  version: "0.7.0",
+  date: "2025-09-30",
+  features: [
+    "Added rich text markdown support for entity descriptions",
+    "Entity descriptions now support bold, italic, links, lists, headings, and code blocks",
+    "Added MarkdownDisplay component for consistent rich text rendering"
+  ],
+  improvements: [
+    "Entity relationships section now always visible for better UX",
+    "Enhanced entity description formatting with better spacing and wrapping",
+    "Improved relationship section layout with clear heading and icon"
+  ],
+  fixes: [
+    "Fixed linked entities to display bidirectionally (if A links to B, both see the link)",
+    "Corrected version numbering from 1.2.0 to 0.6.0 for proper semantic versioning"
+  ],
+  docs: [
+    "Updated design system with markdown formatting examples",
+    "Documented proper semantic versioning guidelines in development rules"
+  ],
+  maintenance: [
+    "Added react-markdown and remark-gfm dependencies",
+    "Created reusable MarkdownDisplay component"
+  ]
+}, {
+  version: "0.6.0",
   date: "2025-09-30",
   features: [
     "Added Player Characters, Races, Religions, Quests, and Enemies entity types",
