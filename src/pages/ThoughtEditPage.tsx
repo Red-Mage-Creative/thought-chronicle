@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ThoughtForm } from '@/components/forms/ThoughtForm';
 import { FormControls } from '@/components/forms/FormControls';
 import { thoughtService } from '@/services/thoughtService';
+import { entityService } from '@/services/entityService';
 import { useEntities } from '@/hooks/useEntities';
 import { useThoughts } from '@/hooks/useThoughts';
 import { useEntitySuggestions } from '@/hooks/useEntitySuggestions';
@@ -11,13 +12,15 @@ import { useNavigationState } from '@/hooks/useNavigationState';
 import { LocalThought } from '@/types/thoughts';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const ThoughtEditPage = () => {
   const { thoughtId } = useParams<{ thoughtId: string }>();
   const { navigateBack } = useNavigationState();
-  const { entities } = useEntities();
+  const { entities, refreshEntities } = useEntities();
   const { thoughts } = useThoughts();
   const suggestions = useEntitySuggestions(entities, thoughts);
+  const { toast } = useToast();
   const [thought, setThought] = useState<LocalThought | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,9 +46,38 @@ const ThoughtEditPage = () => {
     try {
       const thoughtIdToUpdate = thought.id || thought.localId;
       if (thoughtIdToUpdate) {
+        // Get existing entities before update to identify new ones
+        const existingEntities = entityService.getAllEntities();
+        const existingNames = existingEntities.map(e => e.name.toLowerCase());
+        
+        // Identify new entity tags
+        const newEntityNames = tags.filter(tag => 
+          !existingNames.includes(tag.toLowerCase())
+        );
+        
+        // Update thought (will auto-create missing entities)
         thoughtService.updateThought(thoughtIdToUpdate, content, tags, gameDate);
+        
+        // Show notification if new entities were created
+        if (newEntityNames.length > 0) {
+          toast({
+            title: 'Entities created',
+            description: `Created ${newEntityNames.length} new ${newEntityNames.length === 1 ? 'entity' : 'entities'}: ${newEntityNames.join(', ')}`
+          });
+          
+          // Refresh entities to show new ones in the UI
+          refreshEntities();
+        }
+        
         navigateBack();
       }
+    } catch (error) {
+      console.error('Error updating thought:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update thought',
+        variant: 'destructive'
+      });
     } finally {
       setIsSubmitting(false);
     }

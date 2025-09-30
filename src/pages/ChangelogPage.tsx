@@ -18,6 +18,20 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.2.2",
+  date: "2025-09-30",
+  features: [
+    "Added user feedback notifications when new entities are auto-created during thought editing",
+    "Entity list now automatically refreshes after editing thoughts with new entities"
+  ],
+  improvements: [],
+  fixes: [
+    "Fixed entity creation during thought editing - entities are now properly created when adding new tags to existing thoughts",
+    "Added comprehensive error handling to thought editing workflow to prevent silent failures"
+  ],
+  docs: [],
+  maintenance: []
+}, {
   version: "1.2.1",
   date: "2025-09-30",
   features: [],
