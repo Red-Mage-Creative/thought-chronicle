@@ -33,6 +33,13 @@ const EntityEditPage = () => {
     }
   }, [entityName]);
 
+  /**
+   * Handle entity update with relationship management
+   * 
+   * Note: This function works with entity NAMES for the API, but entityService (v1.3.0+)
+   * converts these names to IDs internally when storing relationships. This provides
+   * a user-friendly interface while maintaining data integrity behind the scenes.
+   */
   const handleSubmit = async (
     name: string,
     type: EntityType,
@@ -51,16 +58,18 @@ const EntityEditPage = () => {
         { name, type, description, attributes }
       );
 
-      // Handle parent entity changes
+      // Handle parent entity changes (names converted to IDs in entityService)
       if (parentEntities !== undefined) {
         const currentParents = entity.parentEntities || [];
         
+        // Remove parents that are no longer selected
         currentParents.forEach(parent => {
           if (!parentEntities.includes(parent)) {
             entityService.removeParentEntity(entity.localId || entity.id!, parent);
           }
         });
         
+        // Add newly selected parents
         parentEntities.forEach(parent => {
           if (!currentParents.includes(parent)) {
             entityService.addParentEntity(entity.localId || entity.id!, parent);
@@ -68,16 +77,18 @@ const EntityEditPage = () => {
         });
       }
 
-      // Handle linked entity changes
+      // Handle linked entity changes (names converted to IDs in entityService)
       if (linkedEntities !== undefined) {
         const currentLinked = entity.linkedEntities || [];
         
+        // Remove links that are no longer selected
         currentLinked.forEach(linked => {
           if (!linkedEntities.includes(linked)) {
             entityService.removeLinkedEntity(entity.localId || entity.id!, linked);
           }
         });
         
+        // Add newly selected links
         linkedEntities.forEach(linked => {
           if (!currentLinked.includes(linked)) {
             entityService.addLinkedEntity(entity.localId || entity.id!, linked);

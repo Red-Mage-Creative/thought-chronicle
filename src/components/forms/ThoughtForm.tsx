@@ -12,13 +12,20 @@ import { Settings } from '@/components/Settings';
 import { EntitySuggestion } from '@/types/entities';
 import { Pin, X } from 'lucide-react';
 
+/**
+ * ThoughtForm - Thought creation/editing form
+ * 
+ * Note: This form works with entity NAMES (user-friendly), but the underlying
+ * service layer (v1.3.0+) stores entity references as IDs internally for data integrity.
+ * The conversion from names to IDs happens automatically in thoughtService.
+ */
 interface ThoughtFormProps {
   onSubmit: (content: string, tags: string[], gameDate?: string) => Promise<void>;
   suggestions: EntitySuggestion[];
   defaultTags?: string[];
   initialData?: {
     content: string;
-    relatedEntities: string[];
+    relatedEntities: string[];  // Entity names (display format)
     gameDate?: string;
   };
   isEditMode?: boolean;

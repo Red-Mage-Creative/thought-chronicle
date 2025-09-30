@@ -66,29 +66,43 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
           setEntity(entityWithMetrics);
         }
 
-        // Get related thoughts
-        const related = allThoughts.filter(thought =>
-          thought.relatedEntities.some(e => 
+        // Get related thoughts (v1.3.0+ uses ID-based references)
+        const entityId = foundEntity.localId || foundEntity.id;
+        const related = allThoughts.filter(thought => {
+          // Check ID-based references first (v1.3.0+)
+          if (thought.relatedEntityIds && thought.relatedEntityIds.length > 0 && entityId) {
+            return thought.relatedEntityIds.includes(entityId);
+          }
+          
+          // Fall back to legacy name-based references
+          return thought.relatedEntities.some(e => 
             e.toLowerCase() === foundEntity.name.toLowerCase()
-          )
-        ).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+          );
+        }).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
         setRelatedThoughts(related);
 
-        // Get relationship entities
+        // Get relationship entities (v1.3.0+ uses ID-based references)
         const allEntities = entityService.getAllEntities();
         
-        // Parent entities
-        const parents = (foundEntity.parentEntities || [])
-          .map(name => allEntities.find(e => e.name === name))
-          .filter((e): e is LocalEntity => e !== undefined);
+        // Parent entities - use ID-based references first, fall back to names
+        let parents: LocalEntity[] = [];
+        if (foundEntity.parentEntityIds && foundEntity.parentEntityIds.length > 0) {
+          // Use new ID-based references
+          parents = entityService.getEntitiesByIds(foundEntity.parentEntityIds);
+        } else if (foundEntity.parentEntities && foundEntity.parentEntities.length > 0) {
+          // Fall back to legacy name-based references
+          parents = (foundEntity.parentEntities || [])
+            .map(name => allEntities.find(e => e.name === name))
+            .filter((e): e is LocalEntity => e !== undefined);
+        }
         setParentEntities(parents);
 
-        // Child entities
+        // Child entities (getChildEntities already handles both ID and name-based)
         const children = entityService.getChildEntities(foundEntity.name);
         setChildEntities(children);
 
-        // Linked entities
+        // Linked entities (getLinkedEntities already handles both ID and name-based)
         const linked = entityService.getLinkedEntities(foundEntity.name);
         setLinkedEntities(linked);
       } catch (error) {

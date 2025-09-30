@@ -26,7 +26,8 @@ const changelog: ChangelogEntry[] = [{
     "Added backward compatibility with legacy name-based references",
     "Added helper methods for converting between entity names and IDs",
     "Thoughts now store entity references as IDs internally",
-    "Entity relationships (parent/linked) now use IDs internally"
+    "Entity relationships (parent/linked) now use IDs internally",
+    "All UI components seamlessly work with ID-based system"
   ],
   improvements: [
     "Enhanced data integrity by eliminating orphaned entity references",
@@ -34,14 +35,17 @@ const changelog: ChangelogEntry[] = [{
     "Added automatic entity creation during reference migration",
     "Added efficient entity lookup by ID with O(n) complexity",
     "Thought creation/update now maintains both ID and name references",
-    "Entity relationship operations now use IDs with name-based API"
+    "Entity relationship operations now use IDs with name-based API",
+    "Entity details page now uses ID-based queries for better performance",
+    "Form components maintain user-friendly name-based interface"
   ],
   fixes: [],
   docs: [
     "Documented ID-based reference architecture pattern",
     "Added migration rollback capabilities for v1.3.0",
     "Documented new entity service helper methods",
-    "Added comprehensive JSDoc comments to all ID-based methods"
+    "Added comprehensive JSDoc comments to all ID-based methods",
+    "Added inline documentation explaining name→ID conversion in forms"
   ],
   refactor: [
     "Major architectural refactor: Entity references now use IDs instead of names",
@@ -51,13 +55,19 @@ const changelog: ChangelogEntry[] = [{
     "Updated thoughtService.updateThought() to store ID-based references",
     "Updated entity relationship methods to use IDs internally",
     "Enhanced getThoughtsByEntity() to work with both names and IDs",
-    "Enhanced getChildEntities() and getLinkedEntities() to use ID-based queries"
+    "Enhanced getChildEntities() and getLinkedEntities() to use ID-based queries",
+    "Updated EntityDetailsPage to query using IDs with name fallback",
+    "Updated all form components to document name→ID conversion flow"
   ],
   tests: [
     "Added comprehensive unit tests for entity ID/name conversion methods",
     "Added tests for getEntityById, getEntityIdByName, getEntityNameById",
     "Added tests for batch operations: getEntitiesByIds, convertNamesToIds, convertIdsToNames",
-    "Added round-trip conversion tests to verify data integrity"
+    "Added round-trip conversion tests to verify data integrity",
+    "Added comprehensive tests for thought and entity operations with ID-based refs",
+    "Added tests for entity relationship operations (add/remove parent/linked)",
+    "Added tests for querying thoughts by entity name or ID",
+    "Added backward compatibility tests for legacy name-based references"
   ],
   maintenance: [
     "Created comprehensive migration system for ID-based references",
@@ -66,7 +76,9 @@ const changelog: ChangelogEntry[] = [{
     "Extended type system to support both legacy and new reference formats",
     "Added 6 new helper methods to entityService for ID/name operations",
     "Updated thoughtService with ID-based reference storage",
-    "Updated entityService relationship methods with ID-based storage"
+    "Updated entityService relationship methods with ID-based storage",
+    "Updated form components with clarifying comments about name→ID flow",
+    "Updated EntityDetailsPage with ID-based queries and legacy fallback"
   ]
 }, {
   version: "1.2.2",

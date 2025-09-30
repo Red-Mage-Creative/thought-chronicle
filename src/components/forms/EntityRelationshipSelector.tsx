@@ -9,13 +9,21 @@ import { LocalEntity } from '@/types/entities';
 import { getEntityIcon } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 
+/**
+ * EntityRelationshipSelector - Select parent/linked entities for an entity
+ * 
+ * Note: This component works with entity NAMES for display and API, but the underlying
+ * entityService (v1.3.0+) stores relationships as IDs internally. The conversion
+ * from names to IDs happens automatically in entityService methods like
+ * addParentEntity() and addLinkedEntity().
+ */
 interface EntityRelationshipSelectorProps {
   label: string;
-  selectedEntities: string[];
+  selectedEntities: string[];  // Array of entity names (display format)
   availableEntities: LocalEntity[];
-  excludeIds?: string[];
-  onAdd: (entityName: string) => void;
-  onRemove: (entityName: string) => void;
+  excludeIds?: string[];  // Entity names to exclude from selection
+  onAdd: (entityName: string) => void;  // Called with entity name
+  onRemove: (entityName: string) => void;  // Called with entity name
   disabled?: boolean;
 }
 
