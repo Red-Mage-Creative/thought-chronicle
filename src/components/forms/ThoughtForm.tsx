@@ -25,6 +25,12 @@ interface ThoughtFormProps {
   showSettings?: boolean;
   onDefaultTagsChange?: (tags: string[]) => void;
   existingEntities?: EntitySuggestion[];
+  onFormStateChange?: (state: {
+    isSaveDisabled: boolean;
+    hasUnsavedChanges: boolean;
+    isSubmitting: boolean;
+    handleSubmit: () => void;
+  }) => void;
 }
 
 export const ThoughtForm = ({ 
@@ -35,7 +41,8 @@ export const ThoughtForm = ({
   isEditMode = false,
   showSettings = false,
   onDefaultTagsChange,
-  existingEntities = []
+  existingEntities = [],
+  onFormStateChange
 }: ThoughtFormProps) => {
   const [content, setContent] = useState(initialData?.content || '');
   const [tags, setTags] = useState<string[]>(
@@ -50,14 +57,22 @@ export const ThoughtForm = ({
   const allTags = useDefaultTags ? [...defaultTags, ...tags] : [...tags];
   const isContentValid = content.trim().length > 0 && content.length <= 2000;
 
-  // Track unsaved changes
+  // Track unsaved changes and notify parent
   useEffect(() => {
     const contentChanged = content !== (initialData?.content || '');
     const tagsChanged = JSON.stringify(allTags.sort()) !== JSON.stringify((initialData?.relatedEntities || []).sort());
     const dateChanged = gameDate !== (initialData?.gameDate || '');
     
-    setHasUnsavedChanges(contentChanged || tagsChanged || dateChanged);
-  }, [content, allTags, gameDate, initialData]);
+    const unsaved = contentChanged || tagsChanged || dateChanged;
+    setHasUnsavedChanges(unsaved);
+
+    onFormStateChange?.({
+      isSaveDisabled: !isContentValid,
+      hasUnsavedChanges: unsaved,
+      isSubmitting,
+      handleSubmit
+    });
+  }, [content, allTags, gameDate, initialData, isContentValid, isSubmitting, onFormStateChange]);
 
   // Warn before leaving with unsaved changes
   useEffect(() => {
@@ -156,7 +171,7 @@ export const ThoughtForm = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 pb-24">
+      <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="content">What happened in your campaign?</Label>
           <Textarea
@@ -211,34 +226,6 @@ export const ThoughtForm = ({
             value={gameDate}
             onChange={(e) => setGameDate(e.target.value)}
           />
-        </div>
-
-        {/* Sticky Footer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg">
-          <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <p className="text-xs text-muted-foreground hidden sm:block">
-                <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+S</kbd> or{' '}
-                <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+Enter</kbd> to save
-              </p>
-              {hasUnsavedChanges && isContentValid && (
-                <span className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-amber-600 dark:bg-amber-400 animate-pulse" />
-                  Unsaved changes
-                </span>
-              )}
-            </div>
-            <Button
-              onClick={handleSubmit}
-              disabled={!isContentValid || isSubmitting}
-              className="min-w-32"
-            >
-              {isSubmitting 
-                ? (isEditMode ? 'Updating...' : 'Recording...') 
-                : (isEditMode ? 'Update Thought' : 'Record Thought')
-              }
-            </Button>
-          </div>
         </div>
       </CardContent>
     </Card>

@@ -17,7 +17,7 @@ export const AppFooter = () => {
   ).length : 0;
 
   return (
-    <footer className="border-t border-border bg-card/50 backdrop-blur-sm">
+    <footer className="border-t border-border bg-card/50 backdrop-blur-sm relative z-10">
       <div className="container py-4 sm:py-6">
         <div className="max-w-2xl mx-auto px-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-sm text-muted-foreground place-items-center text-center md:text-left md:place-items-start">

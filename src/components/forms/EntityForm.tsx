@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +13,12 @@ import { schemaValidationService } from '@/services/schemaValidationService';
 interface EntityFormProps {
   onSubmit: (name: string, type: EntityType, description?: string, attributes?: EntityAttribute[]) => Promise<void>;
   onCancel: () => void;
+  onFormStateChange?: (state: {
+    name: string;
+    isSaveDisabled: boolean;
+    hasUnsavedChanges: boolean;
+    isSubmitting: boolean;
+  }) => void;
 }
 
 const entityTypes = [
@@ -28,7 +33,7 @@ const entityTypes = [
   { value: 'item' as const, label: 'Item', icon: Package }
 ];
 
-export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
+export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps>(({ onSubmit, onCancel, onFormStateChange }, ref) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<EntityType>('npc');
   const [description, setDescription] = useState('');
@@ -38,10 +43,18 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
-  // Track unsaved changes
+  // Track unsaved changes and notify parent
   useEffect(() => {
-    setHasUnsavedChanges(name.trim().length > 0 || description.trim().length > 0);
-  }, [name, description]);
+    const unsaved = name.trim().length > 0 || description.trim().length > 0;
+    setHasUnsavedChanges(unsaved);
+    
+    onFormStateChange?.({
+      name,
+      isSaveDisabled: !name.trim(),
+      hasUnsavedChanges: unsaved,
+      isSubmitting
+    });
+  }, [name, description, isSubmitting, onFormStateChange]);
 
   // Warn before leaving with unsaved changes
   useEffect(() => {
@@ -194,23 +207,8 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
         defaultAttributes={defaultAttributes}
         disabled={isSubmitting}
       />
-
-      {/* Sticky Footer */}
-      <div className="sticky bottom-0 left-0 right-0 bg-background border-t border-border pt-4 pb-2 -mx-6 px-6 mt-6">
-        <div className="flex gap-2 items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+S</kbd> to save
-          </p>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim() || isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Entity'}
-            </Button>
-          </div>
-        </div>
-      </div>
     </form>
   );
-};
+});
+
+EntityForm.displayName = 'EntityForm';

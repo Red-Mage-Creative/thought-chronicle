@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,9 +36,15 @@ interface EntityEditFormProps {
     attributes?: EntityAttribute[]
   ) => Promise<void>;
   onCancel: () => void;
+  onFormStateChange?: (state: {
+    name: string;
+    isSaveDisabled: boolean;
+    hasUnsavedChanges: boolean;
+    isSubmitting: boolean;
+  }) => void;
 }
 
-export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormProps) => {
+export const EntityEditForm = forwardRef<HTMLFormElement, EntityEditFormProps>(({ entity, onSubmit, onCancel, onFormStateChange }, ref) => {
   const [name, setName] = useState(entity.name);
   const [type, setType] = useState<EntityType>(entity.type === 'uncategorized' ? 'npc' : entity.type);
   const [description, setDescription] = useState(entity.description || '');
@@ -56,7 +61,7 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
     setAllEntities(entityService.getAllEntities());
   }, []);
 
-  // Track unsaved changes
+  // Track unsaved changes and notify parent
   useEffect(() => {
     const nameChanged = name !== entity.name;
     const typeChanged = type !== entity.type;
@@ -65,8 +70,16 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
     const linkedChanged = JSON.stringify(linkedEntities) !== JSON.stringify(entity.linkedEntities || []);
     const attrsChanged = JSON.stringify(attributes) !== JSON.stringify(entity.attributes || []);
     
-    setHasUnsavedChanges(nameChanged || typeChanged || descChanged || parentsChanged || linkedChanged || attrsChanged);
-  }, [name, type, description, parentEntities, linkedEntities, attributes, entity]);
+    const unsaved = nameChanged || typeChanged || descChanged || parentsChanged || linkedChanged || attrsChanged;
+    setHasUnsavedChanges(unsaved);
+
+    onFormStateChange?.({
+      name,
+      isSaveDisabled: !name.trim(),
+      hasUnsavedChanges: unsaved,
+      isSubmitting
+    });
+  }, [name, type, description, parentEntities, linkedEntities, attributes, entity, isSubmitting, onFormStateChange]);
 
   // Warn before leaving with unsaved changes
   useEffect(() => {
@@ -237,31 +250,8 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
         defaultAttributes={defaultAttributes}
         disabled={isSubmitting}
       />
-
-      {/* Sticky Footer */}
-      <div className="sticky bottom-0 left-0 right-0 bg-background border-t border-border pt-4 pb-2 -mx-6 px-6 mt-6">
-        <div className="flex gap-2 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <p className="text-xs text-muted-foreground">
-              Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+S</kbd> to save
-            </p>
-            {hasUnsavedChanges && (
-              <span className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-amber-600 dark:bg-amber-400 animate-pulse" />
-                Unsaved changes
-              </span>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!name.trim() || isSubmitting}>
-              {isSubmitting ? 'Updating...' : 'Update Entity'}
-            </Button>
-          </div>
-        </div>
-      </div>
     </form>
   );
-};
+});
+
+EntityEditForm.displayName = 'EntityEditForm';
