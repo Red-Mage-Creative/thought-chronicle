@@ -12,7 +12,11 @@ import { useThoughts } from "@/hooks/useThoughts";
 import Index from "./pages/Index";
 import EntitiesPage from "./pages/EntitiesPage";
 import EntityDetailsPage from "./pages/EntityDetailsPage";
+import EntityCreatePage from "./pages/EntityCreatePage";
+import EntityEditPage from "./pages/EntityEditPage";
 import HistoryPage from "./pages/HistoryPage";
+import ThoughtCreatePage from "./pages/ThoughtCreatePage";
+import ThoughtEditPage from "./pages/ThoughtEditPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
 import MigrationHistoryPage from "./pages/MigrationHistoryPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -104,6 +108,26 @@ const App = () => {
                 } 
               />
               <Route 
+                path="/entities/new" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <EntityCreatePage />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/entities/:entityName/edit" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <EntityEditPage />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
                 path="/entities/:entityName" 
                 element={
                   <AuthGuard>
@@ -123,6 +147,26 @@ const App = () => {
                       <HistoryPage 
                         onEntityClick={handleEntityClick} 
                       />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/thoughts/new" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <ThoughtCreatePage />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/thoughts/:thoughtId/edit" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <ThoughtEditPage />
                     </AppLayout>
                   </AuthGuard>
                 } 
