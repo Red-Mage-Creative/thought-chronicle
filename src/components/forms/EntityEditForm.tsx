@@ -49,11 +49,37 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
   const [defaultAttributes, setDefaultAttributes] = useState<DefaultEntityAttribute[]>([]);
   const [allEntities, setAllEntities] = useState<LocalEntity[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     setAllEntities(entityService.getAllEntities());
   }, []);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const nameChanged = name !== entity.name;
+    const typeChanged = type !== entity.type;
+    const descChanged = description !== (entity.description || '');
+    const parentsChanged = JSON.stringify(parentEntities) !== JSON.stringify(entity.parentEntities || []);
+    const linkedChanged = JSON.stringify(linkedEntities) !== JSON.stringify(entity.linkedEntities || []);
+    const attrsChanged = JSON.stringify(attributes) !== JSON.stringify(entity.attributes || []);
+    
+    setHasUnsavedChanges(nameChanged || typeChanged || descChanged || parentsChanged || linkedChanged || attrsChanged);
+  }, [name, type, description, parentEntities, linkedEntities, attributes, entity]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !isSubmitting) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges, isSubmitting]);
 
   // Load default attributes when type changes
   useEffect(() => {
@@ -93,10 +119,26 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
         linkedEntities,
         attributes
       );
+      setHasUnsavedChanges(false);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Keyboard shortcut: Ctrl+S to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (name.trim() && !isSubmitting) {
+          handleSubmit(e as any);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [name, type, description, parentEntities, linkedEntities, attributes, isSubmitting]);
 
   // Get child entities to prevent circular references
   const getChildEntityNames = (entityName: string, visited = new Set<string>()): string[] => {
@@ -117,7 +159,7 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
   const excludeFromParents = [entity.name, ...childEntityNames];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="entity-name">Name</Label>
         <Input
@@ -127,6 +169,7 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
           placeholder="Enter entity name"
           disabled={isSubmitting}
           required
+          autoFocus
         />
       </div>
 
@@ -195,13 +238,29 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
         disabled={isSubmitting}
       />
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={!name.trim() || isSubmitting}>
-          {isSubmitting ? 'Updating...' : 'Update Entity'}
-        </Button>
+      {/* Sticky Footer */}
+      <div className="sticky bottom-0 left-0 right-0 bg-background border-t border-border pt-4 pb-2 -mx-6 px-6 mt-6">
+        <div className="flex gap-2 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-muted-foreground">
+              Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+S</kbd> to save
+            </p>
+            {hasUnsavedChanges && (
+              <span className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-amber-600 dark:bg-amber-400 animate-pulse" />
+                Unsaved changes
+              </span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim() || isSubmitting}>
+              {isSubmitting ? 'Updating...' : 'Update Entity'}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );

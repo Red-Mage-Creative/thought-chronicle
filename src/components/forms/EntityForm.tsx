@@ -35,7 +35,26 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
   const [attributes, setAttributes] = useState<EntityAttribute[]>([]);
   const [defaultAttributes, setDefaultAttributes] = useState<DefaultEntityAttribute[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
+
+  // Track unsaved changes
+  useEffect(() => {
+    setHasUnsavedChanges(name.trim().length > 0 || description.trim().length > 0);
+  }, [name, description]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !isSubmitting) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges, isSubmitting]);
 
   // Load default attributes when type changes
   useEffect(() => {
@@ -86,6 +105,7 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
       setType('npc');
       setDescription('');
       setAttributes([]);
+      setHasUnsavedChanges(false);
       
       toast({
         title: 'Success',
@@ -102,8 +122,23 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
     }
   };
 
+  // Keyboard shortcut: Ctrl+S to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (name.trim() && !isSubmitting) {
+          handleSubmit(e as any);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [name, type, description, attributes, isSubmitting]);
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Name *</Label>
         <Input
@@ -112,6 +147,7 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter entity name..."
           disabled={isSubmitting}
+          autoFocus
         />
       </div>
 
@@ -159,13 +195,21 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
         disabled={isSubmitting}
       />
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={!name.trim() || isSubmitting} className="flex-1">
-          {isSubmitting ? 'Creating...' : 'Create Entity'}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
-        </Button>
+      {/* Sticky Footer */}
+      <div className="sticky bottom-0 left-0 right-0 bg-background border-t border-border pt-4 pb-2 -mx-6 px-6 mt-6">
+        <div className="flex gap-2 items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            Press <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+S</kbd> to save
+          </p>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!name.trim() || isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Entity'}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );

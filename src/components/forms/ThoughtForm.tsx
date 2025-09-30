@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,10 +44,33 @@ export const ThoughtForm = ({
   const [gameDate, setGameDate] = useState(initialData?.gameDate || '');
   const [useDefaultTags, setUseDefaultTags] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
   const allTags = useDefaultTags ? [...defaultTags, ...tags] : [...tags];
   const isContentValid = content.trim().length > 0 && content.length <= 2000;
+
+  // Track unsaved changes
+  useEffect(() => {
+    const contentChanged = content !== (initialData?.content || '');
+    const tagsChanged = JSON.stringify(allTags.sort()) !== JSON.stringify((initialData?.relatedEntities || []).sort());
+    const dateChanged = gameDate !== (initialData?.gameDate || '');
+    
+    setHasUnsavedChanges(contentChanged || tagsChanged || dateChanged);
+  }, [content, allTags, gameDate, initialData]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !isSubmitting && isContentValid) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges, isSubmitting, isContentValid]);
 
   const handleSubmit = async () => {
     if (!isContentValid) return;
@@ -57,8 +80,11 @@ export const ThoughtForm = ({
       await onSubmit(content, allTags, gameDate || undefined);
       
       // Clear form (keep tags for quick note-taking)
-      setContent('');
-      setGameDate('');
+      if (!isEditMode) {
+        setContent('');
+        setGameDate('');
+      }
+      setHasUnsavedChanges(false);
       
       toast({
         title: isEditMode ? 'Thought updated' : 'Thought recorded',
@@ -82,6 +108,21 @@ export const ThoughtForm = ({
       handleSubmit();
     }
   };
+
+  // Keyboard shortcut: Ctrl+S to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (isContentValid && !isSubmitting) {
+          handleSubmit();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [content, allTags, gameDate, isSubmitting, isContentValid]);
 
   return (
     <Card className="w-full">
@@ -115,7 +156,7 @@ export const ThoughtForm = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 pb-24">
         <div className="space-y-2">
           <Label htmlFor="content">What happened in your campaign?</Label>
           <Textarea
@@ -172,16 +213,33 @@ export const ThoughtForm = ({
           />
         </div>
 
-        <Button
-          onClick={handleSubmit}
-          disabled={!isContentValid || isSubmitting}
-          className="w-full"
-        >
-          {isSubmitting 
-            ? (isEditMode ? 'Updating...' : 'Recording...') 
-            : (isEditMode ? 'Update Thought' : 'Record Thought')
-          }
-        </Button>
+        {/* Sticky Footer */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 shadow-lg">
+          <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <p className="text-xs text-muted-foreground hidden sm:block">
+                <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+S</kbd> or{' '}
+                <kbd className="px-1.5 py-0.5 text-xs font-semibold bg-muted rounded">Ctrl+Enter</kbd> to save
+              </p>
+              {hasUnsavedChanges && isContentValid && (
+                <span className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-amber-600 dark:bg-amber-400 animate-pulse" />
+                  Unsaved changes
+                </span>
+              )}
+            </div>
+            <Button
+              onClick={handleSubmit}
+              disabled={!isContentValid || isSubmitting}
+              className="min-w-32"
+            >
+              {isSubmitting 
+                ? (isEditMode ? 'Updating...' : 'Recording...') 
+                : (isEditMode ? 'Update Thought' : 'Record Thought')
+              }
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
