@@ -21,7 +21,7 @@ interface HistoryPageProps {
 
 export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
   const { thoughts, createThought, updateThought, deleteThought, refreshThoughts, isLoading } = useThoughts();
-  const { getSuggestions } = useEntities();
+  const { getSuggestions, entities } = useEntities();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -179,7 +179,8 @@ export const HistoryPage = ({ onEntityClick }: HistoryPageProps) => {
         </div>
 
         <ThoughtList 
-          thoughts={filteredThoughts} 
+          thoughts={filteredThoughts}
+          entities={entities}
           onEntityClick={onEntityClick}
           onEditThought={setEditingThought}
           onDeleteThought={setDeletingThoughtId}

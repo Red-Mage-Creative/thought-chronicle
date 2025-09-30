@@ -1,14 +1,16 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LocalThought } from '@/types/thoughts';
+import { LocalEntity } from '@/types/entities';
 
-import { Clock, Calendar, Edit, Trash2 } from 'lucide-react';
+import { Clock, Calendar, Edit, Trash2, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getEntityClass, getEntityIcon, inferEntityType } from '@/utils/entityUtils';
+import { getEntityClass, getEntityIcon } from '@/utils/entityUtils';
 import { useNavigate } from 'react-router-dom';
 
 interface ThoughtListProps {
   thoughts: LocalThought[];
+  entities: LocalEntity[];
   onEntityClick?: (entityName: string) => void;
   onEditThought?: (thought: LocalThought) => void;
   onDeleteThought?: (thoughtId: string) => void;
@@ -17,13 +19,22 @@ interface ThoughtListProps {
 
 
 export const ThoughtList = ({ 
-  thoughts, 
+  thoughts,
+  entities,
   onEntityClick, 
   onEditThought, 
   onDeleteThought, 
   isLoading 
 }: ThoughtListProps) => {
   const navigate = useNavigate();
+  
+  // Helper function to get actual entity type from entities list
+  const getEntityType = (entityName: string) => {
+    const entity = entities.find(e => 
+      e.name.toLowerCase() === entityName.toLowerCase()
+    );
+    return entity?.type || 'uncategorized';
+  };
   
   const handleEntityClick = (entityName: string) => {
     // Navigate to entity details page
@@ -74,7 +85,7 @@ export const ThoughtList = ({
             
             <div className="flex flex-wrap gap-2 mb-3">
               {thought.relatedEntities.map((entity) => {
-                const entityType = inferEntityType(entity);
+                const entityType = getEntityType(entity);
                 const Icon = getEntityIcon(entityType);
                 
                 return (

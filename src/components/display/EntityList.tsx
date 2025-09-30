@@ -85,10 +85,6 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
                       )}
                     </div>
 
-                    {entity.description && (
-                      <p className="text-sm text-muted-foreground">{entity.description}</p>
-                    )}
-
                     {entity.creationSource === 'auto' && (
                       <div className="text-xs text-muted-foreground italic">
                         Created from message tagging
