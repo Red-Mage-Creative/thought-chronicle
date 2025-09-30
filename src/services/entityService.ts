@@ -19,7 +19,8 @@ export const entityService = {
     name: string, 
     type?: EntityType, 
     description?: string,
-    creationSource: 'manual' | 'auto' = 'manual'
+    creationSource: 'manual' | 'auto' = 'manual',
+    attributes?: any[]
   ): LocalEntity {
     const data = dataStorageService.getData();
     const campaignId = campaignService.getCurrentCampaignId();
@@ -42,6 +43,7 @@ export const entityService = {
       type: inferredType,
       description,
       creationSource,
+      attributes: attributes || [],
       campaign_id: campaignId,
       created_by: userId
     });
@@ -87,7 +89,7 @@ export const entityService = {
     }));
   },
 
-  updateEntity(entityId: string, updates: Partial<Pick<LocalEntity, 'name' | 'type' | 'description'>>): LocalEntity {
+  updateEntity(entityId: string, updates: Partial<Pick<LocalEntity, 'name' | 'type' | 'description' | 'attributes'>>): LocalEntity {
     const data = dataStorageService.getData();
     const entityIndex = data.entities.findIndex(e => e.localId === entityId || e.id === entityId);
     

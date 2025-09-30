@@ -28,13 +28,14 @@ export const useEntities = () => {
     refreshEntities();
   }, []);
 
-  const createEntity = async (name: string, type?: string, description?: string) => {
+  const createEntity = async (name: string, type?: string, description?: string, attributes?: any[]) => {
     try {
       const entity = entityService.createEntity(
         name, 
         type as any, 
         description,
-        'manual'
+        'manual',
+        attributes
       );
       refreshEntities();
       return entity;

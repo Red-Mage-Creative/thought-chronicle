@@ -1,5 +1,18 @@
 export type EntityType = 'pc' | 'npc' | 'race' | 'religion' | 'quest' | 'enemy' | 'location' | 'organization' | 'item' | 'uncategorized';
 
+export interface EntityAttribute {
+  key: string;
+  value: string;
+}
+
+export interface DefaultEntityAttribute {
+  id?: string;
+  key: string;
+  defaultValue?: string;
+  required: boolean;
+  entityTypes: EntityType[];
+}
+
 export interface BaseEntity {
   id?: string;
   name: string;
@@ -7,6 +20,7 @@ export interface BaseEntity {
   description?: string;
   parentEntities?: string[];  // Array of entity IDs/names representing hierarchical parents
   linkedEntities?: string[];  // Array of entity IDs/names representing non-hierarchical relationships
+  attributes?: EntityAttribute[];  // Array of key-value pairs
 }
 
 export interface CampaignEntity extends BaseEntity {

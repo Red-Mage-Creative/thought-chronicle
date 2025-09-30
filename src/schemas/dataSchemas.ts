@@ -14,6 +14,7 @@ export const EntitySchema: FieldSchema = {
     'description', 
     'parentEntities', 
     'linkedEntities', 
+    'attributes',
     'creationSource', 
     'createdLocally', 
     'modifiedLocally'
@@ -24,6 +25,7 @@ export const EntitySchema: FieldSchema = {
     creationSource: 'manual' as const,
     parentEntities: [] as string[],
     linkedEntities: [] as string[],
+    attributes: [] as any[],
     createdLocally: () => new Date(),
     modifiedLocally: () => new Date()
   }

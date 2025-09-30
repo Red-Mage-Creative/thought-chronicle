@@ -16,6 +16,7 @@ export interface LocalDataStore {
   // Campaign-scoped data
   thoughts: LocalThought[];
   entities: LocalEntity[];
+  defaultEntityAttributes: any[];  // DefaultEntityAttribute[]
   pendingChanges: PendingChanges;
   lastSyncTime: Date | null;
   lastRefreshTime: Date | null;
@@ -29,6 +30,7 @@ const getDefaultStore = (): LocalDataStore => ({
   campaigns: [],
   thoughts: [],
   entities: [],
+  defaultEntityAttributes: [],
   pendingChanges: {
     campaigns: { added: [], modified: [], deleted: [] },
     thoughts: { added: [], modified: [], deleted: [] },
@@ -376,5 +378,24 @@ export const dataStorageService = {
     } catch (error) {
       // Error clearing localStorage
     }
+  },
+
+  // Get default entity attributes
+  getDefaultEntityAttributes(): any[] {
+    const data = this.getData();
+    return data.defaultEntityAttributes || [];
+  },
+
+  // Save default entity attributes
+  saveDefaultEntityAttributes(attributes: any[]): void {
+    const data = this.getData();
+    data.defaultEntityAttributes = attributes;
+    this.saveData(data);
+  },
+
+  // Get default attributes for a specific entity type
+  getDefaultAttributesForEntityType(entityType: string): any[] {
+    const allDefaults = this.getDefaultEntityAttributes();
+    return allDefaults.filter(attr => attr.entityTypes.includes(entityType));
   }
 };

@@ -267,5 +267,32 @@ export const schemaValidationService = {
     });
     
     return { valid, invalid, errors };
+  },
+
+  /**
+   * Validate that all required attributes are present for an entity
+   */
+  validateRequiredAttributes(
+    entity: LocalEntity, 
+    defaultAttributes: any[]
+  ): { valid: boolean; missingFields: string[] } {
+    const requiredAttrs = defaultAttributes.filter(attr => attr.required);
+    const entityAttrs = entity.attributes || [];
+    const missingFields: string[] = [];
+
+    requiredAttrs.forEach(reqAttr => {
+      const hasAttribute = entityAttrs.some(
+        entityAttr => entityAttr.key.toLowerCase() === reqAttr.key.toLowerCase()
+      );
+      
+      if (!hasAttribute) {
+        missingFields.push(reqAttr.key);
+      }
+    });
+
+    return {
+      valid: missingFields.length === 0,
+      missingFields
+    };
   }
 };

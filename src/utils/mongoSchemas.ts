@@ -20,6 +20,10 @@ export const MongoEntitySchema = z.object({
   description: z.string().optional(),
   parentEntities: z.array(z.string()).optional(),
   linkedEntities: z.array(z.string()).optional(),
+  attributes: z.array(z.object({
+    key: z.string(),
+    value: z.string()
+  })).optional(),
   campaign_id: z.string().min(1, 'Campaign ID is required'),
   created_by: z.string().min(1, 'Creator ID is required'),
   creationSource: z.enum(['manual', 'auto']).optional(),
