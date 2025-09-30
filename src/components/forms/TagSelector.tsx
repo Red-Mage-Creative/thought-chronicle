@@ -189,7 +189,10 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
                 className={`w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
                   index === selectedIndex ? 'bg-accent text-accent-foreground' : ''
                 }`}
-                onClick={() => addTag(suggestion.name)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  addTag(suggestion.name);
+                }}
               >
                 <div className="flex items-center justify-between">
                   <span>{suggestion.name}</span>
@@ -205,7 +208,8 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
               className={`w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
                 selectedIndex === filteredSuggestions.length ? 'bg-accent text-accent-foreground' : ''
               }`}
-              onClick={() => {
+              onMouseDown={(e) => {
+                e.preventDefault();
                 if (inputValue.trim()) {
                   if (inputValue.includes(',')) {
                     addMultipleTags(inputValue);

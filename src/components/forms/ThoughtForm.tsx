@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { TagSelector } from './TagSelector';
 import { Settings } from '@/components/Settings';
 import { EntitySuggestion } from '@/types/entities';
-import { Pin } from 'lucide-react';
+import { Pin, X } from 'lucide-react';
 
 interface ThoughtFormProps {
   onSubmit: (content: string, tags: string[], gameDate?: string) => Promise<void>;
@@ -41,10 +41,11 @@ export const ThoughtForm = ({
     initialData?.relatedEntities?.filter(entity => !defaultTags.includes(entity)) || []
   );
   const [gameDate, setGameDate] = useState(initialData?.gameDate || '');
+  const [useDefaultTags, setUseDefaultTags] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const allTags = [...defaultTags, ...tags];
+  const allTags = useDefaultTags ? [...defaultTags, ...tags] : [...tags];
   const isContentValid = content.trim().length > 0 && content.length <= 2000;
 
   const handleSubmit = async () => {
@@ -54,14 +55,15 @@ export const ThoughtForm = ({
     try {
       await onSubmit(content, allTags, gameDate || undefined);
       
-      // Clear form
+      // Clear form (keep tags for quick note-taking)
       setContent('');
-      setTags([]);
       setGameDate('');
       
       toast({
         title: isEditMode ? 'Thought updated' : 'Thought recorded',
-        description: isEditMode ? 'Your thought has been updated successfully.' : 'Your thought has been saved successfully.'
+        description: isEditMode 
+          ? 'Your thought has been updated successfully.' 
+          : 'Your thought has been saved successfully. Tags retained for next entry.'
       });
     } catch (error) {
       toast({
@@ -87,13 +89,25 @@ export const ThoughtForm = ({
           <CardTitle className="text-foreground">
             {isEditMode ? 'Edit Thought' : 'Record a Thought'}
           </CardTitle>
-          {showSettings && onDefaultTagsChange && (
-            <Settings
-              defaultTags={defaultTags}
-              onDefaultTagsChange={onDefaultTagsChange}
-              existingEntities={existingEntities}
-            />
-          )}
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant={useDefaultTags ? "default" : "outline"}
+              size="sm"
+              onClick={() => setUseDefaultTags(!useDefaultTags)}
+              className="gap-2"
+            >
+              <Pin className="h-4 w-4" />
+              Use Default Tags
+            </Button>
+            {showSettings && onDefaultTagsChange && (
+              <Settings
+                defaultTags={defaultTags}
+                onDefaultTagsChange={onDefaultTagsChange}
+                existingEntities={existingEntities}
+              />
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -116,13 +130,30 @@ export const ThoughtForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label>Tags (Characters, Locations, Items, etc.)</Label>
+          <div className="flex items-center justify-between">
+            <Label>
+              Tags (Characters, Locations, Items, etc.)
+              <span className="text-muted-foreground ml-2">({allTags.length} active)</span>
+            </Label>
+            {tags.length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setTags([])}
+                className="h-auto py-1 px-2 gap-1"
+              >
+                <X className="h-3 w-3" />
+                Clear tags
+              </Button>
+            )}
+          </div>
           <TagSelector
             tags={tags}
             onTagsChange={setTags}
             suggestions={suggestions}
             placeholder="Add additional tags..."
-            defaultTags={defaultTags}
+            defaultTags={useDefaultTags ? defaultTags : []}
           />
         </div>
 
