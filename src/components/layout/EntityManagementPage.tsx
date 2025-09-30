@@ -52,9 +52,9 @@ export const EntityManagementPage = ({ onEntityClick }: EntityManagementPageProp
     }
   };
 
-  const handleEntityCreate = async (name: string, type: EntityType, description?: string) => {
+  const handleEntityCreate = async (name: string, type: EntityType, description?: string, attributes?: any[]) => {
     try {
-      await createEntity(name, type, description);
+      await createEntity(name, type, description, attributes);
       setShowModal(false);
       toast.success(`Entity "${name}" created successfully`);
     } catch (error: any) {

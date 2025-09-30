@@ -112,14 +112,15 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
     type: EntityType, 
     description?: string,
     newParentEntities?: string[],
-    newLinkedEntities?: string[]
+    newLinkedEntities?: string[],
+    attributes?: any[]
   ) => {
     if (!entity) return;
 
     try {
       const updatedEntity = entityService.updateEntity(
         entity.localId || entity.id!,
-        { name, type, description }
+        { name, type, description, attributes }
       );
 
       // Handle parent entity changes
@@ -324,6 +325,24 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
               )}
             </div>
           </div>
+
+          {/* Entity Attributes */}
+          {entity.attributes && entity.attributes.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <h3 className="font-semibold text-base">Attributes</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {entity.attributes.map((attr, index) => (
+                    <div key={index} className="space-y-1">
+                      <div className="text-xs text-muted-foreground font-medium">{attr.key}</div>
+                      <div className="text-sm">{attr.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Entity Relationships */}
           <Separator />

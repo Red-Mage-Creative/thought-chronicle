@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { EntityType } from '@/types/entities';
+import { EntityType, EntityAttribute, DefaultEntityAttribute } from '@/types/entities';
 import { UserCheck, Users, Footprints, Church, ScrollText, Skull, MapPin, Shield, Package } from 'lucide-react';
+import { AttributeEditor } from './AttributeEditor';
+import { dataStorageService } from '@/services/dataStorageService';
+import { schemaValidationService } from '@/services/schemaValidationService';
 
 interface EntityFormProps {
-  onSubmit: (name: string, type: EntityType, description?: string) => Promise<void>;
+  onSubmit: (name: string, type: EntityType, description?: string, attributes?: EntityAttribute[]) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -29,8 +32,23 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<EntityType>('npc');
   const [description, setDescription] = useState('');
+  const [attributes, setAttributes] = useState<EntityAttribute[]>([]);
+  const [defaultAttributes, setDefaultAttributes] = useState<DefaultEntityAttribute[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  // Load default attributes when type changes
+  useEffect(() => {
+    const defaults = dataStorageService.getDefaultAttributesForEntityType(type);
+    setDefaultAttributes(defaults);
+    
+    // Pre-populate attributes with defaults that have default values
+    const initialAttributes: EntityAttribute[] = defaults
+      .filter(attr => attr.defaultValue)
+      .map(attr => ({ key: attr.key, value: attr.defaultValue! }));
+    
+    setAttributes(initialAttributes);
+  }, [type]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,14 +62,30 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
       return;
     }
 
+    // Validate required attributes
+    const validation = schemaValidationService.validateRequiredAttributes(
+      { name, type, attributes } as any,
+      defaultAttributes
+    );
+
+    if (!validation.valid) {
+      toast({
+        title: 'Missing Required Attributes',
+        description: `Please fill in: ${validation.missingFields.join(', ')}`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await onSubmit(name.trim(), type, description.trim() || undefined);
+      await onSubmit(name.trim(), type, description.trim() || undefined, attributes);
       
       // Reset form
       setName('');
       setType('npc');
       setDescription('');
+      setAttributes([]);
       
       toast({
         title: 'Success',
@@ -117,6 +151,13 @@ export const EntityForm = ({ onSubmit, onCancel }: EntityFormProps) => {
           Supports markdown: **bold**, *italic*, [links](url), lists, and more
         </p>
       </div>
+
+      <AttributeEditor
+        attributes={attributes}
+        onChange={setAttributes}
+        defaultAttributes={defaultAttributes}
+        disabled={isSubmitting}
+      />
 
       <div className="flex gap-2">
         <Button type="submit" disabled={!name.trim() || isSubmitting} className="flex-1">

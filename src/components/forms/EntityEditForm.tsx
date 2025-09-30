@@ -4,11 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { EntityType, LocalEntity } from '@/types/entities';
+import { EntityType, LocalEntity, EntityAttribute, DefaultEntityAttribute } from '@/types/entities';
 import { getEntityIcon } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 import { EntityRelationshipSelector } from './EntityRelationshipSelector';
+import { AttributeEditor } from './AttributeEditor';
 import { entityService } from '@/services/entityService';
+import { dataStorageService } from '@/services/dataStorageService';
+import { schemaValidationService } from '@/services/schemaValidationService';
+import { useToast } from '@/hooks/use-toast';
 
 const entityTypes = [
   { value: 'pc' as const, label: 'Player Character', icon: getEntityIcon('pc') },
@@ -29,7 +33,8 @@ interface EntityEditFormProps {
     type: EntityType, 
     description?: string,
     parentEntities?: string[],
-    linkedEntities?: string[]
+    linkedEntities?: string[],
+    attributes?: EntityAttribute[]
   ) => Promise<void>;
   onCancel: () => void;
 }
@@ -40,17 +45,41 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
   const [description, setDescription] = useState(entity.description || '');
   const [parentEntities, setParentEntities] = useState<string[]>(entity.parentEntities || []);
   const [linkedEntities, setLinkedEntities] = useState<string[]>(entity.linkedEntities || []);
+  const [attributes, setAttributes] = useState<EntityAttribute[]>(entity.attributes || []);
+  const [defaultAttributes, setDefaultAttributes] = useState<DefaultEntityAttribute[]>([]);
   const [allEntities, setAllEntities] = useState<LocalEntity[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     setAllEntities(entityService.getAllEntities());
   }, []);
 
+  // Load default attributes when type changes
+  useEffect(() => {
+    const defaults = dataStorageService.getDefaultAttributesForEntityType(type);
+    setDefaultAttributes(defaults);
+  }, [type]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
+      return;
+    }
+
+    // Validate required attributes
+    const validation = schemaValidationService.validateRequiredAttributes(
+      { name, type, attributes } as any,
+      defaultAttributes
+    );
+
+    if (!validation.valid) {
+      toast({
+        title: 'Missing Required Attributes',
+        description: `Please fill in: ${validation.missingFields.join(', ')}`,
+        variant: 'destructive'
+      });
       return;
     }
 
@@ -61,7 +90,8 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
         type, 
         description.trim() || undefined,
         parentEntities,
-        linkedEntities
+        linkedEntities,
+        attributes
       );
     } finally {
       setIsSubmitting(false);
@@ -154,6 +184,13 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
         excludeIds={[entity.name]}
         onAdd={(entityName) => setLinkedEntities([...linkedEntities, entityName])}
         onRemove={(entityName) => setLinkedEntities(linkedEntities.filter(e => e !== entityName))}
+        disabled={isSubmitting}
+      />
+
+      <AttributeEditor
+        attributes={attributes}
+        onChange={setAttributes}
+        defaultAttributes={defaultAttributes}
         disabled={isSubmitting}
       />
 
