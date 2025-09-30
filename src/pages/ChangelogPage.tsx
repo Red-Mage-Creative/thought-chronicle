@@ -45,13 +45,16 @@ const changelog: ChangelogEntry[] = [{
   ],
   fixes: [],
   docs: [
-    "Documented ID-based reference architecture pattern",
+    "Created ID_BASED_REFERENCES.md with complete system architecture and API documentation",
+    "Created TESTING_STRATEGY.md with testing philosophy, patterns, and best practices",
+    "Documented ID-based reference architecture pattern with migration guide",
     "Added migration rollback capabilities for v1.3.0",
-    "Documented new entity service helper methods",
+    "Documented new entity service helper methods with usage examples",
     "Added comprehensive JSDoc comments to all ID-based methods",
     "Added inline documentation explaining name→ID conversion in forms",
     "Documented cascade deletion modes and their use cases",
-    "Added comprehensive validation documentation"
+    "Added comprehensive validation documentation with troubleshooting guide",
+    "Documented performance improvements (5-10x faster lookups for large datasets)"
   ],
   refactor: [
     "Major architectural refactor: Entity references now use IDs instead of names",
