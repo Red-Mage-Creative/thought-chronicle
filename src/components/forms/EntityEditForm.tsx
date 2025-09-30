@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { EntityType, LocalEntity } from '@/types/entities';
 import { getEntityIcon } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
+import { EntityRelationshipSelector } from './EntityRelationshipSelector';
+import { entityService } from '@/services/entityService';
 
 const entityTypes = [
   { value: 'pc' as const, label: 'Player Character', icon: getEntityIcon('pc') },
@@ -22,7 +24,13 @@ const entityTypes = [
 
 interface EntityEditFormProps {
   entity: LocalEntity;
-  onSubmit: (name: string, type: EntityType, description?: string) => Promise<void>;
+  onSubmit: (
+    name: string, 
+    type: EntityType, 
+    description?: string,
+    parentEntities?: string[],
+    linkedEntities?: string[]
+  ) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -30,7 +38,14 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
   const [name, setName] = useState(entity.name);
   const [type, setType] = useState<EntityType>(entity.type === 'uncategorized' ? 'npc' : entity.type);
   const [description, setDescription] = useState(entity.description || '');
+  const [parentEntities, setParentEntities] = useState<string[]>(entity.parentEntities || []);
+  const [linkedEntities, setLinkedEntities] = useState<string[]>(entity.linkedEntities || []);
+  const [allEntities, setAllEntities] = useState<LocalEntity[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setAllEntities(entityService.getAllEntities());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,11 +56,35 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
 
     setIsSubmitting(true);
     try {
-      await onSubmit(name.trim(), type, description.trim() || undefined);
+      await onSubmit(
+        name.trim(), 
+        type, 
+        description.trim() || undefined,
+        parentEntities,
+        linkedEntities
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Get child entities to prevent circular references
+  const getChildEntityNames = (entityName: string, visited = new Set<string>()): string[] => {
+    if (visited.has(entityName)) return [];
+    visited.add(entityName);
+    
+    const children = entityService.getChildEntities(entityName);
+    let allDescendants = children.map(c => c.name);
+    
+    children.forEach(child => {
+      allDescendants = [...allDescendants, ...getChildEntityNames(child.name, visited)];
+    });
+    
+    return allDescendants;
+  };
+
+  const childEntityNames = getChildEntityNames(entity.name);
+  const excludeFromParents = [entity.name, ...childEntityNames];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,6 +133,26 @@ export const EntityEditForm = ({ entity, onSubmit, onCancel }: EntityEditFormPro
           rows={3}
         />
       </div>
+
+      <EntityRelationshipSelector
+        label="Parent Entities"
+        selectedEntities={parentEntities}
+        availableEntities={allEntities}
+        excludeIds={excludeFromParents}
+        onAdd={(entityName) => setParentEntities([...parentEntities, entityName])}
+        onRemove={(entityName) => setParentEntities(parentEntities.filter(e => e !== entityName))}
+        disabled={isSubmitting}
+      />
+
+      <EntityRelationshipSelector
+        label="Linked Entities"
+        selectedEntities={linkedEntities}
+        availableEntities={allEntities}
+        excludeIds={[entity.name]}
+        onAdd={(entityName) => setLinkedEntities([...linkedEntities, entityName])}
+        onRemove={(entityName) => setLinkedEntities(linkedEntities.filter(e => e !== entityName))}
+        disabled={isSubmitting}
+      />
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, User, Clock } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, Clock, Network, GitBranch, Link2 } from 'lucide-react';
 import { LocalEntity, EntityWithMetrics, EntityType } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { entityService } from '@/services/entityService';
@@ -15,6 +15,7 @@ import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 import { format } from 'date-fns';
 import { EntityEditForm } from '@/components/forms/EntityEditForm';
+import { EntityRelationshipDisplay } from '@/components/display/EntityRelationshipDisplay';
 import { useToast } from '@/hooks/use-toast';
 
 interface EntityDetailsPageProps {
@@ -27,6 +28,9 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
   const { toast } = useToast();
   const [entity, setEntity] = useState<EntityWithMetrics | null>(null);
   const [relatedThoughts, setRelatedThoughts] = useState<LocalThought[]>([]);
+  const [parentEntities, setParentEntities] = useState<LocalEntity[]>([]);
+  const [childEntities, setChildEntities] = useState<LocalEntity[]>([]);
+  const [linkedEntities, setLinkedEntities] = useState<LocalEntity[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -70,6 +74,23 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
         ).sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
         setRelatedThoughts(related);
+
+        // Get relationship entities
+        const allEntities = entityService.getAllEntities();
+        
+        // Parent entities
+        const parents = (foundEntity.parentEntities || [])
+          .map(name => allEntities.find(e => e.name === name))
+          .filter((e): e is LocalEntity => e !== undefined);
+        setParentEntities(parents);
+
+        // Child entities
+        const children = entityService.getChildEntities(foundEntity.name);
+        setChildEntities(children);
+
+        // Linked entities
+        const linked = entityService.getLinkedEntities(foundEntity.name);
+        setLinkedEntities(linked);
       } catch (error) {
         toast({
           title: "Error loading entity",
@@ -85,7 +106,13 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
     loadEntityData();
   }, [entityName, navigate, toast]);
 
-  const handleEdit = async (name: string, type: EntityType, description?: string) => {
+  const handleEdit = async (
+    name: string, 
+    type: EntityType, 
+    description?: string,
+    newParentEntities?: string[],
+    newLinkedEntities?: string[]
+  ) => {
     if (!entity) return;
 
     try {
@@ -93,6 +120,44 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
         entity.localId || entity.id!,
         { name, type, description }
       );
+
+      // Handle parent entity changes
+      if (newParentEntities !== undefined) {
+        const currentParents = entity.parentEntities || [];
+        
+        // Remove old parents
+        currentParents.forEach(parent => {
+          if (!newParentEntities.includes(parent)) {
+            entityService.removeParentEntity(entity.localId || entity.id!, parent);
+          }
+        });
+        
+        // Add new parents
+        newParentEntities.forEach(parent => {
+          if (!currentParents.includes(parent)) {
+            entityService.addParentEntity(entity.localId || entity.id!, parent);
+          }
+        });
+      }
+
+      // Handle linked entity changes
+      if (newLinkedEntities !== undefined) {
+        const currentLinked = entity.linkedEntities || [];
+        
+        // Remove old links
+        currentLinked.forEach(linked => {
+          if (!newLinkedEntities.includes(linked)) {
+            entityService.removeLinkedEntity(entity.localId || entity.id!, linked);
+          }
+        });
+        
+        // Add new links
+        newLinkedEntities.forEach(linked => {
+          if (!currentLinked.includes(linked)) {
+            entityService.addLinkedEntity(entity.localId || entity.id!, linked);
+          }
+        });
+      }
 
       // If name changed, navigate to new URL
       if (name !== entity.name) {
@@ -136,8 +201,11 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
   };
 
   const handleThoughtClick = (thoughtId: string) => {
-    // Navigate to history page with the thought selected/highlighted
     navigate(`/history?highlight=${thoughtId}`);
+  };
+
+  const handleEntityClick = (entityName: string) => {
+    navigate(`/entities/${encodeURIComponent(entityName)}`);
   };
 
   if (isLoading) {
@@ -252,6 +320,36 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
               )}
             </div>
           </div>
+
+          {/* Entity Relationships */}
+          {(parentEntities.length > 0 || childEntities.length > 0 || linkedEntities.length > 0) && (
+            <>
+              <Separator />
+              <div className="grid md:grid-cols-3 gap-6">
+                <EntityRelationshipDisplay
+                  title="Parent Entities"
+                  icon={Network}
+                  entities={parentEntities}
+                  emptyMessage="No parent entities"
+                  onEntityClick={handleEntityClick}
+                />
+                <EntityRelationshipDisplay
+                  title="Child Entities"
+                  icon={GitBranch}
+                  entities={childEntities}
+                  emptyMessage="No child entities"
+                  onEntityClick={handleEntityClick}
+                />
+                <EntityRelationshipDisplay
+                  title="Linked Entities"
+                  icon={Link2}
+                  entities={linkedEntities}
+                  emptyMessage="No linked entities"
+                  onEntityClick={handleEntityClick}
+                />
+              </div>
+            </>
+          )}
 
           <Separator />
 
