@@ -402,6 +402,10 @@ export default function DesignSystemPage() {
                         <Building className="h-3 w-3 mr-1" />
                         Organization
                       </Badge>
+                      <Badge className="entity-plot-thread cursor-pointer hover:opacity-80 transition-opacity">
+                        <Building className="h-3 w-3 mr-1" />
+                        Plot Thread
+                      </Badge>
                       <Badge className="entity-uncategorized cursor-pointer hover:opacity-80 transition-opacity">
                         <Tag className="h-3 w-3 mr-1" />
                         Uncategorized
@@ -410,6 +414,16 @@ export default function DesignSystemPage() {
                   <p className="text-xs text-muted-foreground">
                     Icons are automatically inferred based on entity type using the getEntityIcon utility function.
                   </p>
+                  <div className="space-y-2 bg-muted/50 p-4 rounded-md mt-4">
+                    <p className="text-sm font-medium">Centralized Configuration:</p>
+                    <p className="text-xs text-muted-foreground">
+                      All entity types are now defined in <code className="bg-muted px-1 py-0.5 rounded">src/config/entityTypeConfig.ts</code> as a single source of truth.
+                      This ensures consistency across manual creation, auto-creation from thoughts, editing, and all display components.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Available entity classes: entity-pc, entity-npc, entity-race, entity-religion, entity-quest, entity-enemy, entity-location, entity-organization, entity-item, entity-plot-thread, entity-uncategorized
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

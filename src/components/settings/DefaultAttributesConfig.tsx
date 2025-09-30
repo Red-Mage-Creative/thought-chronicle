@@ -14,8 +14,10 @@ import { dataStorageService } from '@/services/dataStorageService';
 import { getEntityIcon } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 import { useToast } from '@/hooks/use-toast';
+import { getAllEntityTypeValues } from '@/config/entityTypeConfig';
 
-const entityTypes: EntityType[] = ['pc', 'npc', 'race', 'religion', 'quest', 'enemy', 'location', 'organization', 'item'];
+// Entity types are now centralized in entityTypeConfig.ts
+const entityTypes: EntityType[] = getAllEntityTypeValues();
 
 export const DefaultAttributesConfig = () => {
   const [attributes, setAttributes] = useState<DefaultEntityAttribute[]>(

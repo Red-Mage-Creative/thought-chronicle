@@ -37,7 +37,7 @@ export const businessLogicService = {
         if (!entityMap.has(key)) {
           entityMap.set(key, {
             name: entityName,
-            type: 'character' // Default type for mentioned-only entities
+            type: 'npc' // Default type for mentioned-only entities
           });
         }
       });

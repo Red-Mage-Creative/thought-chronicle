@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EntityType, LocalEntity, EntityAttribute, DefaultEntityAttribute } from '@/types/entities';
-import { getEntityIcon } from '@/utils/entityUtils';
+import { ENTITY_TYPE_CONFIGS } from '@/config/entityTypeConfig';
 import { capitalize } from '@/utils/formatters';
 import { EntityRelationshipSelector } from './EntityRelationshipSelector';
 import { AttributeEditor } from './AttributeEditor';
@@ -13,17 +13,8 @@ import { dataStorageService } from '@/services/dataStorageService';
 import { schemaValidationService } from '@/services/schemaValidationService';
 import { useToast } from '@/hooks/use-toast';
 
-const entityTypes = [
-  { value: 'pc' as const, label: 'Player Character', icon: getEntityIcon('pc') },
-  { value: 'npc' as const, label: 'NPC', icon: getEntityIcon('npc') },
-  { value: 'race' as const, label: 'Race', icon: getEntityIcon('race') },
-  { value: 'religion' as const, label: 'Religion', icon: getEntityIcon('religion') },
-  { value: 'quest' as const, label: 'Quest', icon: getEntityIcon('quest') },
-  { value: 'enemy' as const, label: 'Enemy', icon: getEntityIcon('enemy') },
-  { value: 'location' as const, label: 'Location', icon: getEntityIcon('location') },
-  { value: 'organization' as const, label: 'Organization', icon: getEntityIcon('organization') },
-  { value: 'item' as const, label: 'Item', icon: getEntityIcon('item') },
-] as const;
+// Entity types are now centralized in entityTypeConfig.ts
+const entityTypes = ENTITY_TYPE_CONFIGS;
 
 interface EntityEditFormProps {
   entity: LocalEntity;

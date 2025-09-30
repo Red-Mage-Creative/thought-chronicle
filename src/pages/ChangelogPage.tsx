@@ -18,6 +18,29 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.2.0",
+  date: "2025-09-30",
+  features: [
+    "Added Plot Thread entity type for tracking storylines, mysteries, and campaign to-dos",
+    "Created centralized entity type configuration for consistency across all forms"
+  ],
+  improvements: [
+    "Improved entity type consistency across manual creation, auto-creation, and editing flows",
+    "Enhanced entity suggestions to use valid entity types"
+  ],
+  fixes: [
+    "Fixed invalid entity types being hidden - now properly shown as uncategorized",
+    "Fixed entity suggestions using invalid 'character' type - now uses 'npc'",
+    "Fixed gaps between entities created in different flows"
+  ],
+  docs: [
+    "Documented centralized entity type configuration pattern in design system"
+  ],
+  maintenance: [
+    "Created src/config/entityTypeConfig.ts as single source of truth for entity types",
+    "Refactored all forms to use centralized entity type configuration"
+  ]
+}, {
   version: "0.9.0",
   date: "2025-09-30",
   features: [

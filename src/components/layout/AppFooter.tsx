@@ -35,7 +35,7 @@ export const AppFooter = () => {
                   className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline"
                 >
                   <FileText className="h-3 w-3" />
-                  Alpha - Version 0.9.0
+                  Alpha - Version 1.2.0
                 </a>
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground/70">Built with Lovable</div>

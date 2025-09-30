@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { EntityType, EntityAttribute, DefaultEntityAttribute } from '@/types/entities';
-import { UserCheck, Users, Footprints, Church, ScrollText, Skull, MapPin, Shield, Package } from 'lucide-react';
+import { ENTITY_TYPE_CONFIGS } from '@/config/entityTypeConfig';
 import { AttributeEditor } from './AttributeEditor';
 import { dataStorageService } from '@/services/dataStorageService';
 import { schemaValidationService } from '@/services/schemaValidationService';
@@ -21,17 +21,8 @@ interface EntityFormProps {
   }) => void;
 }
 
-const entityTypes = [
-  { value: 'pc' as const, label: 'Player Character', icon: UserCheck },
-  { value: 'npc' as const, label: 'NPC', icon: Users },
-  { value: 'race' as const, label: 'Race', icon: Footprints },
-  { value: 'religion' as const, label: 'Religion', icon: Church },
-  { value: 'quest' as const, label: 'Quest', icon: ScrollText },
-  { value: 'enemy' as const, label: 'Enemy', icon: Skull },
-  { value: 'location' as const, label: 'Location', icon: MapPin },
-  { value: 'organization' as const, label: 'Organization', icon: Shield },
-  { value: 'item' as const, label: 'Item', icon: Package }
-];
+// Entity types are now centralized in entityTypeConfig.ts
+const entityTypes = ENTITY_TYPE_CONFIGS;
 
 export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps>(({ onSubmit, onCancel, onFormStateChange }, ref) => {
   const [name, setName] = useState('');
