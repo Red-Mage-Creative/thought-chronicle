@@ -121,4 +121,113 @@ describe('schemaValidationService', () => {
       expect(errors.length).toBe(0);
     });
   });
+
+  describe('date validation edge cases', () => {
+    it('should handle invalid date strings', () => {
+      const entity = {
+        name: 'Test Entity',
+        type: 'npc' as EntityType,
+        campaign_id: 'campaign-1',
+        created_by: 'user-1',
+        syncStatus: 'pending' as const,
+        createdLocally: 'not-a-date',
+        modifiedLocally: 'also-not-a-date'
+      };
+      
+      const { entity: validated } = schemaValidationService.validateEntity(entity);
+      
+      // Should fall back to current date for invalid strings
+      expect(validated.createdLocally).toBeInstanceOf(Date);
+      expect(validated.modifiedLocally).toBeInstanceOf(Date);
+      expect(validated.createdLocally.toString()).not.toBe('Invalid Date');
+      expect(validated.modifiedLocally.toString()).not.toBe('Invalid Date');
+    });
+
+    it('should handle null dates', () => {
+      const entity = {
+        name: 'Test Entity',
+        type: 'npc' as EntityType,
+        campaign_id: 'campaign-1',
+        created_by: 'user-1',
+        syncStatus: 'pending' as const,
+        createdLocally: null as any,
+        modifiedLocally: null as any
+      };
+      
+      const { entity: validated } = schemaValidationService.validateEntity(entity);
+      
+      expect(validated.createdLocally).toBeInstanceOf(Date);
+      expect(validated.modifiedLocally).toBeInstanceOf(Date);
+    });
+
+    it('should handle malformed date objects', () => {
+      const entity = {
+        name: 'Test Entity',
+        type: 'npc' as EntityType,
+        campaign_id: 'campaign-1',
+        created_by: 'user-1',
+        syncStatus: 'pending' as const,
+        createdLocally: new Date('invalid'),
+        modifiedLocally: new Date('bad-date')
+      };
+      
+      const { entity: validated } = schemaValidationService.validateEntity(entity);
+      
+      // Should replace invalid Date objects
+      expect(validated.createdLocally).toBeInstanceOf(Date);
+      expect(validated.modifiedLocally).toBeInstanceOf(Date);
+      expect(validated.createdLocally.toString()).not.toBe('Invalid Date');
+      expect(validated.modifiedLocally.toString()).not.toBe('Invalid Date');
+    });
+  });
+
+  describe('validateAllEntities', () => {
+    it('should separate valid and invalid entities', () => {
+      const entities = [
+        {
+          name: 'Valid Entity',
+          type: 'npc' as EntityType,
+          campaign_id: 'campaign-1',
+          created_by: 'user-1',
+          syncStatus: 'pending' as const
+        },
+        {
+          name: 'Invalid Entity',
+          // Missing required fields
+        }
+      ];
+      
+      const result = schemaValidationService.validateAllEntities(entities);
+      
+      expect(result.valid.length).toBe(1);
+      expect(result.invalid.length).toBe(1);
+      expect(result.valid[0].name).toBe('Valid Entity');
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should provide validation summary', () => {
+      const entities = [
+        {
+          name: 'Entity 1',
+          type: 'npc' as EntityType,
+          campaign_id: 'campaign-1',
+          created_by: 'user-1',
+          syncStatus: 'pending' as const
+        },
+        {
+          name: 'Entity 2',
+          type: 'location' as EntityType,
+          campaign_id: 'campaign-1',
+          created_by: 'user-1',
+          syncStatus: 'pending' as const,
+          parentEntities: null as any // Will be fixed
+        }
+      ];
+      
+      const result = schemaValidationService.validateAllEntities(entities);
+      
+      expect(result.valid.length).toBe(2);
+      expect(result.valid[1].parentEntities).toEqual([]);
+    });
+  });
 });

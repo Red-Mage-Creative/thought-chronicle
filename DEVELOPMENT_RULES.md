@@ -16,7 +16,7 @@
 - Group changes by type: feat, fix, docs, style, refactor, test, chore
 - Check the ***Current*** date and use that for the change log. Use a function if you need to find the actual current date. 
 
-### Current Version: 0.8.0
+### Current Version: 0.8.1
 
 ## Rule 3: Clean Code Principles for Component Development
 ### 3.1 Component Structure & Naming
@@ -119,6 +119,59 @@ Add a new migration when:
 - PATCH (0.7.1): Bug fixes, no schema changes
 - MINOR (0.8.0): New features, backward-compatible schema changes
 - MAJOR (1.0.0): Breaking changes OR production-ready release
+
+### 5.5 Migration Progress & Error Handling
+
+#### Progress Callbacks
+When running migrations programmatically, use progress callbacks for user feedback:
+
+```typescript
+await dataMigrationService.runMigrations({
+  onProgress: (progress) => {
+    console.log(`Phase: ${progress.phase}`);
+    console.log(`Status: ${progress.status}`);
+    
+    if (progress.phase === 'migration') {
+      console.log(`Migration ${progress.currentStep}/${progress.totalSteps}`);
+    }
+    
+    if (progress.phase === 'validation') {
+      console.log(`Entities: ${progress.validation?.entitiesChecked}`);
+      console.log(`Issues Fixed: ${progress.validation?.issuesFixed}`);
+    }
+  },
+  onError: (error) => {
+    console.error('Migration failed:', error);
+  }
+});
+```
+
+#### Validation Failure Handling
+The validation system separates valid and invalid items:
+- **Valid items**: Passed all checks or had minor issues that were auto-fixed
+- **Invalid items**: Missing required fields or critical data corruption
+- **Auto-fixes**: Missing optional fields, null arrays, invalid dates
+
+When validation fails:
+1. Migration process stops immediately
+2. Backup is automatically restored
+3. Error details are logged for debugging
+4. User is presented with recovery options
+
+#### Loading State Patterns
+Use `MigrationLoadingScreen` component for consistent UX:
+- Shows current phase (Backup → Migration → Validation → Complete)
+- Displays progress bar for multiple migrations
+- Reports validation statistics in real-time
+- Provides estimated time remaining
+
+#### Error Recovery Flows
+Use `MigrationErrorScreen` component to give users options:
+- **Restore from Backup**: Safe rollback to pre-migration state
+- **Retry Migration**: Attempt migration again (useful for transient errors)
+- **Continue Anyway**: Advanced option with clear warning
+- **View History**: Link to Migration History page for detailed logs
+- **Report Issue**: Pre-filled GitHub issue link
 
 ## Rule 4: Testing Standards & Integrity
 ### 4.1 Core Testing Principles

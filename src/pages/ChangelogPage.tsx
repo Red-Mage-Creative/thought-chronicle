@@ -18,6 +18,38 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "0.8.1",
+  date: "2025-09-30",
+  features: [],
+  improvements: [
+    "Enhanced migration system with detailed loading screens showing progress phases",
+    "Added comprehensive error recovery UI with backup restore, retry, and continue options",
+    "Improved data validation to properly separate valid and invalid items",
+    "Added progress tracking with real-time validation statistics during migrations",
+    "Enhanced user feedback with phase-based progress indicators (Backup → Migration → Validation → Complete)"
+  ],
+  fixes: [
+    "Fixed validation logic to correctly mark items as invalid when required fields are missing",
+    "Fixed date validation to handle invalid date strings, null values, and malformed Date objects",
+    "Fixed migration system to prevent app initialization on migration errors"
+  ],
+  docs: [
+    "Added comprehensive migration progress and error handling documentation",
+    "Added section 5.5 to DEVELOPMENT_RULES.md covering progress callbacks, validation failures, loading patterns, and error recovery"
+  ],
+  tests: [
+    "Added comprehensive tests for migration progress callbacks",
+    "Added tests for validation with invalid and fixable data",
+    "Added tests for migration failure scenarios and automatic rollback",
+    "Added extensive date validation edge case tests",
+    "Added tests for separating valid and invalid entities during validation"
+  ],
+  maintenance: [
+    "Added 0.8.0 marker migration to registry documenting migration system implementation",
+    "Created MigrationLoadingScreen component for consistent progress display",
+    "Created MigrationErrorScreen component for enhanced error recovery UX"
+  ]
+}, {
   version: "0.8.0",
   date: "2025-09-30",
   features: [

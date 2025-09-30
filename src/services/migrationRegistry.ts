@@ -84,5 +84,15 @@ export const migrationRegistry: Migration[] = [
       // This migration is just a version bump marker
       return data;
     }
+  },
+  {
+    version: '0.8.0',
+    name: 'migration-system-infrastructure',
+    description: 'Migration system infrastructure with enhanced loading states and error handling - no data changes',
+    up: (data) => {
+      // No transformation needed - this marks the implementation of the comprehensive migration system
+      // Version 0.8.0 added: progress tracking, loading screens, error recovery UI, and validation improvements
+      return data;
+    }
   }
 ];
