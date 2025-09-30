@@ -439,6 +439,111 @@ export const schemaValidationService = {
   },
 
   /**
+   * Validate that all ID-based entity references point to existing entities (v1.3.0+)
+   * This validates relatedEntityIds, parentEntityIds, and linkedEntityIds
+   * 
+   * @param thoughts - Array of thoughts to validate
+   * @param entities - Array of entities to validate
+   * @returns Validation result with invalid references and recommendations
+   */
+  validateEntityIdReferences(
+    thoughts: LocalThought[],
+    entities: LocalEntity[]
+  ): {
+    invalidThoughtReferences: {
+      thoughtId: string;
+      thoughtContent: string;
+      invalidEntityIds: string[];
+    }[];
+    invalidParentReferences: {
+      entityName: string;
+      entityId: string;
+      invalidParentIds: string[];
+    }[];
+    invalidLinkedReferences: {
+      entityName: string;
+      entityId: string;
+      invalidLinkedIds: string[];
+    }[];
+    totalInvalidReferences: number;
+    recommendation: string;
+  } {
+    const result = {
+      invalidThoughtReferences: [] as any[],
+      invalidParentReferences: [] as any[],
+      invalidLinkedReferences: [] as any[],
+      totalInvalidReferences: 0,
+      recommendation: ''
+    };
+
+    // Create a set of all valid entity IDs for fast lookup
+    const validEntityIds = new Set<string>();
+    entities.forEach(entity => {
+      if (entity.localId) validEntityIds.add(entity.localId);
+      if (entity.id) validEntityIds.add(entity.id);
+    });
+
+    // Validate thought entity references
+    thoughts.forEach(thought => {
+      if (thought.relatedEntityIds && thought.relatedEntityIds.length > 0) {
+        const invalidIds = thought.relatedEntityIds.filter(id => !validEntityIds.has(id));
+        
+        if (invalidIds.length > 0) {
+          result.invalidThoughtReferences.push({
+            thoughtId: thought.localId || thought.id || 'unknown',
+            thoughtContent: thought.content.substring(0, 50) + '...',
+            invalidEntityIds: invalidIds
+          });
+          result.totalInvalidReferences += invalidIds.length;
+        }
+      }
+    });
+
+    // Validate entity parent references
+    entities.forEach(entity => {
+      if (entity.parentEntityIds && entity.parentEntityIds.length > 0) {
+        const invalidIds = entity.parentEntityIds.filter(id => !validEntityIds.has(id));
+        
+        if (invalidIds.length > 0) {
+          result.invalidParentReferences.push({
+            entityName: entity.name,
+            entityId: entity.localId || entity.id || 'unknown',
+            invalidParentIds: invalidIds
+          });
+          result.totalInvalidReferences += invalidIds.length;
+        }
+      }
+    });
+
+    // Validate entity linked references
+    entities.forEach(entity => {
+      if (entity.linkedEntityIds && entity.linkedEntityIds.length > 0) {
+        const invalidIds = entity.linkedEntityIds.filter(id => !validEntityIds.has(id));
+        
+        if (invalidIds.length > 0) {
+          result.invalidLinkedReferences.push({
+            entityName: entity.name,
+            entityId: entity.localId || entity.id || 'unknown',
+            invalidLinkedIds: invalidIds
+          });
+          result.totalInvalidReferences += invalidIds.length;
+        }
+      }
+    });
+
+    // Generate recommendation based on findings
+    if (result.totalInvalidReferences > 0) {
+      result.recommendation = `Found ${result.totalInvalidReferences} invalid entity ID reference(s). ` +
+        `This typically indicates deleted entities or data corruption. ` +
+        `Consider running a data repair migration or manually reviewing affected items.`;
+    } else {
+      result.recommendation = 'All entity ID references are valid.';
+    }
+
+    return result;
+  },
+
+  /**
    * Helper method to generate a local ID
    */
   generateLocalId(): string {

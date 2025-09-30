@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button';
 import { getEntityClass, getEntityIcon } from '@/utils/entityUtils';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * ThoughtList - Display list of thoughts with entity tags
+ * 
+ * Note: This component displays entity names from legacy relatedEntities field.
+ * For ID-based validation (v1.3.0+), we could use relatedEntityIds to detect
+ * invalid references, but currently we rely on the legacy field for display.
+ */
 interface ThoughtListProps {
   thoughts: LocalThought[];
   entities: LocalEntity[];
@@ -28,12 +35,21 @@ export const ThoughtList = ({
 }: ThoughtListProps) => {
   const navigate = useNavigate();
   
-  // Helper function to get actual entity type from entities list
-  const getEntityType = (entityName: string) => {
+  /**
+   * Get entity type by name (with validation for orphaned references)
+   * Returns 'uncategorized' if entity not found
+   */
+  const getEntityType = (entityName: string): string => {
     const entity = entities.find(e => 
       e.name.toLowerCase() === entityName.toLowerCase()
     );
-    return entity?.type || 'uncategorized';
+    
+    if (!entity) {
+      console.warn(`[ThoughtList] Orphaned entity reference: "${entityName}"`);
+      return 'uncategorized';
+    }
+    
+    return entity.type;
   };
   
   const handleEntityClick = (entityName: string) => {
@@ -87,15 +103,19 @@ export const ThoughtList = ({
               {thought.relatedEntities.map((entity) => {
                 const entityType = getEntityType(entity);
                 const Icon = getEntityIcon(entityType);
+                const entityExists = entities.some(e => e.name.toLowerCase() === entity.toLowerCase());
                 
                 return (
                   <Badge
                     key={entity}
                     className={`cursor-pointer hover:opacity-80 transition-all hover:scale-105 ${getEntityClass(entityType)}`}
                     onClick={() => handleEntityClick(entity)}
+                    variant={!entityExists ? "outline" : "default"}
+                    title={!entityExists ? `Entity "${entity}" not found` : entity}
                   >
                     <Icon className="h-3 w-3 mr-1" />
                     {entity}
+                    {!entityExists && <HelpCircle className="h-3 w-3 ml-1 opacity-50" />}
                   </Badge>
                 );
               })}

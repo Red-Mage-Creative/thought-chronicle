@@ -27,7 +27,9 @@ const changelog: ChangelogEntry[] = [{
     "Added helper methods for converting between entity names and IDs",
     "Thoughts now store entity references as IDs internally",
     "Entity relationships (parent/linked) now use IDs internally",
-    "All UI components seamlessly work with ID-based system"
+    "All UI components seamlessly work with ID-based system",
+    "Added ID-based validation to detect invalid entity references",
+    "Added cascade deletion with three modes: orphan, block, remove"
   ],
   improvements: [
     "Enhanced data integrity by eliminating orphaned entity references",
@@ -37,7 +39,9 @@ const changelog: ChangelogEntry[] = [{
     "Thought creation/update now maintains both ID and name references",
     "Entity relationship operations now use IDs with name-based API",
     "Entity details page now uses ID-based queries for better performance",
-    "Form components maintain user-friendly name-based interface"
+    "Form components maintain user-friendly name-based interface",
+    "Display components show visual indicators for orphaned entity references",
+    "Validation system can now detect and report invalid entity IDs"
   ],
   fixes: [],
   docs: [
@@ -45,7 +49,9 @@ const changelog: ChangelogEntry[] = [{
     "Added migration rollback capabilities for v1.3.0",
     "Documented new entity service helper methods",
     "Added comprehensive JSDoc comments to all ID-based methods",
-    "Added inline documentation explaining name→ID conversion in forms"
+    "Added inline documentation explaining name→ID conversion in forms",
+    "Documented cascade deletion modes and their use cases",
+    "Added comprehensive validation documentation"
   ],
   refactor: [
     "Major architectural refactor: Entity references now use IDs instead of names",
@@ -57,7 +63,9 @@ const changelog: ChangelogEntry[] = [{
     "Enhanced getThoughtsByEntity() to work with both names and IDs",
     "Enhanced getChildEntities() and getLinkedEntities() to use ID-based queries",
     "Updated EntityDetailsPage to query using IDs with name fallback",
-    "Updated all form components to document name→ID conversion flow"
+    "Updated all form components to document name→ID conversion flow",
+    "Refactored deleteEntity() to support cascade modes (orphan, block, remove)",
+    "Updated ThoughtList to show indicators for orphaned entity references"
   ],
   tests: [
     "Added comprehensive unit tests for entity ID/name conversion methods",
@@ -67,7 +75,11 @@ const changelog: ChangelogEntry[] = [{
     "Added comprehensive tests for thought and entity operations with ID-based refs",
     "Added tests for entity relationship operations (add/remove parent/linked)",
     "Added tests for querying thoughts by entity name or ID",
-    "Added backward compatibility tests for legacy name-based references"
+    "Added backward compatibility tests for legacy name-based references",
+    "Added tests for ID-based validation (validateEntityIdReferences)",
+    "Added tests for cascade deletion in all three modes (orphan, block, remove)",
+    "Added tests for orphaned reference handling in display components",
+    "Added edge case tests for entity deletion with server IDs"
   ],
   maintenance: [
     "Created comprehensive migration system for ID-based references",
@@ -78,7 +90,10 @@ const changelog: ChangelogEntry[] = [{
     "Updated thoughtService with ID-based reference storage",
     "Updated entityService relationship methods with ID-based storage",
     "Updated form components with clarifying comments about name→ID flow",
-    "Updated EntityDetailsPage with ID-based queries and legacy fallback"
+    "Updated EntityDetailsPage with ID-based queries and legacy fallback",
+    "Added validateEntityIdReferences method to schemaValidationService",
+    "Enhanced deleteEntity with cascade behavior support",
+    "Updated ThoughtList with orphaned reference detection and display"
   ]
 }, {
   version: "1.2.2",

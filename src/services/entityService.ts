@@ -215,20 +215,162 @@ export const entityService = {
     return updatedEntity;
   },
 
-  deleteEntity(entityId: string): void {
+  // ============================================================
+  // Entity Deletion with Cascade Options (v1.3.0+)
+  // ============================================================
+
+  /**
+   * Delete an entity with cascade behavior for references
+   * @param entityId - Entity ID to delete
+   * @param cascadeMode - How to handle references ('remove', 'orphan', 'block')
+   * @returns Result indicating success and affected items
+   */
+  deleteEntity(
+    entityId: string,
+    cascadeMode: 'remove' | 'orphan' | 'block' = 'orphan'
+  ): { success: boolean; affectedThoughts?: number; affectedEntities?: number; blockReason?: string } {
     const data = dataStorageService.getData();
     const entity = data.entities.find(e => e.localId === entityId || e.id === entityId);
     
+    if (!entity) {
+      throw new Error('Entity not found');
+    }
+
+    // Check for references if using 'block' mode
+    if (cascadeMode === 'block') {
+      // Count thoughts that reference this entity
+      const referencingThoughts = data.thoughts.filter(t => {
+        // Check ID-based references
+        if (t.relatedEntityIds?.includes(entityId)) return true;
+        // Check legacy name-based references
+        return t.relatedEntities.some(name => name.toLowerCase() === entity.name.toLowerCase());
+      });
+
+      // Count entities that reference this entity
+      const referencingEntities = data.entities.filter(e => {
+        // Check as parent
+        if (e.parentEntityIds?.includes(entityId)) return true;
+        if (e.parentEntities?.some(name => name.toLowerCase() === entity.name.toLowerCase())) return true;
+        // Check as linked
+        if (e.linkedEntityIds?.includes(entityId)) return true;
+        if (e.linkedEntities?.some(name => name.toLowerCase() === entity.name.toLowerCase())) return true;
+        return false;
+      });
+
+      const totalReferences = referencingThoughts.length + referencingEntities.length;
+      
+      if (totalReferences > 0) {
+        return {
+          success: false,
+          affectedThoughts: referencingThoughts.length,
+          affectedEntities: referencingEntities.length,
+          blockReason: `Cannot delete "${entity.name}": Referenced by ${referencingThoughts.length} thought(s) and ${referencingEntities.length} entity/entities. Remove references first.`
+        };
+      }
+    }
+
+    // Handle 'remove' mode - clean up all references
+    if (cascadeMode === 'remove') {
+      let affectedThoughts = 0;
+      let affectedEntities = 0;
+
+      // Remove from thoughts
+      data.thoughts.forEach(thought => {
+        let modified = false;
+
+        // Remove from ID-based references
+        if (thought.relatedEntityIds && thought.relatedEntityIds.includes(entityId)) {
+          thought.relatedEntityIds = thought.relatedEntityIds.filter(id => id !== entityId);
+          modified = true;
+        }
+
+        // Remove from legacy name-based references
+        if (thought.relatedEntities.some(name => name.toLowerCase() === entity.name.toLowerCase())) {
+          thought.relatedEntities = thought.relatedEntities.filter(
+            name => name.toLowerCase() !== entity.name.toLowerCase()
+          );
+          modified = true;
+        }
+
+        if (modified) {
+          thought.modifiedLocally = new Date();
+          thought.syncStatus = 'pending';
+          affectedThoughts++;
+        }
+      });
+
+      // Remove from entity relationships
+      data.entities.forEach(e => {
+        let modified = false;
+
+        // Remove from parent references
+        if (e.parentEntityIds && e.parentEntityIds.includes(entityId)) {
+          e.parentEntityIds = e.parentEntityIds.filter(id => id !== entityId);
+          modified = true;
+        }
+        if (e.parentEntities) {
+          e.parentEntities = e.parentEntities.filter(
+            name => name.toLowerCase() !== entity.name.toLowerCase()
+          );
+          modified = true;
+        }
+
+        // Remove from linked references
+        if (e.linkedEntityIds && e.linkedEntityIds.includes(entityId)) {
+          e.linkedEntityIds = e.linkedEntityIds.filter(id => id !== entityId);
+          modified = true;
+        }
+        if (e.linkedEntities) {
+          e.linkedEntities = e.linkedEntities.filter(
+            name => name.toLowerCase() !== entity.name.toLowerCase()
+          );
+          modified = true;
+        }
+
+        if (modified) {
+          e.modifiedLocally = new Date();
+          e.syncStatus = 'pending';
+          affectedEntities++;
+        }
+      });
+
+      // Delete the entity
+      data.entities = data.entities.filter(e => e.localId !== entityId && e.id !== entityId);
+      
+      // Track for sync if it has server ID
+      if (entity?.id) {
+        data.pendingChanges.entities.deleted.push(entity.id);
+      } else if (entity?.localId) {
+        data.pendingChanges.entities.deleted.push(entity.localId);
+      }
+      
+      // Optimize pending changes
+      data.pendingChanges.entities = dataStorageService.optimizeEntityChanges(
+        data.pendingChanges.entities.added,
+        data.pendingChanges.entities.modified,
+        data.pendingChanges.entities.deleted
+      );
+      
+      dataStorageService.saveData(data);
+
+      return {
+        success: true,
+        affectedThoughts,
+        affectedEntities
+      };
+    }
+
+    // 'orphan' mode (default) - just delete the entity, leave references
     data.entities = data.entities.filter(e => e.localId !== entityId && e.id !== entityId);
     
-    // Track for sync if it has server ID
+    // Track for sync
     if (entity?.id) {
       data.pendingChanges.entities.deleted.push(entity.id);
     } else if (entity?.localId) {
       data.pendingChanges.entities.deleted.push(entity.localId);
     }
     
-    // Optimize pending changes in memory before saving
+    // Optimize pending changes
     data.pendingChanges.entities = dataStorageService.optimizeEntityChanges(
       data.pendingChanges.entities.added,
       data.pendingChanges.entities.modified,
@@ -236,6 +378,8 @@ export const entityService = {
     );
     
     dataStorageService.saveData(data);
+
+    return { success: true };
   },
 
   // ============================================================
