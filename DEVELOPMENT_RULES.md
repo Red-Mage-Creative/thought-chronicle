@@ -16,7 +16,7 @@
 - Group changes by type: feat, fix, docs, style, refactor, test, chore
 - Check the ***Current*** date and use that for the change log. Use a function if you need to find the actual current date. 
 
-### Current Version: 0.8.1
+### Current Version: 0.9.0
 
 ## Rule 3: Clean Code Principles for Component Development
 ### 3.1 Component Structure & Naming
@@ -172,6 +172,58 @@ Use `MigrationErrorScreen` component to give users options:
 - **Continue Anyway**: Advanced option with clear warning
 - **View History**: Link to Migration History page for detailed logs
 - **Report Issue**: Pre-filled GitHub issue link
+
+## Rule 6: Entity Attribute System
+
+### 6.1 Attribute Structure
+- Attributes are key-value pairs stored in `EntityAttribute[]`
+- Each attribute has `{ key: string, value: string }`
+- Attributes are optional on entities (can be empty array)
+- Example: `[{ key: "Class", value: "Wizard" }, { key: "Level", value: "5" }]`
+
+### 6.2 Default Attributes Configuration
+- Default attributes defined in `DefaultEntityAttribute[]`
+- Each default has: `key`, `defaultValue?`, `required`, `entityTypes[]`
+- Stored in localStorage via `dataStorageService`
+- Loaded by entity type when creating/editing entities
+- Example: `{ key: "Class", required: true, entityTypes: ['pc'], defaultValue: '' }`
+
+### 6.3 Validation Requirements
+- Use `validateRequiredAttributes()` before entity save
+- Display clear error messages for missing required fields
+- Show toast notification listing missing required attributes
+- Prevent form submission until all required attributes filled
+- Validation is case-insensitive for attribute key matching
+- Empty strings and whitespace-only values are treated as missing
+
+### 6.4 Component Usage
+- Use `AttributeEditor` component for all attribute input
+- Pass `defaultAttributes` to show required indicators
+- Handle `onChange` callback to update parent state
+- Support disabled state for view-only scenarios
+- Example usage:
+  ```tsx
+  <AttributeEditor
+    attributes={entity.attributes}
+    onChange={(attrs) => setEntity({...entity, attributes: attrs})}
+    defaultAttributes={defaultAttributes}
+    disabled={isLoading}
+  />
+  ```
+
+### 6.5 UI Patterns
+- Required attributes marked with "Required" badge
+- Add/remove buttons for each attribute row
+- Clear separation between existing and new attributes
+- Settings page for managing default attributes per entity type
+- Hint text shows all required attributes for current entity type
+- Enter key in input fields triggers add action
+
+### 6.6 Storage & Persistence
+- Entity attributes stored in `attributes: EntityAttribute[]` field
+- Default configurations stored in localStorage key `defaultEntityAttributes`
+- Attributes persist through sync operations
+- Attributes included in entity export/import operations
 
 ## Rule 4: Testing Standards & Integrity
 ### 4.1 Core Testing Principles

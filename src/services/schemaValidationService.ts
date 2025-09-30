@@ -270,7 +270,7 @@ export const schemaValidationService = {
   },
 
   /**
-   * Validate that all required attributes are present for an entity
+   * Validate that all required attributes are present and have non-empty values for an entity
    */
   validateRequiredAttributes(
     entity: LocalEntity, 
@@ -281,11 +281,12 @@ export const schemaValidationService = {
     const missingFields: string[] = [];
 
     requiredAttrs.forEach(reqAttr => {
-      const hasAttribute = entityAttrs.some(
+      const attribute = entityAttrs.find(
         entityAttr => entityAttr.key.toLowerCase() === reqAttr.key.toLowerCase()
       );
       
-      if (!hasAttribute) {
+      // Check if attribute exists and has a non-empty, non-whitespace value
+      if (!attribute || !attribute.value || attribute.value.trim() === '') {
         missingFields.push(reqAttr.key);
       }
     });

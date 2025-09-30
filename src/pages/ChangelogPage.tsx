@@ -18,6 +18,39 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "0.9.0",
+  date: "2025-09-30",
+  features: [
+    "Added flexible entity attribute system with key-value pairs",
+    "Implemented default entity attributes configuration per entity type",
+    "Added required attribute validation with form submission blocking",
+    "Created Settings page with Profile and Default Attributes sections",
+    "Added AttributeEditor component for managing entity attributes",
+    "Implemented attribute display on entity details page"
+  ],
+  improvements: [
+    "Enhanced entity creation/editing with dynamic attribute support",
+    "Improved entity data model with optional attributes array",
+    "Added clear validation feedback for missing required attributes",
+    "Enhanced settings navigation with dedicated Settings menu item"
+  ],
+  fixes: [],
+  docs: [
+    "Added Rule 6: Entity Attribute System to DEVELOPMENT_RULES.md",
+    "Updated design system with AttributeEditor component showcase",
+    "Documented attribute validation requirements and patterns"
+  ],
+  tests: [
+    "Added comprehensive tests for validateRequiredAttributes function",
+    "Created AttributeEditor component tests with user interaction coverage",
+    "Added edge case tests for attribute validation scenarios"
+  ],
+  maintenance: [
+    "Updated EntitySchema and MongoEntitySchema with attributes field",
+    "Enhanced dataStorageService with default attribute management",
+    "Extended entityService with attribute CRUD operations"
+  ]
+}, {
   version: "0.8.1",
   date: "2025-09-30",
   features: [],

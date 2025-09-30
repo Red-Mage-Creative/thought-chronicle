@@ -34,10 +34,18 @@ import {
   MessageSquare,
   Tag
 } from "lucide-react";
+import { AttributeEditor } from "@/components/forms/AttributeEditor";
 
 export default function DesignSystemPage() {
   const [demoValue, setDemoValue] = useState("");
   const [progress, setProgress] = useState(33);
+  const [demoAttributes, setDemoAttributes] = useState([
+    { key: "Height", value: "6'0\"" },
+    { key: "Weight", value: "180 lbs" }
+  ]);
+  const [demoRequiredAttributes, setDemoRequiredAttributes] = useState([
+    { key: "Class", value: "Wizard" }
+  ]);
 
   return (
     <TooltipProvider>
@@ -302,6 +310,59 @@ export default function DesignSystemPage() {
                 </CardContent>
               </Card>
             </div>
+          </section>
+
+          {/* Attribute Editor */}
+          <section className="space-y-6">
+            <h2 className="text-3xl font-semibold">Attribute Editor</h2>
+            <Card>
+              <CardHeader>
+                <CardTitle>Entity Attributes</CardTitle>
+                <CardDescription>
+                  Component for managing key-value attributes on entities.
+                  Supports required attributes, default values, and real-time editing.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Basic Usage</h4>
+                  <p className="text-sm text-muted-foreground">
+                    The AttributeEditor component allows users to add, edit, and remove custom attributes.
+                  </p>
+                  <AttributeEditor
+                    attributes={demoAttributes}
+                    onChange={setDemoAttributes}
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium">With Required Attributes</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Required attributes are marked with a "Required" badge and shown with hint text.
+                  </p>
+                  <AttributeEditor
+                    attributes={demoRequiredAttributes}
+                    defaultAttributes={[
+                      { key: "Class", required: true, entityTypes: ['pc'] },
+                      { key: "Level", required: true, entityTypes: ['pc'] }
+                    ]}
+                    onChange={setDemoRequiredAttributes}
+                  />
+                </div>
+                
+                <div className="space-y-2 bg-muted/50 p-4 rounded-md">
+                  <p className="text-sm font-medium">Component Props:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• <code>attributes</code>: EntityAttribute[] - current attributes</li>
+                    <li>• <code>onChange</code>: (attributes: EntityAttribute[]) =&gt; void - callback on change</li>
+                    <li>• <code>defaultAttributes?</code>: DefaultEntityAttribute[] - for required indicators</li>
+                    <li>• <code>disabled?</code>: boolean - disable all inputs</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           {/* Badges & Tags */}
