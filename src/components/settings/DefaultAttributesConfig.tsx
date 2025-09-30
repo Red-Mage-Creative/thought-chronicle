@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -139,254 +139,263 @@ export const DefaultAttributesConfig = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Entity Type Tabs */}
-          <Tabs value={selectedType} onValueChange={(value) => setSelectedType(value as EntityType)}>
-            <TabsList className="grid grid-cols-3 lg:grid-cols-5 gap-2">
-              {entityTypes.map((type) => {
-                const Icon = getEntityIcon(type);
-                return (
-                  <TabsTrigger key={type} value={type} className="flex items-center gap-2">
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{capitalize(type)}</span>
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
+          {/* Entity Type Selection */}
+          <div className="flex items-center gap-4">
+            <Label htmlFor="entity-type-select" className="min-w-fit">
+              Entity Type:
+            </Label>
+            <Select value={selectedType} onValueChange={(value) => setSelectedType(value as EntityType)}>
+              <SelectTrigger id="entity-type-select" className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {entityTypes.map((type) => {
+                  const Icon = getEntityIcon(type);
+                  return (
+                    <SelectItem key={type} value={type}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {capitalize(type)}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {entityTypes.map((type) => (
-              <TabsContent key={type} value={type} className="space-y-4 mt-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">
-                    Attributes for {capitalize(type)} entities
-                  </h3>
-                  <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" onClick={resetForm}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Attribute
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add Default Attribute</DialogTitle>
-                        <DialogDescription>
-                          Create a new default attribute that will be available for selected entity types.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="attr-key">Attribute Key *</Label>
-                          <Input
-                            id="attr-key"
-                            value={formKey}
-                            onChange={(e) => setFormKey(e.target.value)}
-                            placeholder="e.g., Height, Age, Class"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="attr-default">Default Value (optional)</Label>
-                          <Input
-                            id="attr-default"
-                            value={formDefaultValue}
-                            onChange={(e) => setFormDefaultValue(e.target.value)}
-                            placeholder="e.g., Unknown"
-                          />
-                        </div>
+          {/* Attributes Content */}
+          <div className="space-y-4 mt-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">
+                Attributes for {capitalize(selectedType)} entities
+              </h3>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" onClick={resetForm}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Attribute
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add Default Attribute</DialogTitle>
+                    <DialogDescription>
+                      Create a new default attribute that will be available for selected entity types.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="attr-key">Attribute Key *</Label>
+                      <Input
+                        id="attr-key"
+                        value={formKey}
+                        onChange={(e) => setFormKey(e.target.value)}
+                        placeholder="e.g., Height, Age, Class"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="attr-default">Default Value (optional)</Label>
+                      <Input
+                        id="attr-default"
+                        value={formDefaultValue}
+                        onChange={(e) => setFormDefaultValue(e.target.value)}
+                        placeholder="e.g., Unknown"
+                      />
+                    </div>
 
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            id="attr-required"
-                            checked={formRequired}
-                            onCheckedChange={setFormRequired}
-                          />
-                          <Label htmlFor="attr-required" className="cursor-pointer">
-                            Required field
-                          </Label>
-                        </div>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="attr-required"
+                        checked={formRequired}
+                        onCheckedChange={setFormRequired}
+                      />
+                      <Label htmlFor="attr-required" className="cursor-pointer">
+                        Required field
+                      </Label>
+                    </div>
 
-                        <div className="space-y-2">
-                          <Label>Entity Types</Label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {entityTypes.map((entityType) => {
-                              const Icon = getEntityIcon(entityType);
-                              const isSelected = formEntityTypes.includes(entityType);
+                    <div className="space-y-2">
+                      <Label>Entity Types</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {entityTypes.map((entityType) => {
+                          const Icon = getEntityIcon(entityType);
+                          const isSelected = formEntityTypes.includes(entityType);
+                          return (
+                            <Button
+                              key={entityType}
+                              type="button"
+                              variant={isSelected ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => toggleEntityType(entityType)}
+                              className="justify-start"
+                            >
+                              <Icon className="h-4 w-4 mr-2" />
+                              {capitalize(entityType)}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddAttribute}>
+                      Add Attribute
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {/* Attributes List */}
+            {attributesForType.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No default attributes configured for {capitalize(selectedType)} entities.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {attributesForType.map((attr) => (
+                  <Card key={attr.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{attr.key}</span>
+                            {attr.required && (
+                              <Badge variant="secondary" className="text-xs">
+                                Required
+                              </Badge>
+                            )}
+                          </div>
+                          {attr.defaultValue && (
+                            <p className="text-sm text-muted-foreground">
+                              Default: {attr.defaultValue}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {attr.entityTypes.map((t) => {
+                              const Icon = getEntityIcon(t);
                               return (
-                                <Button
-                                  key={entityType}
-                                  type="button"
-                                  variant={isSelected ? "default" : "outline"}
-                                  size="sm"
-                                  onClick={() => toggleEntityType(entityType)}
-                                  className="justify-start"
-                                >
-                                  <Icon className="h-4 w-4 mr-2" />
-                                  {capitalize(entityType)}
-                                </Button>
+                                <Badge key={t} variant="outline" className="text-xs">
+                                  <Icon className="h-3 w-3 mr-1" />
+                                  {capitalize(t)}
+                                </Badge>
                               );
                             })}
                           </div>
                         </div>
-                      </div>
-                      <div className="flex justify-end gap-2 mt-4">
-                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddAttribute}>
-                          Add Attribute
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                        <div className="flex gap-1">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditAttribute(attr)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Attribute</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-attr-key">Attribute Key *</Label>
+                                  <Input
+                                    id="edit-attr-key"
+                                    value={formKey}
+                                    onChange={(e) => setFormKey(e.target.value)}
+                                  />
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-attr-default">Default Value</Label>
+                                  <Input
+                                    id="edit-attr-default"
+                                    value={formDefaultValue}
+                                    onChange={(e) => setFormDefaultValue(e.target.value)}
+                                  />
+                                </div>
 
-                {/* Attributes List */}
-                {attributesForType.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No default attributes configured for {capitalize(type)} entities.
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {attributesForType.map((attr) => (
-                      <Card key={attr.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{attr.key}</span>
-                                {attr.required && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Required
-                                  </Badge>
-                                )}
-                              </div>
-                              {attr.defaultValue && (
-                                <p className="text-sm text-muted-foreground">
-                                  Default: {attr.defaultValue}
-                                </p>
-                              )}
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {attr.entityTypes.map((t) => {
-                                  const Icon = getEntityIcon(t);
-                                  return (
-                                    <Badge key={t} variant="outline" className="text-xs">
-                                      <Icon className="h-3 w-3 mr-1" />
-                                      {capitalize(t)}
-                                    </Badge>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                            <div className="flex gap-1">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleEditAttribute(attr)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Edit Attribute</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-attr-key">Attribute Key *</Label>
-                                      <Input
-                                        id="edit-attr-key"
-                                        value={formKey}
-                                        onChange={(e) => setFormKey(e.target.value)}
-                                      />
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-attr-default">Default Value</Label>
-                                      <Input
-                                        id="edit-attr-default"
-                                        value={formDefaultValue}
-                                        onChange={(e) => setFormDefaultValue(e.target.value)}
-                                      />
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                    id="edit-attr-required"
+                                    checked={formRequired}
+                                    onCheckedChange={setFormRequired}
+                                  />
+                                  <Label htmlFor="edit-attr-required" className="cursor-pointer">
+                                    Required field
+                                  </Label>
+                                </div>
 
-                                    <div className="flex items-center gap-2">
-                                      <Switch
-                                        id="edit-attr-required"
-                                        checked={formRequired}
-                                        onCheckedChange={setFormRequired}
-                                      />
-                                      <Label htmlFor="edit-attr-required" className="cursor-pointer">
-                                        Required field
-                                      </Label>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <Label>Entity Types</Label>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {entityTypes.map((entityType) => {
-                                          const Icon = getEntityIcon(entityType);
-                                          const isSelected = formEntityTypes.includes(entityType);
-                                          return (
-                                            <Button
-                                              key={entityType}
-                                              type="button"
-                                              variant={isSelected ? "default" : "outline"}
-                                              size="sm"
-                                              onClick={() => toggleEntityType(entityType)}
-                                              className="justify-start"
-                                            >
-                                              <Icon className="h-4 w-4 mr-2" />
-                                              {capitalize(entityType)}
-                                            </Button>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
+                                <div className="space-y-2">
+                                  <Label>Entity Types</Label>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {entityTypes.map((entityType) => {
+                                      const Icon = getEntityIcon(entityType);
+                                      const isSelected = formEntityTypes.includes(entityType);
+                                      return (
+                                        <Button
+                                          key={entityType}
+                                          type="button"
+                                          variant={isSelected ? "default" : "outline"}
+                                          size="sm"
+                                          onClick={() => toggleEntityType(entityType)}
+                                          className="justify-start"
+                                        >
+                                          <Icon className="h-4 w-4 mr-2" />
+                                          {capitalize(entityType)}
+                                        </Button>
+                                      );
+                                    })}
                                   </div>
-                                  <div className="flex justify-end gap-2 mt-4">
-                                    <Button variant="outline" onClick={() => setEditingAttribute(null)}>
-                                      Cancel
-                                    </Button>
-                                    <Button onClick={handleUpdateAttribute}>
-                                      Update Attribute
-                                    </Button>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                                </div>
+                              </div>
+                              <div className="flex justify-end gap-2 mt-4">
+                                <Button variant="outline" onClick={() => setEditingAttribute(null)}>
+                                  Cancel
+                                </Button>
+                                <Button onClick={handleUpdateAttribute}>
+                                  Update Attribute
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
 
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Attribute</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete "{attr.key}"? This will not affect existing entities.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteAttribute(attr.id!)}>
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            ))}
-          </Tabs>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Attribute</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{attr.key}"? This will not affect existing entities.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteAttribute(attr.id!)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Save Button */}
           <div className="flex justify-end pt-4 border-t">
