@@ -5,6 +5,10 @@ import { campaignService } from './campaignService';
 import { inferEntityType } from '@/utils/entityUtils';
 
 export const entityService = {
+  // ============================================================
+  // Basic Entity Retrieval
+  // ============================================================
+  
   getAllEntities(): LocalEntity[] {
     const data = dataStorageService.getData();
     return data.entities;
@@ -14,6 +18,93 @@ export const entityService = {
     const entities = this.getAllEntities();
     return entities.find(entity => entity.name.toLowerCase() === name.toLowerCase());
   },
+
+  // ============================================================
+  // ID-Based Helper Methods (v1.3.0+)
+  // ============================================================
+
+  /**
+   * Get entity by ID (localId or id)
+   * @param id - Entity ID (localId or server id)
+   * @returns Entity or undefined if not found
+   */
+  getEntityById(id: string): LocalEntity | undefined {
+    const entities = this.getAllEntities();
+    return entities.find(entity => entity.localId === id || entity.id === id);
+  },
+
+  /**
+   * Get entity ID by name (case-insensitive)
+   * @param name - Entity name
+   * @returns Entity ID (localId or id) or undefined if not found
+   */
+  getEntityIdByName(name: string): string | undefined {
+    const entity = this.getEntityByName(name);
+    return entity ? (entity.localId || entity.id) : undefined;
+  },
+
+  /**
+   * Get entity name by ID
+   * @param id - Entity ID (localId or server id)
+   * @returns Entity name or undefined if not found
+   */
+  getEntityNameById(id: string): string | undefined {
+    const entity = this.getEntityById(id);
+    return entity?.name;
+  },
+
+  /**
+   * Get multiple entities by their IDs
+   * @param ids - Array of entity IDs
+   * @returns Array of entities (skips IDs that don't exist)
+   */
+  getEntitiesByIds(ids: string[]): LocalEntity[] {
+    const entities: LocalEntity[] = [];
+    ids.forEach(id => {
+      const entity = this.getEntityById(id);
+      if (entity) {
+        entities.push(entity);
+      }
+    });
+    return entities;
+  },
+
+  /**
+   * Convert entity names to IDs
+   * @param names - Array of entity names
+   * @returns Array of entity IDs (skips names that don't exist)
+   */
+  convertNamesToIds(names: string[]): string[] {
+    const ids: string[] = [];
+    names.forEach(name => {
+      const id = this.getEntityIdByName(name);
+      if (id) {
+        ids.push(id);
+      }
+    });
+    return ids;
+  },
+
+  /**
+   * Convert entity IDs to names
+   * @param ids - Array of entity IDs
+   * @returns Array of entity names (skips IDs that don't exist)
+   */
+  convertIdsToNames(ids: string[]): string[] {
+    const names: string[] = [];
+    ids.forEach(id => {
+      const name = this.getEntityNameById(id);
+      if (name) {
+        names.push(name);
+      }
+    });
+    return names;
+  },
+
+  // ============================================================
+  // Entity Creation
+  // ============================================================
+
 
   createEntity(
     name: string, 
