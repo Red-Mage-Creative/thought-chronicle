@@ -5,6 +5,8 @@ import { campaignService } from '@/services/campaignService';
 import { dataMigrationService } from '@/services/dataMigrationService';
 import { schemaVersionService } from '@/services/schemaVersionService';
 import { DataMigrationModal } from './DataMigrationModal';
+import { MigrationLoadingScreen, MigrationProgress } from './MigrationLoadingScreen';
+import { MigrationErrorScreen } from './MigrationErrorScreen';
 import { toast } from '@/hooks/use-toast';
 
 interface AppInitializerProps {
@@ -15,6 +17,18 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
   const { user } = useAuth();
   const [showMigrationModal, setShowMigrationModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [migrationProgress, setMigrationProgress] = useState<MigrationProgress>({
+    phase: 'backup',
+    currentStep: 0,
+    totalSteps: 1,
+    message: 'Initializing...'
+  });
+  const [migrationError, setMigrationError] = useState<{
+    message: string;
+    migration?: string;
+    version?: string;
+    details?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (user && !isInitialized) {
@@ -25,8 +39,36 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
           // Initialize user context
           campaignService.initializeUserContext(user.id);
 
-          // Run data migrations (now async and comprehensive)
-          const migrationLogs = await dataMigrationService.runMigrations();
+          // Run data migrations with progress tracking
+          const migrationLogs = await dataMigrationService.runMigrations({
+            onPhaseChange: (phase) => {
+              setMigrationProgress(prev => ({ ...prev, phase }));
+            },
+            onProgress: (current, total, message) => {
+              setMigrationProgress(prev => ({
+                ...prev,
+                currentStep: current,
+                totalSteps: total,
+                message
+              }));
+            },
+            onMigrationStart: (migration, current, total) => {
+              setMigrationProgress(prev => ({
+                ...prev,
+                currentMigration: migration,
+                currentStep: current,
+                totalSteps: total + 1, // +1 for validation
+                message: `Running migration: ${migration}`
+              }));
+            },
+            onValidationProgress: (validationProgress) => {
+              setMigrationProgress(prev => ({
+                ...prev,
+                validationProgress,
+                message: 'Validating data integrity...'
+              }));
+            }
+          });
           
           if (migrationLogs.length > 0) {
             const successful = migrationLogs.filter(log => log.success).length;
@@ -35,15 +77,30 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
             console.log(`[App] Migrations completed: ${successful} successful, ${failed} failed`);
             
             if (failed === 0) {
+              const issuesFixed = migrationProgress.validationProgress?.issuesFixed || 0;
               toast({
                 title: "Data Updated",
-                description: `Successfully migrated to v${schemaVersionService.CURRENT_VERSION}`,
+                description: `Successfully migrated to v${schemaVersionService.CURRENT_VERSION}${issuesFixed > 0 ? ` • ${issuesFixed} issues auto-fixed` : ''}`,
               });
             } else {
               toast({
-                title: "Migration Issues",
-                description: `Some migrations failed. Please check console.`,
+                title: "Migration Failed",
+                description: `${failed} migration(s) failed`,
                 variant: "destructive"
+              });
+              setMigrationError({
+                message: 'Some migrations failed during execution',
+                version: schemaVersionService.CURRENT_VERSION
+              });
+              return;
+            }
+          } else {
+            // Show success for validation-only runs
+            const issuesFixed = migrationProgress.validationProgress?.issuesFixed || 0;
+            if (issuesFixed > 0) {
+              toast({
+                title: "Data Validated",
+                description: `${issuesFixed} minor issues auto-fixed`,
               });
             }
           }
@@ -60,13 +117,12 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
           }
         } catch (error: any) {
           console.error('[App] Initialization failed:', error);
-          toast({
-            title: "Initialization Failed",
-            description: error.message || "Please refresh and try again.",
-            variant: "destructive"
+          setMigrationError({
+            message: error.message || 'An unknown error occurred',
+            details: error.stack,
+            version: schemaVersionService.CURRENT_VERSION
           });
-          // Still allow app to load even if migration fails
-          setIsInitialized(true);
+          // Do NOT auto-initialize on error - show error screen instead
         }
       };
       
@@ -77,24 +133,41 @@ export const AppInitializer = ({ children }: AppInitializerProps) => {
   const handleMigrationComplete = () => {
     setShowMigrationModal(false);
     setIsInitialized(true);
-    
-    // Reload the page to ensure all components get the updated data
     window.location.reload();
+  };
+
+  const handleRetryMigration = () => {
+    setMigrationError(null);
+    setIsInitialized(false);
+    window.location.reload();
+  };
+
+  const handleContinueAnyway = () => {
+    console.warn('[App] User chose to continue despite migration errors');
+    setMigrationError(null);
+    setIsInitialized(true);
   };
 
   if (!user) {
     return <>{children}</>;
   }
 
-  if (!isInitialized && !showMigrationModal) {
+  // Show error screen if migration failed
+  if (migrationError) {
+    const backupInfo = dataMigrationService.getBackupInfo();
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-2">
-          <p className="text-muted-foreground">Initializing...</p>
-          <p className="text-xs text-muted-foreground">Running data migrations</p>
-        </div>
-      </div>
+      <MigrationErrorScreen
+        error={migrationError}
+        hasBackup={!!backupInfo}
+        onRetry={handleRetryMigration}
+        onContinueAnyway={handleContinueAnyway}
+      />
     );
+  }
+
+  // Show loading screen during migration
+  if (!isInitialized && !showMigrationModal) {
+    return <MigrationLoadingScreen progress={migrationProgress} />;
   }
 
   return (

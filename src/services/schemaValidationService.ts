@@ -11,16 +11,35 @@ export interface ValidationError {
 
 export interface ValidationResult<T> {
   valid: T[];
+  invalid: T[];
   errors: ValidationError[];
+}
+
+export interface ValidationSummary {
+  totalChecked: number;
+  validCount: number;
+  invalidCount: number;
+  issuesFixed: number;
+  criticalErrors: number;
 }
 
 export const schemaValidationService = {
   /**
+   * Helper to check if a date string is valid
+   */
+  isValidDate(dateString: any): boolean {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date.getTime());
+  },
+
+  /**
    * Validate and fix a single entity against schema
    */
-  validateEntity(entity: any, index: number = 0): { entity: LocalEntity; errors: ValidationError[] } {
+  validateEntity(entity: any, index: number = 0): { entity: LocalEntity | null; errors: ValidationError[]; isValid: boolean } {
     const errors: ValidationError[] = [];
     const validated = { ...entity };
+    let hasRequiredFieldErrors = false;
     
     // Check required fields
     EntitySchema.requiredFields.forEach(field => {
@@ -30,6 +49,7 @@ export const schemaValidationService = {
           field,
           error: `Missing required field: ${field}`
         });
+        hasRequiredFieldErrors = true;
       }
     });
     
@@ -45,10 +65,15 @@ export const schemaValidationService = {
       }
     });
     
-    // Convert date strings to Date objects
+    // Convert date strings to Date objects with validation
     ['createdLocally', 'modifiedLocally'].forEach(field => {
       if (validated[field] && typeof validated[field] === 'string') {
-        validated[field] = new Date(validated[field]);
+        if (this.isValidDate(validated[field])) {
+          validated[field] = new Date(validated[field]);
+        } else {
+          console.warn(`[Validation] Invalid date string for ${field}, using current date`);
+          validated[field] = new Date();
+        }
       }
     });
     
@@ -59,7 +84,12 @@ export const schemaValidationService = {
       }
     });
     
-    return { entity: validated as LocalEntity, errors };
+    // If required fields are missing, mark as invalid
+    if (hasRequiredFieldErrors) {
+      return { entity: null, errors, isValid: false };
+    }
+    
+    return { entity: validated as LocalEntity, errors, isValid: true };
   },
   
   /**
@@ -67,23 +97,29 @@ export const schemaValidationService = {
    */
   validateAllEntities(entities: any[]): ValidationResult<LocalEntity> {
     const valid: LocalEntity[] = [];
+    const invalid: LocalEntity[] = [];
     const errors: ValidationError[] = [];
     
     entities.forEach((entity, index) => {
       const result = this.validateEntity(entity, index);
-      valid.push(result.entity);
+      if (result.isValid && result.entity) {
+        valid.push(result.entity);
+      } else if (result.entity) {
+        invalid.push(result.entity);
+      }
       errors.push(...result.errors);
     });
     
-    return { valid, errors };
+    return { valid, invalid, errors };
   },
   
   /**
    * Validate and fix a single thought against schema
    */
-  validateThought(thought: any, index: number = 0): { thought: LocalThought; errors: ValidationError[] } {
+  validateThought(thought: any, index: number = 0): { thought: LocalThought | null; errors: ValidationError[]; isValid: boolean } {
     const errors: ValidationError[] = [];
     const validated = { ...thought };
+    let hasRequiredFieldErrors = false;
     
     // Check required fields
     ThoughtSchema.requiredFields.forEach(field => {
@@ -93,6 +129,7 @@ export const schemaValidationService = {
           field,
           error: `Missing required field: ${field}`
         });
+        hasRequiredFieldErrors = true;
       }
     });
     
@@ -108,10 +145,15 @@ export const schemaValidationService = {
       }
     });
     
-    // Convert date strings to Date objects
+    // Convert date strings to Date objects with validation
     ['timestamp', 'modifiedLocally'].forEach(field => {
       if (validated[field] && typeof validated[field] === 'string') {
-        validated[field] = new Date(validated[field]);
+        if (this.isValidDate(validated[field])) {
+          validated[field] = new Date(validated[field]);
+        } else {
+          console.warn(`[Validation] Invalid date string for ${field}, using current date`);
+          validated[field] = new Date();
+        }
       }
     });
     
@@ -120,7 +162,12 @@ export const schemaValidationService = {
       validated.relatedEntities = [];
     }
     
-    return { thought: validated as LocalThought, errors };
+    // If required fields are missing, mark as invalid
+    if (hasRequiredFieldErrors) {
+      return { thought: null, errors, isValid: false };
+    }
+    
+    return { thought: validated as LocalThought, errors, isValid: true };
   },
   
   /**
@@ -128,23 +175,29 @@ export const schemaValidationService = {
    */
   validateAllThoughts(thoughts: any[]): ValidationResult<LocalThought> {
     const valid: LocalThought[] = [];
+    const invalid: LocalThought[] = [];
     const errors: ValidationError[] = [];
     
     thoughts.forEach((thought, index) => {
       const result = this.validateThought(thought, index);
-      valid.push(result.thought);
+      if (result.isValid && result.thought) {
+        valid.push(result.thought);
+      } else if (result.thought) {
+        invalid.push(result.thought);
+      }
       errors.push(...result.errors);
     });
     
-    return { valid, errors };
+    return { valid, invalid, errors };
   },
   
   /**
    * Validate and fix a single campaign against schema
    */
-  validateCampaign(campaign: any, index: number = 0): { campaign: LocalCampaign; errors: ValidationError[] } {
+  validateCampaign(campaign: any, index: number = 0): { campaign: LocalCampaign | null; errors: ValidationError[]; isValid: boolean } {
     const errors: ValidationError[] = [];
     const validated = { ...campaign };
+    let hasRequiredFieldErrors = false;
     
     // Check required fields
     CampaignSchema.requiredFields.forEach(field => {
@@ -154,6 +207,7 @@ export const schemaValidationService = {
           field,
           error: `Missing required field: ${field}`
         });
+        hasRequiredFieldErrors = true;
       }
     });
     
@@ -169,10 +223,15 @@ export const schemaValidationService = {
       }
     });
     
-    // Convert date strings to Date objects
+    // Convert date strings to Date objects with validation
     ['created_at', 'updated_at', 'modifiedLocally'].forEach(field => {
       if (validated[field] && typeof validated[field] === 'string') {
-        validated[field] = new Date(validated[field]);
+        if (this.isValidDate(validated[field])) {
+          validated[field] = new Date(validated[field]);
+        } else {
+          console.warn(`[Validation] Invalid date string for ${field}, using current date`);
+          validated[field] = new Date();
+        }
       }
     });
     
@@ -181,7 +240,12 @@ export const schemaValidationService = {
       validated.members = [];
     }
     
-    return { campaign: validated as LocalCampaign, errors };
+    // If required fields are missing, mark as invalid
+    if (hasRequiredFieldErrors) {
+      return { campaign: null, errors, isValid: false };
+    }
+    
+    return { campaign: validated as LocalCampaign, errors, isValid: true };
   },
   
   /**
@@ -189,14 +253,19 @@ export const schemaValidationService = {
    */
   validateAllCampaigns(campaigns: any[]): ValidationResult<LocalCampaign> {
     const valid: LocalCampaign[] = [];
+    const invalid: LocalCampaign[] = [];
     const errors: ValidationError[] = [];
     
     campaigns.forEach((campaign, index) => {
       const result = this.validateCampaign(campaign, index);
-      valid.push(result.campaign);
+      if (result.isValid && result.campaign) {
+        valid.push(result.campaign);
+      } else if (result.campaign) {
+        invalid.push(result.campaign);
+      }
       errors.push(...result.errors);
     });
     
-    return { valid, errors };
+    return { valid, invalid, errors };
   }
 };
