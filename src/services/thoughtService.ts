@@ -9,6 +9,12 @@ export const thoughtService = {
     return data.thoughts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   },
 
+  /**
+   * Create a new thought with ID-based entity references (v1.3.0+)
+   * @param content - Thought content
+   * @param relatedEntities - Array of entity names (will be converted to IDs)
+   * @param gameDate - Optional in-game date
+   */
   createThought(
     content: string,
     relatedEntities: string[],
@@ -23,14 +29,26 @@ export const thoughtService = {
     }
     
     // Ensure all related entities exist (auto-create if needed)
-    const validatedEntities = relatedEntities.map(entityName => {
+    const validatedEntityNames: string[] = [];
+    const relatedEntityIds: string[] = [];
+    
+    relatedEntities.forEach(entityName => {
       const entity = entityService.ensureEntityExists(entityName.trim());
-      return entity.name; // Use the canonical name from the entity
+      validatedEntityNames.push(entity.name); // Use canonical name
+      
+      // Get entity ID for ID-based reference
+      const entityId = entity.localId || entity.id;
+      if (entityId) {
+        relatedEntityIds.push(entityId);
+      }
     });
     
     const thought = dataStorageService.addThought({
       content: content.trim(),
-      relatedEntities: validatedEntities,
+      // ID-based references (v1.3.0+) - Primary system
+      relatedEntityIds,
+      // Legacy name-based references - Keep for backward compatibility
+      relatedEntities: validatedEntityNames,
       timestamp: new Date(),
       gameDate,
       campaign_id: campaignId,
@@ -40,6 +58,13 @@ export const thoughtService = {
     return thought;
   },
 
+  /**
+   * Update an existing thought with ID-based entity references (v1.3.0+)
+   * @param thoughtId - Thought ID (localId or server id)
+   * @param content - Updated content
+   * @param relatedEntities - Array of entity names (will be converted to IDs)
+   * @param gameDate - Optional in-game date
+   */
   updateThought(
     thoughtId: string,
     content: string,
@@ -51,16 +76,28 @@ export const thoughtService = {
     
     if (thoughtIndex === -1) return null;
     
-    // Ensure all related entities exist
-    const validatedEntities = relatedEntities.map(entityName => {
+    // Ensure all related entities exist and get their IDs
+    const validatedEntityNames: string[] = [];
+    const relatedEntityIds: string[] = [];
+    
+    relatedEntities.forEach(entityName => {
       const entity = entityService.ensureEntityExists(entityName.trim());
-      return entity.name;
+      validatedEntityNames.push(entity.name);
+      
+      // Get entity ID for ID-based reference
+      const entityId = entity.localId || entity.id;
+      if (entityId) {
+        relatedEntityIds.push(entityId);
+      }
     });
     
     const updatedThought: LocalThought = {
       ...data.thoughts[thoughtIndex],
       content: content.trim(),
-      relatedEntities: validatedEntities,
+      // ID-based references (v1.3.0+) - Primary system
+      relatedEntityIds,
+      // Legacy name-based references - Keep for backward compatibility
+      relatedEntities: validatedEntityNames,
       gameDate,
       modifiedLocally: new Date(),
       syncStatus: 'pending'
@@ -111,12 +148,26 @@ export const thoughtService = {
     }
   },
 
-  getThoughtsByEntity(entityName: string): LocalThought[] {
+  /**
+   * Get all thoughts related to a specific entity (by name or ID)
+   * @param entityNameOrId - Entity name or ID
+   */
+  getThoughtsByEntity(entityNameOrId: string): LocalThought[] {
     const thoughts = this.getAllThoughts();
-    return thoughts.filter(thought => 
-      thought.relatedEntities.some(entity => 
-        entity.toLowerCase() === entityName.toLowerCase()
-      )
-    );
+    
+    // Try to get entity ID if a name was provided
+    const entityId = entityService.getEntityIdByName(entityNameOrId) || entityNameOrId;
+    
+    return thoughts.filter(thought => {
+      // Check ID-based references first (v1.3.0+)
+      if (thought.relatedEntityIds && thought.relatedEntityIds.length > 0) {
+        return thought.relatedEntityIds.includes(entityId);
+      }
+      
+      // Fall back to legacy name-based references
+      return thought.relatedEntities.some(entity => 
+        entity.toLowerCase() === entityNameOrId.toLowerCase()
+      );
+    });
   }
 };
