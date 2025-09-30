@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, Clock, Network, GitBranch, Link2 } from 'lucide-react';
@@ -14,7 +14,7 @@ import { thoughtService } from '@/services/thoughtService';
 import { getEntityIcon, getEntityClass } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
 import { format } from 'date-fns';
-import { EntityEditForm } from '@/components/forms/EntityEditForm';
+
 import { EntityRelationshipDisplay } from '@/components/display/EntityRelationshipDisplay';
 import { MarkdownDisplay } from '@/components/display/MarkdownDisplay';
 import { useToast } from '@/hooks/use-toast';
@@ -32,7 +32,6 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
   const [parentEntities, setParentEntities] = useState<LocalEntity[]>([]);
   const [childEntities, setChildEntities] = useState<LocalEntity[]>([]);
   const [linkedEntities, setLinkedEntities] = useState<LocalEntity[]>([]);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -107,81 +106,6 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
     loadEntityData();
   }, [entityName, navigate, toast]);
 
-  const handleEdit = async (
-    name: string, 
-    type: EntityType, 
-    description?: string,
-    newParentEntities?: string[],
-    newLinkedEntities?: string[],
-    attributes?: any[]
-  ) => {
-    if (!entity) return;
-
-    try {
-      const updatedEntity = entityService.updateEntity(
-        entity.localId || entity.id!,
-        { name, type, description, attributes }
-      );
-
-      // Handle parent entity changes
-      if (newParentEntities !== undefined) {
-        const currentParents = entity.parentEntities || [];
-        
-        // Remove old parents
-        currentParents.forEach(parent => {
-          if (!newParentEntities.includes(parent)) {
-            entityService.removeParentEntity(entity.localId || entity.id!, parent);
-          }
-        });
-        
-        // Add new parents
-        newParentEntities.forEach(parent => {
-          if (!currentParents.includes(parent)) {
-            entityService.addParentEntity(entity.localId || entity.id!, parent);
-          }
-        });
-      }
-
-      // Handle linked entity changes
-      if (newLinkedEntities !== undefined) {
-        const currentLinked = entity.linkedEntities || [];
-        
-        // Remove old links
-        currentLinked.forEach(linked => {
-          if (!newLinkedEntities.includes(linked)) {
-            entityService.removeLinkedEntity(entity.localId || entity.id!, linked);
-          }
-        });
-        
-        // Add new links
-        newLinkedEntities.forEach(linked => {
-          if (!currentLinked.includes(linked)) {
-            entityService.addLinkedEntity(entity.localId || entity.id!, linked);
-          }
-        });
-      }
-
-      // If name changed, navigate to new URL
-      if (name !== entity.name) {
-        navigate(`/entities/${encodeURIComponent(name)}`, { replace: true });
-      } else {
-        // Reload data to reflect changes
-        window.location.reload();
-      }
-
-      setIsEditDialogOpen(false);
-      toast({
-        title: "Entity updated",
-        description: `${name} has been updated successfully.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error updating entity",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleDelete = () => {
     if (!entity) return;
@@ -255,24 +179,14 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
         </Button>
         
         <div className="flex gap-2">
-          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit Entity</DialogTitle>
-              </DialogHeader>
-              <EntityEditForm
-                entity={entity}
-                onSubmit={handleEdit}
-                onCancel={() => setIsEditDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate(`/entities/${encodeURIComponent(entity.name)}/edit`)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
