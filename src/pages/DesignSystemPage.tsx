@@ -32,7 +32,8 @@ import {
   Calendar,
   Clock,
   MessageSquare,
-  Tag
+  Tag,
+  Sparkles
 } from "lucide-react";
 import { AttributeEditor } from "@/components/forms/AttributeEditor";
 
@@ -811,6 +812,110 @@ export default function DesignSystemPage() {
                 </CardContent>
               </Card>
             </div>
+          </section>
+
+          {/* Animations */}
+          <section className="space-y-6">
+            <h2 className="text-3xl font-semibold">Animations</h2>
+            <Card>
+              <CardHeader>
+                <CardTitle>Page Transitions & Micro-Interactions</CardTitle>
+                <CardDescription>
+                  Smooth animations for enhanced user experience with GPU-accelerated CSS transforms.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Animation Types</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="p-4 space-y-2 animate-fade-in">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <h5 className="font-medium">Fade In</h5>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Smooth fade with upward motion
+                      </p>
+                      <code className="text-xs bg-muted px-2 py-1 rounded block">
+                        animate-fade-in
+                      </code>
+                    </Card>
+                    
+                    <Card className="p-4 space-y-2 animate-scale-in">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <h5 className="font-medium">Scale In</h5>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Emphasis with scale effect
+                      </p>
+                      <code className="text-xs bg-muted px-2 py-1 rounded block">
+                        animate-scale-in
+                      </code>
+                    </Card>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="font-medium">Interactive Classes</h4>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted/50 rounded-md space-y-2">
+                      <p className="text-sm font-medium">Hover Scale</p>
+                      <div className="bg-background p-3 rounded border hover-scale cursor-pointer">
+                        Hover me for a lift effect
+                      </div>
+                      <code className="text-xs bg-muted px-2 py-1 rounded block">
+                        .hover-scale
+                      </code>
+                    </div>
+                    
+                    <div className="p-4 bg-muted/50 rounded-md space-y-2">
+                      <p className="text-sm font-medium">Pulse Animation</p>
+                      <div className="bg-background p-3 rounded border pulse">
+                        Pulsing attention grabber
+                      </div>
+                      <code className="text-xs bg-muted px-2 py-1 rounded block">
+                        .pulse
+                      </code>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <h4 className="font-medium">PageTransition Component</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Wrapper component for consistent page animations with customizable variants, delays, and durations.
+                  </p>
+                  <div className="bg-muted/50 p-4 rounded-md">
+                    <code className="text-xs block whitespace-pre-wrap">
+{`<PageTransition variant="enter">
+  <YourContent />
+</PageTransition>`}
+                    </code>
+                  </div>
+                  <div className="text-xs space-y-1">
+                    <p><strong>Variants:</strong> fade, scale, slide, enter (default)</p>
+                    <p><strong>Props:</strong> delay (ms), duration (ms), className</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2 bg-accent/10 p-4 rounded-md">
+                  <p className="text-sm font-medium">Performance & Accessibility</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• GPU-accelerated with CSS transforms</li>
+                    <li>• Respects prefers-reduced-motion media query</li>
+                    <li>• Timing: 300ms pages, 200ms micro-interactions, 150ms hovers</li>
+                    <li>• All animations use ease-out for natural feel</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </section>
         </div>
       </div>

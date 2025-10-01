@@ -58,7 +58,7 @@ export const EntityList = ({ entities, onEntityClick, isLoading }: EntityListPro
             <Tooltip key={entity.localId || entity.id}>
               <TooltipTrigger asChild>
                 <Card 
-                  className="p-4 flex flex-col cursor-pointer hover:bg-accent/10 transition-colors"
+                  className="p-4 flex flex-col cursor-pointer hover:bg-accent/10 transition-colors hover-scale"
                   onClick={() => handleEntityClick(entity.name)}
                 >
                   <div className="space-y-3 flex-1">

@@ -133,7 +133,7 @@ export const ThoughtsList = ({ onEntityClick }: ThoughtsListProps) => {
             filteredThoughts.map(thought => (
               <div
                 key={thought.id}
-                className="p-4 bg-muted/30 border border-border hover:bg-muted/50 transition-colors"
+                className="p-4 bg-muted/30 border border-border hover:bg-muted/50 transition-colors hover-scale"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs text-muted-foreground">

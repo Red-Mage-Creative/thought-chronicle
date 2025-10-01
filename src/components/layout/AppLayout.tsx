@@ -3,6 +3,7 @@ import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { PageTransition } from '@/components/PageTransition';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -33,14 +34,16 @@ export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefault
     <div className="min-h-screen bg-background flex flex-col">
       {shouldShowHeader && <AppHeader />}
       <main className="flex-1">
-        <div className="container">
-          <div className={getContainerClasses()}>
-            {defaultTags && onDefaultTagsChange ? 
-              cloneElement(children as ReactElement, { defaultTags, onDefaultTagsChange }) : 
-              children
-            }
+        <PageTransition>
+          <div className="container">
+            <div className={getContainerClasses()}>
+              {defaultTags && onDefaultTagsChange ? 
+                cloneElement(children as ReactElement, { defaultTags, onDefaultTagsChange }) : 
+                children
+              }
+            </div>
           </div>
-        </div>
+        </PageTransition>
       </main>
       <AppFooter />
     </div>

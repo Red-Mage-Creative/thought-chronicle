@@ -18,6 +18,35 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.1",
+  date: "2025-10-01",
+  features: [
+    "Added comprehensive page animation system with fade, scale, and slide transitions",
+    "Created PageTransition component for consistent page animations",
+    "Added interactive animation classes: hover-scale, pulse, story-link",
+    "Implemented GPU-accelerated animations for smooth performance"
+  ],
+  improvements: [
+    "Enhanced user experience with smooth page transitions (300ms)",
+    "Added micro-interactions for better visual feedback (200ms)",
+    "Improved accessibility with prefers-reduced-motion support",
+    "Enhanced AppLayout with automatic PageTransition wrapper"
+  ],
+  fixes: [],
+  docs: [
+    "Added comprehensive animations section to Design System page",
+    "Documented all animation types, timing, and usage examples",
+    "Added PageTransition component documentation with props and variants",
+    "Documented performance and accessibility best practices"
+  ],
+  refactor: [],
+  tests: [],
+  maintenance: [
+    "Extended tailwind.config.ts with fade, scale, and slide keyframes",
+    "Added combined animation utilities (enter, exit) for complex transitions",
+    "Updated AppLayout to wrap all page content in PageTransition"
+  ]
+}, {
   version: "1.3.0",
   date: "2025-09-30",
   features: [
