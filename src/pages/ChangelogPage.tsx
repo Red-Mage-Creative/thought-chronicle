@@ -24,26 +24,33 @@ const changelog: ChangelogEntry[] = [{
     "Added cascade deletion dialog with three modes: orphan (safe), block (preventive), and remove (destructive)",
     "Added manual data validation tool in Settings for checking orphaned entity references",
     "Added rename safety indicator on entity edit form showing ID-based reference protection",
-    "Added comprehensive validation results display with navigation to affected items"
+    "Added comprehensive validation results display with navigation to affected items",
+    "Added visual indicators for orphaned entity references in relationship displays"
   ],
   improvements: [
     "Enhanced entity deletion UX with preview of affected thoughts and entities before deletion",
     "Improved data integrity visibility with detailed validation reporting",
     "Added visual feedback for cascade deletion impacts",
-    "Enhanced Settings page with dedicated Data Validation tab"
+    "Enhanced Settings page with dedicated Data Validation tab",
+    "Entity relationship displays now show orphaned references with warning badges and tooltips",
+    "EntityDetailsPage now detects and displays broken ID references for parent and linked entities"
   ],
   fixes: [],
   docs: [
     "Added EntityDeleteDialog component to design system",
     "Added ValidationResultsDisplay component to design system",
-    "Documented cascade deletion modes and their use cases"
+    "Added EntityRelationshipDisplay with orphaned references to design system",
+    "Documented cascade deletion modes and their use cases",
+    "Updated ID_BASED_REFERENCES.md with orphaned reference UI documentation"
   ],
   refactor: [],
   tests: [],
   maintenance: [
     "Created EntityDeleteDialog component for consistent deletion workflow",
     "Created ValidationResultsDisplay component for validation feedback",
-    "Extended SettingsPage with validation functionality"
+    "Extended SettingsPage with validation functionality",
+    "Enhanced EntityRelationshipDisplay with orphanedIds prop and visual indicators",
+    "Updated EntityDetailsPage to detect and pass orphaned IDs to display components"
   ]
 }, {
   version: "1.3.1",

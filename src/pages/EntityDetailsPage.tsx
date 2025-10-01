@@ -31,6 +31,8 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
   const [parentEntities, setParentEntities] = useState<LocalEntity[]>([]);
   const [childEntities, setChildEntities] = useState<LocalEntity[]>([]);
   const [linkedEntities, setLinkedEntities] = useState<LocalEntity[]>([]);
+  const [orphanedParentIds, setOrphanedParentIds] = useState<string[]>([]);
+  const [orphanedLinkedIds, setOrphanedLinkedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -86,9 +88,14 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
         
         // Parent entities - use ID-based references first, fall back to names
         let parents: LocalEntity[] = [];
+        let orphanedParents: string[] = [];
         if (foundEntity.parentEntityIds && foundEntity.parentEntityIds.length > 0) {
           // Use new ID-based references
           parents = entityService.getEntitiesByIds(foundEntity.parentEntityIds);
+          // Detect orphaned IDs
+          orphanedParents = foundEntity.parentEntityIds.filter(
+            id => !parents.some(p => p.localId === id || p.id === id)
+          );
         } else if (foundEntity.parentEntities && foundEntity.parentEntities.length > 0) {
           // Fall back to legacy name-based references
           parents = (foundEntity.parentEntities || [])
@@ -96,14 +103,28 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
             .filter((e): e is LocalEntity => e !== undefined);
         }
         setParentEntities(parents);
+        setOrphanedParentIds(orphanedParents);
 
         // Child entities (getChildEntities already handles both ID and name-based)
         const children = entityService.getChildEntities(foundEntity.name);
         setChildEntities(children);
 
         // Linked entities (getLinkedEntities already handles both ID and name-based)
-        const linked = entityService.getLinkedEntities(foundEntity.name);
+        let linked: LocalEntity[] = [];
+        let orphanedLinked: string[] = [];
+        if (foundEntity.linkedEntityIds && foundEntity.linkedEntityIds.length > 0) {
+          linked = entityService.getEntitiesByIds(foundEntity.linkedEntityIds);
+          // Detect orphaned IDs
+          orphanedLinked = foundEntity.linkedEntityIds.filter(
+            id => !linked.some(l => l.localId === id || l.id === id)
+          );
+        } else if (foundEntity.linkedEntities && foundEntity.linkedEntities.length > 0) {
+          linked = (foundEntity.linkedEntities || [])
+            .map(name => allEntities.find(e => e.name === name))
+            .filter((e): e is LocalEntity => e !== undefined);
+        }
         setLinkedEntities(linked);
+        setOrphanedLinkedIds(orphanedLinked);
       } catch (error) {
         toast({
           title: "Error loading entity",
@@ -278,6 +299,7 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
                 title="Parent Entities"
                 icon={Network}
                 entities={parentEntities}
+                orphanedIds={orphanedParentIds}
                 emptyMessage="No parent entities"
                 onEntityClick={handleEntityClick}
               />
@@ -292,6 +314,7 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
                 title="Linked Entities"
                 icon={Link2}
                 entities={linkedEntities}
+                orphanedIds={orphanedLinkedIds}
                 emptyMessage="No linked entities"
                 onEntityClick={handleEntityClick}
               />

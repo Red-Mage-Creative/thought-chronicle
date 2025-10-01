@@ -138,9 +138,41 @@ console.log(report.recommendation);
 
 ### 4. Orphaned Reference Display
 
-Visual indicators for missing entities:
-- 🔵 Normal entity badge
-- ⭕ Outlined badge with `HelpCircle` icon = orphaned reference
+Visual indicators for missing entities in `EntityRelationshipDisplay` component:
+
+**Valid Entity Badge:**
+- Colored background with entity type color (green, blue, purple, etc.)
+- Entity type icon (User, MapPin, Sword, etc.)
+- Entity name and type label
+- Clickable for navigation
+- Hover effect for interactivity
+
+**Orphaned Reference Badge:**
+- Muted gray background (`bg-muted/50`)
+- Dashed border (`border-dashed`)
+- AlertTriangle warning icon
+- "Unknown Entity" label with truncated ID
+- Non-clickable (no navigation)
+- Tooltip explaining the issue
+
+**Header Count Display:**
+- Without orphans: "Parent Entities (2)"
+- With orphans: "Parent Entities (2 valid, 1 orphaned)"
+
+**Example Usage:**
+```tsx
+<EntityRelationshipDisplay
+  title="Parent Entities"
+  icon={Network}
+  entities={[validEntity1, validEntity2]}
+  orphanedIds={['deleted-entity-123']}
+  emptyMessage="No parent entities"
+  onEntityClick={handleEntityClick}
+/>
+```
+
+**Tooltip Content:**
+"This reference points to an entity that no longer exists. The entity may have been deleted or the data may be corrupted. You can remove this reference by editing the entity."
 
 ## Migration Guide
 

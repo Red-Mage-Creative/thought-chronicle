@@ -33,9 +33,13 @@ import {
   Clock,
   MessageSquare,
   Tag,
-  Sparkles
+  Sparkles,
+  Network,
+  Link2
 } from "lucide-react";
 import { AttributeEditor } from "@/components/forms/AttributeEditor";
+import { EntityRelationshipDisplay } from "@/components/display/EntityRelationshipDisplay";
+import type { LocalEntity } from "@/types/entities";
 
 export default function DesignSystemPage() {
   const [demoValue, setDemoValue] = useState("");
@@ -360,6 +364,99 @@ export default function DesignSystemPage() {
                     <li>• <code>onChange</code>: (attributes: EntityAttribute[]) =&gt; void - callback on change</li>
                     <li>• <code>defaultAttributes?</code>: DefaultEntityAttribute[] - for required indicators</li>
                     <li>• <code>disabled?</code>: boolean - disable all inputs</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Entity Relationship Display */}
+          <section className="space-y-6">
+            <h2 className="text-3xl font-semibold">Entity Relationship Display</h2>
+            <Card>
+              <CardHeader>
+                <CardTitle>Relationship Display with Orphaned References</CardTitle>
+                <CardDescription>
+                  Component for displaying entity relationships with visual indicators for broken/orphaned references (v1.3.0+)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Valid References</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Shows entity relationships with clickable badges, type icons, and proper styling
+                  </p>
+                  <EntityRelationshipDisplay
+                    title="Parent Entities"
+                    icon={Network}
+                    entities={[
+                      { 
+                        localId: 'entity-1', 
+                        name: 'Castle Town', 
+                        type: 'location', 
+                        syncStatus: 'synced',
+                        campaign_id: 'demo',
+                        created_by: 'demo'
+                      } as LocalEntity,
+                      { 
+                        localId: 'entity-2', 
+                        name: 'Kingdom', 
+                        type: 'location', 
+                        syncStatus: 'synced',
+                        campaign_id: 'demo',
+                        created_by: 'demo'
+                      } as LocalEntity
+                    ]}
+                    emptyMessage="No parent entities"
+                    onEntityClick={() => {}}
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium">With Orphaned References</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Orphaned references appear with dashed borders, warning icons, and tooltips explaining the issue
+                  </p>
+                  <EntityRelationshipDisplay
+                    title="Linked Entities"
+                    icon={Link2}
+                    entities={[
+                      { 
+                        localId: 'entity-3', 
+                        name: 'Gandalf', 
+                        type: 'npc', 
+                        syncStatus: 'synced',
+                        campaign_id: 'demo',
+                        created_by: 'demo'
+                      } as LocalEntity
+                    ]}
+                    orphanedIds={['deleted-entity-123', 'missing-entity-456']}
+                    emptyMessage="No linked entities"
+                    onEntityClick={() => {}}
+                  />
+                </div>
+                
+                <div className="space-y-2 bg-muted/50 p-4 rounded-md">
+                  <p className="text-sm font-medium">Visual Design:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• <strong>Valid entities</strong>: Colored badge with entity type icon, clickable</li>
+                    <li>• <strong>Orphaned refs</strong>: Gray/muted badge with dashed border, AlertTriangle icon, non-clickable</li>
+                    <li>• <strong>Header count</strong>: Shows "X valid, Y orphaned" when orphans exist</li>
+                    <li>• <strong>Tooltip</strong>: Explains that the entity was deleted or data is corrupted</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2 bg-muted/50 p-4 rounded-md">
+                  <p className="text-sm font-medium">Component Props:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• <code>title</code>: string - Section title (e.g., "Parent Entities")</li>
+                    <li>• <code>icon</code>: LucideIcon - Icon for the section header</li>
+                    <li>• <code>entities</code>: LocalEntity[] - Array of valid resolved entities</li>
+                    <li>• <code>orphanedIds?</code>: string[] - Array of IDs that couldn't be resolved</li>
+                    <li>• <code>emptyMessage</code>: string - Message when no entities exist</li>
+                    <li>• <code>onEntityClick?</code>: (name: string) =&gt; void - Click handler for navigation</li>
                   </ul>
                 </div>
               </CardContent>
