@@ -21,6 +21,7 @@ const changelog: ChangelogEntry[] = [{
   version: "1.3.2",
   date: "2025-10-01",
   features: [
+    "Added data import functionality to restore exported Chronicle JSON files",
     "Added cascade deletion dialog with three modes: orphan (safe), block (preventive), and remove (destructive)",
     "Added manual data validation tool in Settings for checking orphaned entity references",
     "Added rename safety indicator on entity edit form showing ID-based reference protection",
@@ -28,6 +29,8 @@ const changelog: ChangelogEntry[] = [{
     "Added visual indicators for orphaned entity references in relationship displays"
   ],
   improvements: [
+    "Added Upload Data option to user dropdown menu for easy data import",
+    "Import dialog provides clear file validation and campaign data preview",
     "Enhanced entity deletion UX with preview of affected thoughts and entities before deletion",
     "Improved data integrity visibility with detailed validation reporting",
     "Added visual feedback for cascade deletion impacts",
@@ -46,6 +49,9 @@ const changelog: ChangelogEntry[] = [{
   refactor: [],
   tests: [],
   maintenance: [
+    "Created dataImportService for file validation and data import",
+    "Created DataImportDialog component for import workflow",
+    "Updated AppHeader with import button and dialog integration",
     "Created EntityDeleteDialog component for consistent deletion workflow",
     "Created ValidationResultsDisplay component for validation feedback",
     "Extended SettingsPage with validation functionality",

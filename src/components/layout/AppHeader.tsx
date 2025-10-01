@@ -4,13 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { User, LogOut, ScrollText, Download, Settings } from "lucide-react";
+import { User, LogOut, ScrollText, Download, Upload, Settings } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { campaignService } from "@/services/campaignService";
 import { LocalCampaign } from "@/types/campaigns";
 import { CampaignManagementModal } from "@/components/CampaignManagementModal";
 import { dataExportService } from "@/services/dataExportService";
-
+import { DataImportDialog } from "@/components/DataImportDialog";
 import { toast } from "sonner";
 
 export const AppHeader = () => {
@@ -18,6 +18,7 @@ export const AppHeader = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showManagementModal, setShowManagementModal] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<LocalCampaign | null>(null);
   const [allCampaigns, setAllCampaigns] = useState<LocalCampaign[]>([]);
 
@@ -72,6 +73,14 @@ export const AppHeader = () => {
     setShowExportDialog(false);
   };
 
+  const handleImportComplete = () => {
+    loadCampaignData();
+    toast.success('Data imported successfully');
+    setShowImportDialog(false);
+    // Trigger a full page refresh to reload all data
+    window.location.reload();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container">
@@ -122,6 +131,10 @@ export const AppHeader = () => {
                 <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
                   <Download className="h-4 w-4 mr-2" />
                   Download Data
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowImportDialog(true)}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Data
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowConfirmDialog(true)}>
@@ -181,6 +194,12 @@ export const AppHeader = () => {
           onCampaignsUpdated={handleCampaignsUpdated}
         />
       )}
+
+      <DataImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        onImportComplete={handleImportComplete}
+      />
     </header>
   );
 };
