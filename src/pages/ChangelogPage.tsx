@@ -18,6 +18,34 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.2",
+  date: "2025-10-01",
+  features: [
+    "Added cascade deletion dialog with three modes: orphan (safe), block (preventive), and remove (destructive)",
+    "Added manual data validation tool in Settings for checking orphaned entity references",
+    "Added rename safety indicator on entity edit form showing ID-based reference protection",
+    "Added comprehensive validation results display with navigation to affected items"
+  ],
+  improvements: [
+    "Enhanced entity deletion UX with preview of affected thoughts and entities before deletion",
+    "Improved data integrity visibility with detailed validation reporting",
+    "Added visual feedback for cascade deletion impacts",
+    "Enhanced Settings page with dedicated Data Validation tab"
+  ],
+  fixes: [],
+  docs: [
+    "Added EntityDeleteDialog component to design system",
+    "Added ValidationResultsDisplay component to design system",
+    "Documented cascade deletion modes and their use cases"
+  ],
+  refactor: [],
+  tests: [],
+  maintenance: [
+    "Created EntityDeleteDialog component for consistent deletion workflow",
+    "Created ValidationResultsDisplay component for validation feedback",
+    "Extended SettingsPage with validation functionality"
+  ]
+}, {
   version: "1.3.1",
   date: "2025-10-01",
   features: [

@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, Clock, Network, GitBranch, Link2 } from 'lucide-react';
 import { LocalEntity, EntityWithMetrics, EntityType } from '@/types/entities';
@@ -17,6 +15,7 @@ import { format } from 'date-fns';
 
 import { EntityRelationshipDisplay } from '@/components/display/EntityRelationshipDisplay';
 import { MarkdownDisplay } from '@/components/display/MarkdownDisplay';
+import { EntityDeleteDialog } from '@/components/EntityDeleteDialog';
 import { useToast } from '@/hooks/use-toast';
 
 interface EntityDetailsPageProps {
@@ -121,22 +120,32 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
   }, [entityName, navigate, toast]);
 
 
-  const handleDelete = () => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const handleDelete = (cascadeMode: 'orphan' | 'block' | 'remove') => {
     if (!entity) return;
 
     try {
-      entityService.deleteEntity(entity.localId || entity.id!);
+      entityService.deleteEntity(entity.localId || entity.id!, cascadeMode);
       toast({
         title: "Entity deleted",
         description: `${entity.name} has been deleted successfully.`,
       });
       navigate('/entities');
     } catch (error) {
-      toast({
-        title: "Error deleting entity",
-        description: "An error occurred while deleting the entity.",
-        variant: "destructive",
-      });
+      if (error instanceof Error && error.message.includes('Cannot delete entity')) {
+        toast({
+          title: "Cannot delete entity",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error deleting entity",
+          description: "An error occurred while deleting the entity.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -202,29 +211,14 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
             Edit
           </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Entity</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete "{entity.name}"? This action cannot be undone.
-                  The entity will be removed from all related thoughts.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => setDeleteDialogOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -414,6 +408,13 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
           </div>
         )}
       </Card>
+
+      <EntityDeleteDialog
+        entity={entity}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

@@ -165,7 +165,14 @@ export const EntityEditForm = forwardRef<HTMLFormElement, EntityEditFormProps>((
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="entity-name">Name</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="entity-name">Name</Label>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              💡 Safe to rename - all references use IDs
+            </span>
+          </div>
+        </div>
         <Input
           id="entity-name"
           value={name}
