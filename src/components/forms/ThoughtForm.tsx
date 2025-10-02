@@ -234,6 +234,16 @@ export const ThoughtForm = ({
             onChange={(e) => setGameDate(e.target.value)}
           />
         </div>
+
+        <div className="pt-4 flex justify-end">
+          <Button
+            onClick={handleSubmit}
+            disabled={!isContentValid || isSubmitting}
+            className="min-w-32"
+          >
+            {isSubmitting ? 'Saving...' : (isEditMode ? 'Update Thought' : 'Save Thought')}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

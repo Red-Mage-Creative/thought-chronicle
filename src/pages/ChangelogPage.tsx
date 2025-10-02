@@ -18,6 +18,21 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.3",
+  date: "2025-10-02",
+  features: [],
+  improvements: [
+    "Added visible 'Save Thought' button to thought form for better discoverability",
+    "Button shows clear visual feedback during save operation"
+  ],
+  fixes: [],
+  docs: [],
+  refactor: [],
+  tests: [],
+  maintenance: [
+    "Updated ThoughtForm component with submit button"
+  ]
+}, {
   version: "1.3.2",
   date: "2025-10-01",
   features: [
