@@ -1,11 +1,11 @@
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { EntityType, LocalEntity, EntityAttribute, DefaultEntityAttribute } from '@/types/entities';
 import { ENTITY_TYPE_CONFIGS } from '@/config/entityTypeConfig';
-import { capitalize } from '@/utils/formatters';
 import { EntityRelationshipSelector } from './EntityRelationshipSelector';
 import { AttributeEditor } from './AttributeEditor';
 import { entityService } from '@/services/entityService';
@@ -27,6 +27,8 @@ interface EntityEditFormProps {
     attributes?: EntityAttribute[]
   ) => Promise<void>;
   onCancel: () => void;
+  hasUnsavedChanges?: boolean;
+  submitTrigger?: number;
   onFormStateChange?: (state: {
     name: string;
     isSaveDisabled: boolean;
@@ -35,7 +37,7 @@ interface EntityEditFormProps {
   }) => void;
 }
 
-export const EntityEditForm = forwardRef<HTMLFormElement, EntityEditFormProps>(({ entity, onSubmit, onCancel, onFormStateChange }, ref) => {
+export const EntityEditForm = ({ entity, onSubmit, onCancel, hasUnsavedChanges: externalHasUnsavedChanges = false, submitTrigger, onFormStateChange }: EntityEditFormProps) => {
   const [name, setName] = useState(entity.name);
   const [type, setType] = useState<EntityType>(entity.type === 'uncategorized' ? 'npc' : entity.type);
   const [description, setDescription] = useState(entity.description || '');
@@ -90,6 +92,13 @@ export const EntityEditForm = forwardRef<HTMLFormElement, EntityEditFormProps>((
     const defaults = dataStorageService.getDefaultAttributesForEntityType(type);
     setDefaultAttributes(defaults);
   }, [type]);
+
+  // Listen for submit trigger from parent
+  useEffect(() => {
+    if (submitTrigger && submitTrigger > 0) {
+      handleSubmit({ preventDefault: () => {} } as any);
+    }
+  }, [submitTrigger]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +172,15 @@ export const EntityEditForm = forwardRef<HTMLFormElement, EntityEditFormProps>((
   const excludeFromParents = [entity.name, ...childEntityNames];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Card className={externalHasUnsavedChanges ? 'border-l-4 border-l-amber-500' : ''}>
+      <CardHeader>
+        <CardTitle>Edit Entity</CardTitle>
+        <CardDescription>
+          Modify entity details, relationships, and attributes.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="entity-name">Name</Label>
@@ -242,14 +259,14 @@ export const EntityEditForm = forwardRef<HTMLFormElement, EntityEditFormProps>((
         disabled={isSubmitting}
       />
 
-      <AttributeEditor
-        attributes={attributes}
-        onChange={setAttributes}
-        defaultAttributes={defaultAttributes}
-        disabled={isSubmitting}
-      />
-    </form>
+          <AttributeEditor
+            attributes={attributes}
+            onChange={setAttributes}
+            defaultAttributes={defaultAttributes}
+            disabled={isSubmitting}
+          />
+        </form>
+      </CardContent>
+    </Card>
   );
-});
-
-EntityEditForm.displayName = 'EntityEditForm';
+};

@@ -13,9 +13,10 @@ interface TagSelectorProps {
   placeholder?: string;
   isDefaultTagSelector?: boolean;
   defaultTags?: string[];
+  onCreateEntity?: (name: string) => Promise<void>;
 }
 
-export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags...", isDefaultTagSelector = false, defaultTags = [] }: TagSelectorProps) => {
+export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Add tags...", isDefaultTagSelector = false, defaultTags = [], onCreateEntity }: TagSelectorProps) => {
   const [inputValue, setInputValue] = useState('');
   const [filteredSuggestions, setFilteredSuggestions] = useState<EntitySuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -208,9 +209,19 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
               className={`w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground ${
                 selectedIndex === filteredSuggestions.length ? 'bg-accent text-accent-foreground' : ''
               }`}
-              onMouseDown={(e) => {
+              onMouseDown={async (e) => {
                 e.preventDefault();
                 if (inputValue.trim()) {
+                  // Call onCreateEntity if provided (for entity forms)
+                  if (onCreateEntity) {
+                    try {
+                      await onCreateEntity(inputValue.trim());
+                    } catch (error) {
+                      // Error handled in onCreateEntity, don't add tag if it failed
+                      return;
+                    }
+                  }
+                  
                   if (inputValue.includes(',')) {
                     addMultipleTags(inputValue);
                   } else {

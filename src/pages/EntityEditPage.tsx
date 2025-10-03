@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EntityEditForm } from '@/components/forms/EntityEditForm';
 import { FormControls } from '@/components/forms/FormControls';
 import { entityService } from '@/services/entityService';
@@ -14,7 +13,6 @@ const EntityEditPage = () => {
   const { entityName } = useParams<{ entityName: string }>();
   const { navigateBack } = useNavigationState();
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
   const [entity, setEntity] = useState<LocalEntity | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,6 +21,7 @@ const EntityEditPage = () => {
     name: string;
     isSaveDisabled: boolean;
   }>({ name: '', isSaveDisabled: false });
+  const [submitTrigger, setSubmitTrigger] = useState(0);
 
   useEffect(() => {
     if (entityName) {
@@ -131,9 +130,7 @@ const EntityEditPage = () => {
   };
 
   const handleSaveClick = () => {
-    if (formRef.current) {
-      formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    }
+    setSubmitTrigger(prev => prev + 1);
   };
 
   if (loading) {
@@ -152,11 +149,7 @@ const EntityEditPage = () => {
           <ChevronLeft className="h-4 w-4" />
           Back to Entities
         </Button>
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground">Entity not found.</p>
-          </CardContent>
-        </Card>
+        <p className="text-muted-foreground">Entity not found.</p>
       </div>
     );
   }
@@ -185,27 +178,18 @@ const EntityEditPage = () => {
         />
       </div>
 
-      <Card className={hasUnsavedChanges ? 'border-l-4 border-l-amber-500' : ''}>
-        <CardHeader>
-          <CardTitle>Edit Entity</CardTitle>
-          <CardDescription>
-            Update the details, relationships, and attributes for {entity.name}.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EntityEditForm
-            ref={formRef}
-            entity={entity} 
-            onSubmit={handleSubmit} 
-            onCancel={handleCancel}
-            onFormStateChange={(state) => {
-              setFormData({ name: state.name, isSaveDisabled: state.isSaveDisabled });
-              setHasUnsavedChanges(state.hasUnsavedChanges);
-              setIsSubmitting(state.isSubmitting);
-            }}
-          />
-        </CardContent>
-      </Card>
+      <EntityEditForm
+        entity={entity} 
+        onSubmit={handleSubmit} 
+        onCancel={handleCancel}
+        hasUnsavedChanges={hasUnsavedChanges}
+        submitTrigger={submitTrigger}
+        onFormStateChange={(state) => {
+          setFormData({ name: state.name, isSaveDisabled: state.isSaveDisabled });
+          setHasUnsavedChanges(state.hasUnsavedChanges);
+          setIsSubmitting(state.isSubmitting);
+        }}
+      />
 
       <FormControls
         onSave={handleSaveClick}

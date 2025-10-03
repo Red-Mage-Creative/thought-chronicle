@@ -1,8 +1,9 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { EntityType, EntityAttribute, DefaultEntityAttribute } from '@/types/entities';
 import { ENTITY_TYPE_CONFIGS } from '@/config/entityTypeConfig';
@@ -13,6 +14,7 @@ import { schemaValidationService } from '@/services/schemaValidationService';
 interface EntityFormProps {
   onSubmit: (name: string, type: EntityType, description?: string, attributes?: EntityAttribute[]) => Promise<void>;
   onCancel: () => void;
+  submitTrigger?: number;
   onFormStateChange?: (state: {
     name: string;
     isSaveDisabled: boolean;
@@ -24,7 +26,7 @@ interface EntityFormProps {
 // Entity types are now centralized in entityTypeConfig.ts
 const entityTypes = ENTITY_TYPE_CONFIGS;
 
-export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps>(({ onSubmit, onCancel, onFormStateChange }, ref) => {
+export const EntityForm = ({ onSubmit, onCancel, submitTrigger, onFormStateChange }: EntityFormProps) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<EntityType>('npc');
   const [description, setDescription] = useState('');
@@ -72,6 +74,13 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps>(({ onSubm
     
     setAttributes(initialAttributes);
   }, [type]);
+
+  // Listen for submit trigger from parent
+  useEffect(() => {
+    if (submitTrigger && submitTrigger > 0) {
+      handleSubmit({ preventDefault: () => {} } as any);
+    }
+  }, [submitTrigger]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +151,15 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps>(({ onSubm
   }, [name, type, description, attributes, isSubmitting]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Create New Entity</CardTitle>
+        <CardDescription>
+          Add a new character, location, item, or other entity to your campaign registry.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Name *</Label>
         <Input
@@ -192,14 +209,14 @@ export const EntityForm = forwardRef<HTMLFormElement, EntityFormProps>(({ onSubm
         </p>
       </div>
 
-      <AttributeEditor
-        attributes={attributes}
-        onChange={setAttributes}
-        defaultAttributes={defaultAttributes}
-        disabled={isSubmitting}
-      />
-    </form>
+          <AttributeEditor
+            attributes={attributes}
+            onChange={setAttributes}
+            defaultAttributes={defaultAttributes}
+            disabled={isSubmitting}
+          />
+        </form>
+      </CardContent>
+    </Card>
   );
-});
-
-EntityForm.displayName = 'EntityForm';
+};

@@ -18,6 +18,30 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.5",
+  date: "2025-10-03",
+  features: [
+    "Quick entity creation from relationship selector - creates entities immediately when adding relationships"
+  ],
+  improvements: [
+    "Standardized card and button layout across all forms for consistency",
+    "Enhanced entity relationship selector with inline entity creation",
+    "Improved visual hierarchy with forms having internal card wrappers",
+    "Better separation of form content and form controls"
+  ],
+  fixes: [
+    "Fixed 'Add new entity' button to actually create entities in entity forms",
+    "Fixed inconsistent card wrapper placement between entity and thought forms"
+  ],
+  docs: [],
+  refactor: [
+    "Moved card wrappers from pages into form components",
+    "Removed ref forwarding from EntityForm and EntityEditForm (no longer needed)",
+    "Replaced command popover with TagSelector in EntityRelationshipSelector for better UX"
+  ],
+  tests: [],
+  maintenance: []
+}, {
   version: "1.3.4",
   date: "2025-10-03",
   features: [],

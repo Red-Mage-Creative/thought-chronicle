@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { EntityForm } from '@/components/forms/EntityForm';
 import { FormControls } from '@/components/forms/FormControls';
 import { entityService } from '@/services/entityService';
@@ -10,13 +9,13 @@ import { Button } from '@/components/ui/button';
 
 const EntityCreatePage = () => {
   const { navigateBack } = useNavigationState();
-  const formRef = useRef<HTMLFormElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     isSaveDisabled: boolean;
   }>({ name: '', isSaveDisabled: true });
+  const [submitTrigger, setSubmitTrigger] = useState(0);
 
   const handleSubmit = async (
     name: string,
@@ -38,9 +37,7 @@ const EntityCreatePage = () => {
   };
 
   const handleSaveClick = () => {
-    if (formRef.current) {
-      formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-    }
+    setSubmitTrigger(prev => prev + 1);
   };
 
   return (
@@ -67,26 +64,16 @@ const EntityCreatePage = () => {
         />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Create New Entity</CardTitle>
-          <CardDescription>
-            Add a new character, location, item, or other entity to your campaign registry.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EntityForm 
-            ref={formRef}
-            onSubmit={handleSubmit} 
-            onCancel={handleCancel}
-            onFormStateChange={(state) => {
-              setFormData({ name: state.name, isSaveDisabled: state.isSaveDisabled });
-              setHasUnsavedChanges(state.hasUnsavedChanges);
-              setIsSubmitting(state.isSubmitting);
-            }}
-          />
-        </CardContent>
-      </Card>
+      <EntityForm 
+        onSubmit={handleSubmit} 
+        onCancel={handleCancel}
+        submitTrigger={submitTrigger}
+        onFormStateChange={(state) => {
+          setFormData({ name: state.name, isSaveDisabled: state.isSaveDisabled });
+          setHasUnsavedChanges(state.hasUnsavedChanges);
+          setIsSubmitting(state.isSubmitting);
+        }}
+      />
 
       <FormControls
         onSave={handleSaveClick}

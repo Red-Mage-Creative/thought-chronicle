@@ -8,6 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { LocalEntity } from '@/types/entities';
 import { getEntityIcon } from '@/utils/entityUtils';
 import { capitalize } from '@/utils/formatters';
+import { TagSelector } from './TagSelector';
+import { entityService } from '@/services/entityService';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * EntityRelationshipSelector - Select parent/linked entities for an entity
@@ -37,6 +40,25 @@ export const EntityRelationshipSelector = ({
   disabled = false,
 }: EntityRelationshipSelectorProps) => {
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleCreateEntity = async (name: string) => {
+    try {
+      // Create entity with inferred type as "uncategorized"
+      await entityService.createEntity(name, 'uncategorized', '', 'manual');
+      toast({
+        title: 'Entity Created',
+        description: `"${name}" has been added to your registry. You can edit it later to set the type and details.`
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to create entity.',
+        variant: 'destructive'
+      });
+      throw error;
+    }
+  };
 
   const filteredEntities = availableEntities.filter(
     (entity) => 
@@ -80,45 +102,22 @@ export const EntityRelationshipSelector = ({
         </div>
       )}
 
-      {/* Add entity selector */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full justify-start"
-            disabled={disabled || filteredEntities.length === 0}
-          >
-            {filteredEntities.length === 0 ? 'No entities available' : `Add ${label.toLowerCase()}...`}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput placeholder={`Search entities...`} />
-            <CommandList>
-              <CommandEmpty>No entities found.</CommandEmpty>
-              <CommandGroup>
-                {filteredEntities.map((entity) => {
-                  const Icon = getEntityIcon(entity.type);
-                  return (
-                    <CommandItem
-                      key={entity.name}
-                      value={entity.name}
-                      onSelect={() => handleSelect(entity.name)}
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      <span>{entity.name}</span>
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {capitalize(entity.type)}
-                      </span>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+      {/* Add entity selector with create option */}
+      <TagSelector
+        tags={selectedEntities}
+        onTagsChange={(newTags) => {
+          // Handle additions
+          const added = newTags.filter(t => !selectedEntities.includes(t));
+          added.forEach(entityName => onAdd(entityName));
+          
+          // Handle removals
+          const removed = selectedEntities.filter(t => !newTags.includes(t));
+          removed.forEach(entityName => onRemove(entityName));
+        }}
+        suggestions={filteredEntities.map(e => ({ name: e.name, type: e.type }))}
+        placeholder={label}
+        onCreateEntity={handleCreateEntity}
+      />
     </div>
   );
 };
