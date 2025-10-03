@@ -33,6 +33,19 @@ const EntityEditPage = () => {
     }
   }, [entityName]);
 
+  // Update browser tab title when unsaved changes exist
+  useEffect(() => {
+    const originalTitle = document.title;
+    if (hasUnsavedChanges) {
+      document.title = `* ${originalTitle}`;
+    } else {
+      document.title = originalTitle.replace(/^\* /, '');
+    }
+    return () => {
+      document.title = originalTitle.replace(/^\* /, '');
+    };
+  }, [hasUnsavedChanges]);
+
   /**
    * Handle entity update with relationship management
    * 
@@ -172,7 +185,7 @@ const EntityEditPage = () => {
         />
       </div>
 
-      <Card>
+      <Card className={hasUnsavedChanges ? 'border-l-4 border-l-amber-500' : ''}>
         <CardHeader>
           <CardTitle>Edit Entity</CardTitle>
           <CardDescription>

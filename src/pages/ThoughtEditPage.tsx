@@ -39,6 +39,19 @@ const ThoughtEditPage = () => {
     }
   }, [thoughtId]);
 
+  // Update browser tab title when unsaved changes exist
+  useEffect(() => {
+    const originalTitle = document.title;
+    if (hasUnsavedChanges) {
+      document.title = `* ${originalTitle}`;
+    } else {
+      document.title = originalTitle.replace(/^\* /, '');
+    }
+    return () => {
+      document.title = originalTitle.replace(/^\* /, '');
+    };
+  }, [hasUnsavedChanges]);
+
   const handleSubmit = async (content: string, tags: string[], gameDate?: string) => {
     if (!thought) return;
     

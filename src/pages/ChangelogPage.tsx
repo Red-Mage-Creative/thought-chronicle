@@ -18,6 +18,26 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.4",
+  date: "2025-10-03",
+  features: [],
+  improvements: [
+    "Clarified 'Create Entity' button label to 'Add new entity' for accuracy",
+    "Enhanced unsaved changes indicators with multiple visual cues",
+    "Added browser tab title indicator (* prefix) for unsaved changes",
+    "Added amber border to edit page cards when changes are unsaved",
+    "Made unsaved changes dot larger and more prominent (h-3 w-3)",
+    "Show unsaved changes indicator in compact mode (top of edit pages)",
+    "Added visual ring enhancement to Save button when changes are unsaved"
+  ],
+  fixes: [
+    "Fixed 'Create Entity' button misleading label in tag selector"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  maintenance: []
+}, {
   version: "1.3.3",
   date: "2025-10-02",
   features: [],

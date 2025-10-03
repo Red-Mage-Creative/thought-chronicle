@@ -223,8 +223,8 @@ export const TagSelector = ({ tags, onTagsChange, suggestions, placeholder = "Ad
                 <Plus className="h-3 w-3" />
                 <span>
                   {inputValue.trim() 
-                    ? `Create "${inputValue.trim()}" (new)` 
-                    : 'Create new entity'
+                    ? `Add "${inputValue.trim()}" as new entity` 
+                    : 'Add new entity'
                   }
                 </span>
               </div>
