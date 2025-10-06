@@ -1,73 +1,138 @@
-# Welcome to your Lovable project
+# D&D Chronicle
 
-## Project info
+A comprehensive campaign management tool for Dungeons & Dragons sessions, designed to help Dungeon Masters and players track entities, record thoughts, and manage multiple campaigns with ease.
 
-**URL**: https://lovable.dev/projects/2796b295-16d5-4955-9bc8-8e551f69e0b9
+## Features
 
-## How can I edit this code?
+### Entity Management
+- Track characters (PCs, NPCs), locations, items, and organizations
+- Customizable entity attributes with required field validation
+- Entity relationships and metrics (mention counts, last mentioned dates)
+- Multiple view modes: grid, list, and table views
+- Advanced search and filtering by entity type
 
-There are several ways of editing your application.
+### Thought Recording
+- Quick capture of session notes and ideas with keyboard shortcuts (Ctrl+Enter)
+- Automatic entity extraction and suggestions
+- Tag system for organizing thoughts
+- Game date tracking for chronicle timeline
+- Markdown formatting support
 
-**Use Lovable**
+### Campaign Management
+- Multi-campaign support with quick switching
+- Campaign-specific entity and thought isolation
+- Import/export functionality for backup and sharing
+- Offline-first architecture with cloud sync
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2796b295-16d5-4955-9bc8-8e551f69e0b9) and start prompting.
+### Data Management
+- Automatic schema migrations with validation
+- Migration history and rollback support
+- Data validation and integrity checks
+- Secure local storage with optional cloud backup
 
-Changes made via Lovable will be committed automatically to this repo.
+## Technology Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18, TypeScript, Vite
+- **UI Framework**: shadcn-ui, Tailwind CSS
+- **State Management**: React Hooks, Context API
+- **Routing**: React Router v6
+- **Forms**: React Hook Form, Zod validation
+- **Storage**: LocalStorage with optional Supabase sync
+- **Testing**: Vitest, Testing Library
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Development Setup
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js 18+ and npm installed ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
 
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Running Tests
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+# Run all tests
+npm test
 
-**Use GitHub Codespaces**
+# Run tests in watch mode
+npm test -- --watch
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Run tests with coverage
+npm test -- --coverage
+```
 
-## What technologies are used for this project?
+## Project Structure
 
-This project is built with:
+```
+src/
+├── components/        # React components
+│   ├── display/      # Display-only components
+│   ├── forms/        # Form components with validation
+│   ├── layout/       # Layout and page components
+│   ├── settings/     # Settings-related components
+│   └── ui/           # shadcn-ui components
+├── hooks/            # Custom React hooks
+├── pages/            # Route pages
+├── services/         # Business logic and data services
+├── types/            # TypeScript type definitions
+├── utils/            # Utility functions
+└── schemas/          # Zod validation schemas
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Key Development Files
 
-## How can I deploy this project?
+- `DEVELOPMENT_RULES.md` - Development guidelines and standards
+- `docs/ID_BASED_REFERENCES.md` - Entity reference system documentation
+- `docs/TESTING_STRATEGY.md` - Testing approach and standards
 
-Simply open [Lovable](https://lovable.dev/projects/2796b295-16d5-4955-9bc8-8e551f69e0b9) and click on Share -> Publish.
+## Deployment
 
-## Can I connect a custom domain to my Lovable project?
+### Via Lovable
+Simply open [Lovable](https://lovable.dev/projects/2796b295-16d5-4955-9bc8-8e551f69e0b9) and click on Share → Publish.
 
-Yes, you can!
+### Custom Domain
+Navigate to Project > Settings > Domains and click Connect Domain in Lovable.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Read more: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Self-Hosting
+The project can be built and deployed to any static hosting service:
+
+```sh
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Contributing
+
+This project follows strict development rules outlined in `DEVELOPMENT_RULES.md`, including:
+- Design system first approach
+- Clean code principles
+- Comprehensive testing requirements
+- Changelog and versioning standards
+
+## Version
+
+Current version: **1.3.6**
+
+See `CHANGELOG.md` or visit `/changelog` in the app for full version history.
+
+## License
+
+This project is built with [Lovable](https://lovable.dev) and uses open-source technologies.
