@@ -18,6 +18,21 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.3.6",
+  date: "2025-10-06",
+  features: [],
+  improvements: [],
+  fixes: [],
+  docs: [
+    "Updated DEVELOPMENT_RULES.md with current version (1.3.5)",
+    "Added comprehensive FormControls component documentation to Design System page",
+    "Documented all FormControls variants (default, compact) with interactive examples",
+    "Added FormControls usage patterns and best practices to Design System"
+  ],
+  refactor: [],
+  tests: [],
+  maintenance: []
+}, {
   version: "1.3.5",
   date: "2025-10-03",
   features: [

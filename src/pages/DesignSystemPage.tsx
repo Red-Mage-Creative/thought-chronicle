@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { AttributeEditor } from "@/components/forms/AttributeEditor";
 import { EntityRelationshipDisplay } from "@/components/display/EntityRelationshipDisplay";
+import { FormControls } from "@/components/forms/FormControls";
 import type { LocalEntity } from "@/types/entities";
 
 export default function DesignSystemPage() {
@@ -51,6 +52,8 @@ export default function DesignSystemPage() {
   const [demoRequiredAttributes, setDemoRequiredAttributes] = useState([
     { key: "Class", value: "Wizard" }
   ]);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <TooltipProvider>
@@ -315,6 +318,161 @@ export default function DesignSystemPage() {
                 </CardContent>
               </Card>
             </div>
+          </section>
+
+          {/* Form Controls Component */}
+          <section className="space-y-6">
+            <h2 className="text-3xl font-semibold">Form Controls Component</h2>
+            <Card>
+              <CardHeader>
+                <CardTitle>FormControls - Standardized Save/Cancel Actions</CardTitle>
+                <CardDescription>
+                  A reusable component that provides consistent save and cancel controls across all forms.
+                  Used in Entity and Thought creation/edit pages.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium">Default Variant</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Full-width layout with keyboard shortcut hint, unsaved changes indicator, and action buttons.
+                    Typically used at the bottom of forms.
+                  </p>
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <FormControls
+                      onSave={() => console.log('Save clicked')}
+                      onCancel={() => console.log('Cancel clicked')}
+                      isSubmitting={false}
+                      isSaveDisabled={false}
+                      saveLabel="Save Entity"
+                      variant="default"
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium">Compact Variant</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Compact layout with right-aligned buttons, no keyboard shortcut hint.
+                    Typically used at the top of forms for quick access.
+                  </p>
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <FormControls
+                      onSave={() => console.log('Save clicked')}
+                      onCancel={() => console.log('Cancel clicked')}
+                      isSubmitting={false}
+                      isSaveDisabled={false}
+                      saveLabel="Save Entity"
+                      variant="compact"
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium">With Unsaved Changes</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Shows a pulsing amber indicator and highlights the save button when there are unsaved changes.
+                  </p>
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <FormControls
+                      onSave={() => setHasUnsavedChanges(false)}
+                      onCancel={() => setHasUnsavedChanges(false)}
+                      isSubmitting={false}
+                      isSaveDisabled={false}
+                      saveLabel="Save Entity"
+                      hasUnsavedChanges={true}
+                      variant="default"
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium">Submitting State</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Disables buttons and shows loading text when a form is being submitted.
+                  </p>
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <FormControls
+                      onSave={() => {}}
+                      onCancel={() => {}}
+                      isSubmitting={true}
+                      isSaveDisabled={false}
+                      saveLabel="Save Entity"
+                      variant="default"
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h4 className="font-medium">Disabled Save Button</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Save button can be disabled independently (e.g., for validation errors).
+                  </p>
+                  <div className="bg-muted/30 p-4 rounded-lg border">
+                    <FormControls
+                      onSave={() => {}}
+                      onCancel={() => console.log('Cancel clicked')}
+                      isSubmitting={false}
+                      isSaveDisabled={true}
+                      saveLabel="Save Entity"
+                      variant="default"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2 bg-muted/50 p-4 rounded-md">
+                  <p className="text-sm font-medium">Component Props:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• <code>onSave</code>: () =&gt; void - Callback when save button is clicked</li>
+                    <li>• <code>onCancel</code>: () =&gt; void - Callback when cancel button is clicked</li>
+                    <li>• <code>isSubmitting</code>: boolean - Shows loading state and disables buttons</li>
+                    <li>• <code>isSaveDisabled</code>: boolean - Disables save button independently</li>
+                    <li>• <code>saveLabel</code>: string - Text for save button (e.g., "Save Entity", "Update Thought")</li>
+                    <li>• <code>hasUnsavedChanges?</code>: boolean - Shows unsaved changes indicator (default: false)</li>
+                    <li>• <code>variant?</code>: 'default' | 'compact' - Layout variant (default: 'default')</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2 bg-blue-50 dark:bg-blue-950/30 p-4 rounded-md border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <Info className="h-4 w-4" />
+                    Standard Usage Pattern
+                  </p>
+                  <div className="text-xs text-muted-foreground space-y-2">
+                    <p><strong>Compact at top:</strong> Quick access controls above the form card</p>
+                    <p><strong>Default at bottom:</strong> Full controls below the form card with keyboard hints</p>
+                    <p><strong>Example:</strong></p>
+                    <pre className="bg-muted p-2 rounded text-[10px] overflow-x-auto">
+{`<FormControls variant="compact" ... />
+<Card>
+  {/* Form content */}
+</Card>
+<FormControls variant="default" hasUnsavedChanges={...} ... />`}
+                    </pre>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 bg-muted/50 p-4 rounded-md">
+                  <p className="text-sm font-medium">Key Features:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 ml-4">
+                    <li>• Consistent button styling and spacing across all forms</li>
+                    <li>• Visual feedback for unsaved changes (pulsing amber indicator)</li>
+                    <li>• Keyboard shortcut hint (Ctrl+S) in default variant</li>
+                    <li>• Automatic button text transformation during submission (e.g., "Save" → "Saving...")</li>
+                    <li>• Save button highlight ring when unsaved changes present</li>
+                    <li>• Proper disabled states for loading and validation</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           {/* Attribute Editor */}

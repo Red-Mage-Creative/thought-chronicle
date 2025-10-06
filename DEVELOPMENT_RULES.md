@@ -16,7 +16,7 @@
 - Group changes by type: feat, fix, docs, style, refactor, test, chore
 - Check the ***Current*** date and use that for the change log. Use a function if you need to find the actual current date. 
 
-### Current Version: 0.9.0
+### Current Version: 1.3.5
 
 ## Rule 3: Clean Code Principles for Component Development
 ### 3.1 Component Structure & Naming
