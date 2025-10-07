@@ -18,6 +18,45 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.4.0",
+  date: "2025-10-07",
+  features: [
+    "Plot Threads page - dedicated page for tracking campaign storylines by plot thread entities",
+    "Graph View foundation - campaign-centric visualization showing all entities, thoughts, and relationships",
+    "WebGL-powered graph rendering with reagraph for high performance with 100+ nodes",
+    "Plot thread categorization - thoughts grouped by associated plot thread entities",
+    "Interactive graph controls - zoom, pan, fit view, and reset functionality",
+    "Campaign-centered graph layout - campaign at center, entities as nodes, thoughts as connections",
+    "Graph legend system - color-coded entity types and relationship indicators"
+  ],
+  improvements: [
+    "Added Plot Threads to main navigation for easy access",
+    "Enhanced relationship visualization with force-directed graph layout",
+    "Added active/dormant filtering for plot threads (active = mentioned in last 30 days)",
+    "Added search functionality across plot threads and thought content",
+    "Collapsible accordion UI for plot thread groups with metrics",
+    "Color-coded entity types in graph view for better visual distinction",
+    "Node sizing based on thought count for importance indication"
+  ],
+  fixes: [],
+  docs: [
+    "Updated DEVELOPMENT_RULES.md with graph visualization patterns and conventions",
+    "Documented graph data transformation utilities and structure",
+    "Added documentation for plot thread utilities and grouping logic"
+  ],
+  refactor: [
+    "Created graph component architecture in src/components/graph/",
+    "Extracted plot thread logic into dedicated utility module",
+    "Implemented visited Set pattern to prevent infinite loops in graph traversal"
+  ],
+  tests: [],
+  maintenance: [
+    "Added reagraph dependency for WebGL graph rendering",
+    "Created GraphViewPage.tsx with full-app graph visualization",
+    "Created PlotThreadsPage.tsx with categorized storyline tracking"
+  ],
+  chores: []
+}, {
   version: "1.3.6",
   date: "2025-10-06",
   features: [],

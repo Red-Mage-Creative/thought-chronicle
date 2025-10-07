@@ -17,6 +17,8 @@ import EntityEditPage from "./pages/EntityEditPage";
 import HistoryPage from "./pages/HistoryPage";
 import ThoughtCreatePage from "./pages/ThoughtCreatePage";
 import ThoughtEditPage from "./pages/ThoughtEditPage";
+import PlotThreadsPage from "./pages/PlotThreadsPage";
+import GraphViewPage from "./pages/GraphViewPage";
 import PendingChangesPage from "./pages/PendingChangesPage";
 import MigrationHistoryPage from "./pages/MigrationHistoryPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -152,7 +154,27 @@ const App = () => {
                 } 
               />
               <Route 
-                path="/thoughts/new" 
+                path="/plot-threads" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="narrow">
+                      <PlotThreadsPage />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/graph-view" 
+                element={
+                  <AuthGuard>
+                    <AppLayout variant="full">
+                      <GraphViewPage />
+                    </AppLayout>
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/thoughts/new"
                 element={
                   <AuthGuard>
                     <AppLayout variant="narrow">

@@ -1,4 +1,4 @@
-import { Home, Users, History, Menu, Settings } from "lucide-react";
+import { Home, Users, History, Menu, Settings, Network } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ export const Navigation = () => {
     { to: "/", icon: Home, label: "Home" },
     { to: "/entities", icon: Users, label: "Entities" },
     { to: "/history", icon: History, label: "History" },
+    { to: "/plot-threads", icon: Network, label: "Plot Threads" },
     { to: "/settings", icon: Settings, label: "Settings" },
   ];
 
