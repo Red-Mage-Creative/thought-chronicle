@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { User, LogOut, ScrollText, Download, Upload, Settings } from "lucide-react";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -25,14 +31,14 @@ export const AppHeader = () => {
   useEffect(() => {
     if (user) {
       loadCampaignData();
-      
+
       // Listen for campaign switches
       const handleCampaignSwitch = () => {
         loadCampaignData();
       };
-      
-      window.addEventListener('campaignSwitched', handleCampaignSwitch);
-      return () => window.removeEventListener('campaignSwitched', handleCampaignSwitch);
+
+      window.addEventListener("campaignSwitched", handleCampaignSwitch);
+      return () => window.removeEventListener("campaignSwitched", handleCampaignSwitch);
     }
   }, [user]);
 
@@ -44,16 +50,16 @@ export const AppHeader = () => {
   };
 
   const getDisplayName = () => {
-    if (!user) return '';
-    return user.user_metadata?.display_name || user.email?.split('@')[0] || 'User';
+    if (!user) return "";
+    return user.user_metadata?.display_name || user.email?.split("@")[0] || "User";
   };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
-      toast.error('Error signing out');
+      toast.error("Error signing out");
     } else {
-      toast.success('Successfully signed out');
+      toast.success("Successfully signed out");
     }
     setShowConfirmDialog(false);
   };
@@ -66,16 +72,16 @@ export const AppHeader = () => {
     try {
       const exportData = dataExportService.exportCurrentCampaign();
       dataExportService.downloadExport(exportData);
-      toast.success('Data exported successfully');
+      toast.success("Data exported successfully");
     } catch (error) {
-      toast.error('Failed to export data');
+      toast.error("Failed to export data");
     }
     setShowExportDialog(false);
   };
 
   const handleImportComplete = () => {
     loadCampaignData();
-    toast.success('Data imported successfully');
+    toast.success("Data imported successfully");
     setShowImportDialog(false);
     // Trigger a full page refresh to reload all data
     window.location.reload();
@@ -90,13 +96,15 @@ export const AppHeader = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button 
+                  <button
                     onClick={() => setShowManagementModal(true)}
                     className="text-sm text-muted-foreground hidden sm:inline hover:text-foreground transition-colors cursor-pointer"
                   >
                     {getDisplayName()}
                     {currentCampaign && (
-                      <>, Campaign: <span className="text-foreground font-medium">{currentCampaign.name}</span></>
+                      <>
+                        , Campaign: <span className="text-foreground font-medium">{currentCampaign.name}</span>
+                      </>
                     )}
                   </button>
                 </TooltipTrigger>
@@ -107,13 +115,15 @@ export const AppHeader = () => {
                       {currentCampaign.description && (
                         <div className="text-xs text-muted-foreground">{currentCampaign.description}</div>
                       )}
-                      <div className="text-xs text-muted-foreground">{currentCampaign.members.length} member{currentCampaign.members.length !== 1 ? 's' : ''}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {currentCampaign.members.length} member{currentCampaign.members.length !== 1 ? "s" : ""}
+                      </div>
                     </div>
                   </TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2">
@@ -146,8 +156,8 @@ export const AppHeader = () => {
           </div>
 
           {/* Row 2, Column 1: Brand */}
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="row-start-2 col-start-1 font-bold text-lg text-foreground hover:text-primary transition-colors flex items-center gap-2"
           >
             <ScrollText className="h-5 w-5" />
@@ -157,10 +167,24 @@ export const AppHeader = () => {
           {/* Row 2, Columns 2-3: Navigation */}
           <nav className="row-start-2 col-start-2 col-span-2 flex items-center gap-2 justify-end">
             <Link to="/entities">
-              <Button variant="ghost" size="sm">Entities</Button>
+              <Button variant="ghost" size="sm">
+                Entities
+              </Button>
             </Link>
             <Link to="/history">
-              <Button variant="ghost" size="sm">History</Button>
+              <Button variant="ghost" size="sm">
+                History
+              </Button>
+            </Link>
+            <Link to="/plot-threads">
+              <Button variant="ghost" size="sm">
+                Plot Threads
+              </Button>
+            </Link>
+            <Link to="/graph-view">
+              <Button variant="ghost" size="sm">
+                Graph View
+              </Button>
             </Link>
           </nav>
         </div>
