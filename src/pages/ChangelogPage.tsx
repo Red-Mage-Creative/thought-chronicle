@@ -18,6 +18,29 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.4.1",
+  date: "2025-10-09",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Fixed reagraph WebGL color rendering - converted CSS variables to concrete hex colors",
+    "Fixed potential empty node IDs causing graph rendering errors",
+    "Fixed dangling edge references by validating both source and target nodes exist",
+    "Added defensive validation for all entity relationships before edge creation"
+  ],
+  docs: [],
+  refactor: [
+    "Enhanced graph data transformation with comprehensive node/edge validation",
+    "Added validNodeIds Set to prevent invalid edge references",
+    "Added console warnings for filtered entities/thoughts with missing IDs"
+  ],
+  tests: [],
+  maintenance: [
+    "Updated graphDataTransform with concrete hex color palette for WebGL compatibility",
+    "Improved graph reliability with defensive edge creation checks"
+  ],
+  chores: []
+}, {
   version: "1.4.0",
   date: "2025-10-07",
   features: [

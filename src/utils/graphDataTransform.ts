@@ -43,9 +43,29 @@ export const transformToGraphData = (
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
   const visitedEdges = new Set<string>();
+  const validNodeIds = new Set<string>();
+
+  // Filter out entities/thoughts with invalid IDs
+  const validEntities = entities.filter(entity => {
+    const id = entity.id || entity.localId || '';
+    if (!id) {
+      console.warn('Skipping entity with missing ID:', entity.name);
+      return false;
+    }
+    return true;
+  });
+
+  const validThoughts = thoughts.filter(thought => {
+    const id = thought.id || thought.localId || '';
+    if (!id) {
+      console.warn('Skipping thought with missing ID:', thought.content.substring(0, 30));
+      return false;
+    }
+    return true;
+  });
 
   // Add campaign as center node
-  if (campaign) {
+  if (campaign && campaign.id) {
     nodes.push({
       id: campaign.id,
       label: campaign.name,
@@ -54,10 +74,11 @@ export const transformToGraphData = (
         originalData: campaign
       }
     });
+    validNodeIds.add(campaign.id);
   }
 
-  // Add all entities as nodes
-  entities.forEach(entity => {
+  // Add all valid entities as nodes
+  validEntities.forEach(entity => {
     const entityId = entity.id || entity.localId || '';
     nodes.push({
       id: entityId,
@@ -69,61 +90,11 @@ export const transformToGraphData = (
         originalData: entity
       }
     });
-
-    // Connect campaign to entity
-    if (campaign) {
-      const edgeId = `campaign-${campaign.id}-entity-${entityId}`;
-      if (!visitedEdges.has(edgeId)) {
-        edges.push({
-          id: edgeId,
-          source: campaign.id,
-          target: entityId,
-          data: { type: 'campaign-entity' }
-        });
-        visitedEdges.add(edgeId);
-      }
-    }
-
-    // Add parent entity relationships
-    if (entity.parentEntityIds && entity.parentEntityIds.length > 0) {
-      entity.parentEntityIds.forEach(parentId => {
-        const edgeId = `parent-${entityId}-${parentId}`;
-        if (!visitedEdges.has(edgeId)) {
-          edges.push({
-            id: edgeId,
-            source: entityId,
-            target: parentId,
-            label: 'parent',
-            data: { type: 'parent' }
-          });
-          visitedEdges.add(edgeId);
-        }
-      });
-    }
-
-    // Add linked entity relationships
-    if (entity.linkedEntityIds && entity.linkedEntityIds.length > 0) {
-      entity.linkedEntityIds.forEach(linkedId => {
-        const edgeId = `linked-${entityId}-${linkedId}`;
-        const reverseEdgeId = `linked-${linkedId}-${entityId}`;
-        
-        // Avoid duplicate bidirectional edges
-        if (!visitedEdges.has(edgeId) && !visitedEdges.has(reverseEdgeId)) {
-          edges.push({
-            id: edgeId,
-            source: entityId,
-            target: linkedId,
-            label: 'linked',
-            data: { type: 'linked' }
-          });
-          visitedEdges.add(edgeId);
-        }
-      });
-    }
+    validNodeIds.add(entityId);
   });
 
-  // Add thoughts as nodes and connect to entities
-  thoughts.forEach(thought => {
+  // Add all valid thoughts as nodes
+  validThoughts.forEach(thought => {
     const thoughtId = thought.id || thought.localId || '';
     nodes.push({
       id: thoughtId,
@@ -133,35 +104,86 @@ export const transformToGraphData = (
         originalData: thought
       }
     });
+    validNodeIds.add(thoughtId);
+  });
 
-    // Connect thought to all related entities (ID-based)
-    if (thought.relatedEntityIds && thought.relatedEntityIds.length > 0) {
-      thought.relatedEntityIds.forEach(entityId => {
-        const edgeId = `thought-${thoughtId}-entity-${entityId}`;
+  // Now add edges with validation
+  // Campaign to Entity edges
+  if (campaign && campaign.id && validNodeIds.has(campaign.id)) {
+    validEntities.forEach(entity => {
+      const entityId = entity.id || entity.localId || '';
+      if (validNodeIds.has(entityId)) {
+        const edgeId = `campaign-${campaign.id}-entity-${entityId}`;
         if (!visitedEdges.has(edgeId)) {
           edges.push({
             id: edgeId,
-            source: entityId,
-            target: thoughtId,
-            data: { type: 'thought' }
+            source: campaign.id,
+            target: entityId,
+            data: { type: 'campaign-entity' }
           });
           visitedEdges.add(edgeId);
+        }
+      }
+    });
+  }
 
-          // Increment thought count for entity
-          const entityNode = nodes.find(n => n.id === entityId);
-          if (entityNode && entityNode.data.type === 'entity') {
-            entityNode.data.thoughtCount = (entityNode.data.thoughtCount || 0) + 1;
+  // Entity relationship edges
+  validEntities.forEach(entity => {
+    const entityId = entity.id || entity.localId || '';
+
+    // Add parent entity relationships
+    if (entity.parentEntityIds && entity.parentEntityIds.length > 0) {
+      entity.parentEntityIds.forEach(parentId => {
+        // Only create edge if both nodes exist
+        if (validNodeIds.has(entityId) && validNodeIds.has(parentId)) {
+          const edgeId = `parent-${entityId}-${parentId}`;
+          if (!visitedEdges.has(edgeId)) {
+            edges.push({
+              id: edgeId,
+              source: entityId,
+              target: parentId,
+              label: 'parent',
+              data: { type: 'parent' }
+            });
+            visitedEdges.add(edgeId);
           }
         }
       });
     }
 
-    // Legacy: Connect thought to entities by name
-    if (thought.relatedEntities && thought.relatedEntities.length > 0) {
-      thought.relatedEntities.forEach(entityName => {
-        const entity = entities.find(e => e.name === entityName);
-        if (entity) {
-          const entityId = entity.id || entity.localId || '';
+    // Add linked entity relationships
+    if (entity.linkedEntityIds && entity.linkedEntityIds.length > 0) {
+      entity.linkedEntityIds.forEach(linkedId => {
+        // Only create edge if both nodes exist
+        if (validNodeIds.has(entityId) && validNodeIds.has(linkedId)) {
+          const edgeId = `linked-${entityId}-${linkedId}`;
+          const reverseEdgeId = `linked-${linkedId}-${entityId}`;
+          
+          // Avoid duplicate bidirectional edges
+          if (!visitedEdges.has(edgeId) && !visitedEdges.has(reverseEdgeId)) {
+            edges.push({
+              id: edgeId,
+              source: entityId,
+              target: linkedId,
+              label: 'linked',
+              data: { type: 'linked' }
+            });
+            visitedEdges.add(edgeId);
+          }
+        }
+      });
+    }
+  });
+
+  // Thought to Entity edges
+  validThoughts.forEach(thought => {
+    const thoughtId = thought.id || thought.localId || '';
+
+    // Connect thought to all related entities (ID-based)
+    if (thought.relatedEntityIds && thought.relatedEntityIds.length > 0) {
+      thought.relatedEntityIds.forEach(entityId => {
+        // Only create edge if both nodes exist
+        if (validNodeIds.has(thoughtId) && validNodeIds.has(entityId)) {
           const edgeId = `thought-${thoughtId}-entity-${entityId}`;
           if (!visitedEdges.has(edgeId)) {
             edges.push({
@@ -181,6 +203,35 @@ export const transformToGraphData = (
         }
       });
     }
+
+    // Legacy: Connect thought to entities by name
+    if (thought.relatedEntities && thought.relatedEntities.length > 0) {
+      thought.relatedEntities.forEach(entityName => {
+        const entity = validEntities.find(e => e.name === entityName);
+        if (entity) {
+          const entityId = entity.id || entity.localId || '';
+          // Only create edge if both nodes exist
+          if (validNodeIds.has(thoughtId) && validNodeIds.has(entityId)) {
+            const edgeId = `thought-${thoughtId}-entity-${entityId}`;
+            if (!visitedEdges.has(edgeId)) {
+              edges.push({
+                id: edgeId,
+                source: entityId,
+                target: thoughtId,
+                data: { type: 'thought' }
+              });
+              visitedEdges.add(edgeId);
+
+              // Increment thought count for entity
+              const entityNode = nodes.find(n => n.id === entityId);
+              if (entityNode && entityNode.data.type === 'entity') {
+                entityNode.data.thoughtCount = (entityNode.data.thoughtCount || 0) + 1;
+              }
+            }
+          }
+        }
+      });
+    }
   });
 
   return { nodes, edges };
@@ -188,36 +239,35 @@ export const transformToGraphData = (
 
 /**
  * Gets color for a node based on its type
+ * Uses concrete hex colors instead of CSS variables for reagraph WebGL compatibility
  */
 export const getNodeColor = (node: GraphNode): string => {
   if (node.data.type === 'campaign') {
-    return 'hsl(var(--primary))';
+    return '#fbbf24'; // Gold/amber for campaign center
   }
   
   if (node.data.type === 'thought') {
-    return 'hsl(var(--muted))';
+    return '#9ca3af'; // Gray for thoughts
   }
 
-  // Entity - use entity type config colors
+  // Entity - use concrete hex colors per entity type
   if (node.data.type === 'entity' && node.data.entityType) {
-    const config = getEntityTypeConfig(node.data.entityType as any);
-    // Return different colors per entity type
     const colorMap: Record<string, string> = {
-      'pc': 'hsl(210, 100%, 50%)',
-      'npc': 'hsl(270, 100%, 50%)',
-      'race': 'hsl(30, 100%, 50%)',
-      'religion': 'hsl(330, 100%, 50%)',
-      'quest': 'hsl(150, 100%, 40%)',
-      'enemy': 'hsl(0, 100%, 50%)',
-      'location': 'hsl(180, 100%, 40%)',
-      'organization': 'hsl(240, 100%, 50%)',
-      'item': 'hsl(45, 100%, 50%)',
-      'plot-thread': 'hsl(300, 100%, 50%)'
+      'pc': '#3b82f6',        // Blue
+      'npc': '#a855f7',       // Purple
+      'race': '#f97316',      // Orange
+      'religion': '#ec4899',  // Pink
+      'quest': '#10b981',     // Green
+      'enemy': '#ef4444',     // Red
+      'location': '#06b6d4',  // Cyan
+      'organization': '#6366f1', // Indigo
+      'item': '#eab308',      // Yellow
+      'plot-thread': '#d946ef' // Fuchsia
     };
-    return colorMap[node.data.entityType] || 'hsl(var(--accent))';
+    return colorMap[node.data.entityType] || '#8b5cf6'; // Default purple
   }
 
-  return 'hsl(var(--foreground))';
+  return '#71717a'; // Neutral gray fallback
 };
 
 /**
