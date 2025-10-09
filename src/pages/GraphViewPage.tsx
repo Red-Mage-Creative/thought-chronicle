@@ -1,10 +1,13 @@
+import { lazy, Suspense } from 'react';
 import { useEntities } from '@/hooks/useEntities';
 import { useThoughts } from '@/hooks/useThoughts';
 import { campaignService } from '@/services/campaignService';
-import { EntityGraph } from '@/components/graph/EntityGraph';
-import { GraphLegend } from '@/components/graph/GraphLegend';
 import { Card, CardContent } from '@/components/ui/card';
 import { Network } from 'lucide-react';
+import { GraphErrorBoundary } from '@/components/graph/GraphErrorBoundary';
+
+const EntityGraph = lazy(() => import('@/components/graph/EntityGraph').then(m => ({ default: m.EntityGraph })));
+const GraphLegend = lazy(() => import('@/components/graph/GraphLegend').then(m => ({ default: m.GraphLegend })));
 
 export default function GraphViewPage() {
   const { entities, isLoading: entitiesLoading } = useEntities();
@@ -43,12 +46,23 @@ export default function GraphViewPage() {
 
   return (
     <div className="h-screen w-full relative bg-background">
-      <GraphLegend />
-      <EntityGraph 
-        campaign={currentCampaign} 
-        entities={entities} 
-        thoughts={thoughts} 
-      />
+      <GraphErrorBoundary>
+        <Suspense fallback={
+          <div className="h-full flex items-center justify-center">
+            <div className="animate-pulse text-center space-y-4">
+              <Network className="h-16 w-16 text-muted-foreground mx-auto" />
+              <p className="text-muted-foreground">Loading graph...</p>
+            </div>
+          </div>
+        }>
+          <GraphLegend />
+          <EntityGraph 
+            campaign={currentCampaign} 
+            entities={entities} 
+            thoughts={thoughts} 
+          />
+        </Suspense>
+      </GraphErrorBoundary>
     </div>
   );
 }

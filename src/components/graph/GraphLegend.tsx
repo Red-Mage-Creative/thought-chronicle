@@ -8,16 +8,16 @@ export const GraphLegend = () => {
   const [open, setOpen] = useState(true);
 
   const colorMap: Record<string, string> = {
-    'pc': 'hsl(210, 100%, 50%)',
-    'npc': 'hsl(270, 100%, 50%)',
-    'race': 'hsl(30, 100%, 50%)',
-    'religion': 'hsl(330, 100%, 50%)',
-    'quest': 'hsl(150, 100%, 40%)',
-    'enemy': 'hsl(0, 100%, 50%)',
-    'location': 'hsl(180, 100%, 40%)',
-    'organization': 'hsl(240, 100%, 50%)',
-    'item': 'hsl(45, 100%, 50%)',
-    'plot-thread': 'hsl(300, 100%, 50%)'
+    'pc': '#3b82f6',
+    'npc': '#a855f7',
+    'race': '#f97316',
+    'religion': '#ec4899',
+    'quest': '#10b981',
+    'enemy': '#ef4444',
+    'location': '#06b6d4',
+    'organization': '#6366f1',
+    'item': '#eab308',
+    'plot-thread': '#d946ef'
   };
 
   return (
@@ -35,11 +35,11 @@ export const GraphLegend = () => {
               <h4 className="text-xs font-medium text-muted-foreground mb-2">Node Types</h4>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: 'hsl(var(--primary))' }} />
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#fbbf24' }} />
                   <span className="text-xs">Campaign</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--muted))' }} />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#9ca3af' }} />
                   <span className="text-xs">Thought</span>
                 </div>
               </div>

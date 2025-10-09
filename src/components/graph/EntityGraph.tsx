@@ -2,7 +2,7 @@ import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
 import { transformToGraphData, getNodeColor, getNodeSize } from '@/utils/graphDataTransform';
-import { GraphCanvas, GraphEdge, GraphNode } from 'reagraph';
+import { GraphCanvas, GraphEdge as ReaGraphEdge, GraphNode as ReaGraphNode } from 'reagraph';
 import { useRef } from 'react';
 import { GraphControls } from './GraphControls';
 
@@ -18,7 +18,7 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
   const graphData = transformToGraphData(campaign, entities, thoughts);
 
   // Transform to reagraph format
-  const nodes: GraphNode[] = graphData.nodes.map(node => ({
+  const nodes: ReaGraphNode[] = graphData.nodes.map(node => ({
     id: node.id,
     label: node.label,
     fill: getNodeColor(node),
@@ -26,7 +26,7 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     data: node.data
   }));
 
-  const edges: GraphEdge[] = graphData.edges.map(edge => ({
+  const edges: ReaGraphEdge[] = graphData.edges.map(edge => ({
     id: edge.id,
     source: edge.source,
     target: edge.target,
