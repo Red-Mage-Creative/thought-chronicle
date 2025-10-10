@@ -18,6 +18,28 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.4.2",
+  date: "2025-10-10",
+  features: [
+    "Plot Thread entities now support 'Active' attribute for tracking active/inactive storylines",
+    "Plot Threads page defaults to showing Active threads only for better focus"
+  ],
+  improvements: [
+    "Consistent Card-based layout for Plot Threads page matching other pages",
+    "'New Plot Thread' button navigates to entity creation with type pre-selected",
+    "Removed redundant stats card from Plot Threads page",
+    "Enhanced plot thread filtering with attribute-based active status"
+  ],
+  fixes: [
+    "Fixed visual inconsistency between Plot Threads page and other pages"
+  ],
+  docs: [],
+  refactor: [
+    "Updated plotThreadUtils to check 'Active' attribute with backward compatibility"
+  ],
+  tests: [],
+  maintenance: []
+}, {
   version: "1.4.1",
   date: "2025-10-09",
   features: [],

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEntities } from '@/hooks/useEntities';
 import { useThoughts } from '@/hooks/useThoughts';
-import { groupThoughtsByPlotThread, filterActiveThreads, searchPlotThreads } from '@/utils/plotThreadUtils';
+import { groupThoughtsByPlotThread, filterActiveThreads, searchPlotThreads, isPlotThreadActive } from '@/utils/plotThreadUtils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +19,7 @@ export default function PlotThreadsPage() {
   const { thoughts, isLoading: thoughtsLoading } = useThoughts();
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active'>('all');
+  const [filter, setFilter] = useState<'all' | 'active'>('active');
 
   // Get all plot thread entities
   const plotThreadEntities = useMemo(() => 
@@ -75,17 +75,16 @@ export default function PlotThreadsPage() {
   if (plotThreadEntities.length === 0) {
     return (
       <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-              <Network className="h-8 w-8" />
-              Plot Threads
-            </h1>
-            <p className="text-muted-foreground mt-1">Track your campaign's storylines</p>
-          </div>
-        </div>
-
         <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Network className="h-6 w-6" />
+                Plot Threads
+              </CardTitle>
+            </div>
+            <CardDescription>Track your campaign's storylines</CardDescription>
+          </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Network className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">No Plot Threads Yet</h3>
@@ -94,7 +93,7 @@ export default function PlotThreadsPage() {
             </p>
             <Button onClick={() => navigate('/entities/create?type=plot-thread')}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Plot Thread Entity
+              Create First Plot Thread
             </Button>
           </CardContent>
         </Card>
@@ -103,118 +102,114 @@ export default function PlotThreadsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            <Network className="h-8 w-8" />
-            Plot Threads
-          </h1>
-          <p className="text-muted-foreground mt-1">Track your campaign's storylines</p>
-        </div>
-        <Button onClick={() => navigate('/entities/create?type=plot-thread')}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Plot Thread
-        </Button>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search plot threads or thoughts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'active')}>
-          <TabsList>
-            <TabsTrigger value="all">All ({allGroups.length})</TabsTrigger>
-            <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
+    <div className="container mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">
-            {filteredGroups.length} Plot Thread{filteredGroups.length !== 1 ? 's' : ''}
-          </CardTitle>
-          <CardDescription>
-            {totalThoughts} total thought{totalThoughts !== 1 ? 's' : ''}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Network className="h-6 w-6" />
+                Plot Threads
+              </CardTitle>
+              <CardDescription>Track your campaign's storylines</CardDescription>
+            </div>
+            <Button onClick={() => navigate('/entities/create?type=plot-thread')}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Plot Thread
+            </Button>
+          </div>
         </CardHeader>
-      </Card>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search plot threads or thoughts..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Tabs value={filter} onValueChange={(v) => setFilter(v as 'all' | 'active')}>
+              <TabsList>
+                <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
+                <TabsTrigger value="all">All ({allGroups.length})</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-      {filteredGroups.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No plot threads match your search.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Accordion type="multiple" className="space-y-4">
-          {filteredGroups.map((group) => (
-            <AccordionItem 
-              key={group.entity.id || group.entity.localId} 
-              value={group.entity.id || group.entity.localId || ''}
-              className="border rounded-lg"
-            >
-              <AccordionTrigger className="px-6 hover:no-underline">
-                <div className="flex items-start justify-between w-full pr-4">
-                  <div className="flex items-start gap-3">
-                    <Network className="h-5 w-5 mt-1 text-primary" />
-                    <div className="text-left">
-                      <h3 className="font-semibold text-foreground">{group.entity.name}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary" className="text-xs">
-                          <MessageSquare className="h-3 w-3 mr-1" />
-                          {group.metrics.thoughtCount} thought{group.metrics.thoughtCount !== 1 ? 's' : ''}
-                        </Badge>
-                        {group.metrics.isActive && (
-                          <Badge variant="default" className="text-xs">Active</Badge>
-                        )}
-                        {group.metrics.lastMention && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {formatDistanceToNow(group.metrics.lastMention, { addSuffix: true })}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-4">
-                {group.entity.description && (
-                  <p className="text-sm text-muted-foreground mb-4 italic">
-                    {group.entity.description}
-                  </p>
-                )}
-                <div className="space-y-4">
-                  {group.thoughts.map((thought) => (
-                    <Card key={thought.id || thought.localId} className="bg-muted/30">
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <MarkdownDisplay content={thought.content} />
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Calendar className="h-3 w-3" />
-                            {formatDistanceToNow(new Date(thought.timestamp), { addSuffix: true })}
-                            {thought.gameDate && (
-                              <span className="ml-2">• Game Date: {thought.gameDate}</span>
+          {filteredGroups.length === 0 ? (
+            <div className="py-12 text-center">
+              <p className="text-muted-foreground">
+                {filter === 'active' 
+                  ? 'No active plot threads. Mark plot threads as Active="Yes" in their attributes.' 
+                  : 'No plot threads match your search.'}
+              </p>
+            </div>
+          ) : (
+            <Accordion type="multiple" className="space-y-4">
+              {filteredGroups.map((group) => (
+                <AccordionItem 
+                  key={group.entity.id || group.entity.localId} 
+                  value={group.entity.id || group.entity.localId || ''}
+                  className="border rounded-lg"
+                >
+                  <AccordionTrigger className="px-6 hover:no-underline">
+                    <div className="flex items-start justify-between w-full pr-4">
+                      <div className="flex items-start gap-3">
+                        <Network className="h-5 w-5 mt-1 text-primary" />
+                        <div className="text-left">
+                          <h3 className="font-semibold text-foreground">{group.entity.name}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="text-xs">
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              {group.metrics.thoughtCount} thought{group.metrics.thoughtCount !== 1 ? 's' : ''}
+                            </Badge>
+                            {isPlotThreadActive(group.entity) && (
+                              <Badge variant="default" className="text-xs">Active</Badge>
+                            )}
+                            {group.metrics.lastMention && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {formatDistanceToNow(group.metrics.lastMention, { addSuffix: true })}
+                              </span>
                             )}
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      )}
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-4">
+                    {group.entity.description && (
+                      <p className="text-sm text-muted-foreground mb-4 italic">
+                        {group.entity.description}
+                      </p>
+                    )}
+                    <div className="space-y-4">
+                      {group.thoughts.map((thought) => (
+                        <Card key={thought.id || thought.localId} className="bg-muted/30">
+                          <CardContent className="p-4">
+                            <div className="space-y-2">
+                              <MarkdownDisplay content={thought.content} />
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Calendar className="h-3 w-3" />
+                                {formatDistanceToNow(new Date(thought.timestamp), { addSuffix: true })}
+                                {thought.gameDate && (
+                                  <span className="ml-2">• Game Date: {thought.gameDate}</span>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

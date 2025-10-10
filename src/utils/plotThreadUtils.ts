@@ -45,6 +45,26 @@ export const groupThoughtsByPlotThread = (
 };
 
 /**
+ * Checks if a plot thread entity is marked as active
+ * Checks the 'Active' attribute on the entity
+ * Falls back to time-based logic if no Active attribute exists (backward compatibility)
+ */
+export const isPlotThreadActive = (entity: LocalEntity): boolean => {
+  // Check for Active attribute (case-insensitive)
+  const activeAttr = entity.attributes?.find(
+    attr => attr.key.toLowerCase() === 'active'
+  );
+  
+  if (activeAttr) {
+    const value = activeAttr.value.toLowerCase();
+    return value === 'yes' || value === 'true';
+  }
+  
+  // Fallback for backward compatibility: assume active if no attribute
+  return true;
+};
+
+/**
  * Calculates metrics for a plot thread
  */
 export const calculateThreadMetrics = (thoughts: LocalThought[]) => {
@@ -73,9 +93,10 @@ export const calculateThreadMetrics = (thoughts: LocalThought[]) => {
 
 /**
  * Filters plot thread groups to only active ones
+ * Uses the entity's 'Active' attribute if present, otherwise falls back to time-based logic
  */
 export const filterActiveThreads = (groups: PlotThreadGroup[]): PlotThreadGroup[] => {
-  return groups.filter(group => group.metrics.isActive);
+  return groups.filter(group => isPlotThreadActive(group.entity));
 };
 
 /**
