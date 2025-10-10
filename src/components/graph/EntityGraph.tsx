@@ -3,7 +3,7 @@ import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
 import { transformToGraphData, getNodeColor, getNodeSize } from '@/utils/graphDataTransform';
 import { GraphCanvas, GraphEdge as ReaGraphEdge, GraphNode as ReaGraphNode } from 'reagraph';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { GraphControls } from './GraphControls';
 
 interface EntityGraphProps {
@@ -14,11 +14,12 @@ interface EntityGraphProps {
 
 export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) => {
   const graphRef = useRef<any>(null);
+  const [visibleNodeCount, setVisibleNodeCount] = useState(0);
 
   const graphData = transformToGraphData(campaign, entities, thoughts);
 
   // Transform to reagraph format
-  const nodes: ReaGraphNode[] = graphData.nodes.map(node => ({
+  const allNodes: ReaGraphNode[] = graphData.nodes.map(node => ({
     id: node.id,
     label: node.label,
     fill: getNodeColor(node),
@@ -26,13 +27,40 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     data: node.data
   }));
 
-  const edges: ReaGraphEdge[] = graphData.edges.map(edge => ({
+  const allEdges: ReaGraphEdge[] = graphData.edges.map(edge => ({
     id: edge.id,
     source: edge.source,
     target: edge.target,
     label: edge.label,
     data: edge.data
   }));
+
+  // Progressive rendering: show nodes one at a time with delay
+  useEffect(() => {
+    setVisibleNodeCount(0);
+    
+    if (allNodes.length === 0) return;
+
+    // Stagger node appearance - Obsidian style
+    const interval = setInterval(() => {
+      setVisibleNodeCount(prev => {
+        if (prev >= allNodes.length) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 50); // 50ms delay between each node pop-in
+
+    return () => clearInterval(interval);
+  }, [allNodes.length, campaign?.id, entities.length, thoughts.length]);
+
+  // Only show nodes/edges that should be visible
+  const nodes = allNodes.slice(0, visibleNodeCount);
+  const visibleNodeIds = new Set(nodes.map(n => n.id));
+  const edges = allEdges.filter(edge => 
+    visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+  );
 
   const handleZoomIn = () => {
     if (graphRef.current) {
@@ -58,7 +86,7 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     }
   };
 
-  if (nodes.length === 0) {
+  if (allNodes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-2">
@@ -80,7 +108,7 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
         labelType="all"
         layoutType="forceDirected2d"
         draggable
-        animated={false}
+        animated={true}
         edgeInterpolation="curved"
       />
       <GraphControls
@@ -89,6 +117,13 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
         onFitView={handleFitView}
         onReset={handleReset}
       />
+      {visibleNodeCount < allNodes.length && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-lg">
+          <p className="text-sm text-muted-foreground">
+            Loading nodes: {visibleNodeCount} / {allNodes.length}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
