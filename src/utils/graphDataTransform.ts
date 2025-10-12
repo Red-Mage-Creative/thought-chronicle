@@ -29,6 +29,12 @@ export interface GraphData {
   edges: GraphEdge[];
 }
 
+export interface GraphValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
 // Helper to create namespaced IDs to avoid collisions
 const makeId = (type: 'campaign' | 'entity' | 'thought', id: string): string => {
   return `${type}:${id}`;
@@ -320,4 +326,81 @@ export const getNodeSize = (node: GraphNode): number => {
   }
 
   return 10;
+};
+
+/**
+ * Validates graph data before passing to reagraph
+ * Checks for required fields and data integrity
+ */
+export const validateGraphData = (graphData: GraphData): GraphValidationResult => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // Validate nodes
+  if (!Array.isArray(graphData.nodes)) {
+    errors.push('nodes must be an array');
+    return { isValid: false, errors, warnings };
+  }
+
+  const nodeIds = new Set<string>();
+  graphData.nodes.forEach((node, index) => {
+    if (!node.id || typeof node.id !== 'string') {
+      errors.push(`Node at index ${index} missing or invalid id`);
+    } else {
+      if (nodeIds.has(node.id)) {
+        warnings.push(`Duplicate node id: ${node.id}`);
+      }
+      nodeIds.add(node.id);
+    }
+
+    if (!node.label || typeof node.label !== 'string') {
+      warnings.push(`Node ${node.id || index} missing or invalid label`);
+    }
+
+    if (!node.data || typeof node.data !== 'object') {
+      errors.push(`Node ${node.id || index} missing or invalid data object`);
+    }
+  });
+
+  // Validate edges
+  if (!Array.isArray(graphData.edges)) {
+    errors.push('edges must be an array');
+    return { isValid: false, errors, warnings };
+  }
+
+  graphData.edges.forEach((edge, index) => {
+    if (!edge.id || typeof edge.id !== 'string') {
+      errors.push(`Edge at index ${index} missing or invalid id`);
+    }
+
+    if (!edge.source || typeof edge.source !== 'string') {
+      errors.push(`Edge ${edge.id || index} missing or invalid source`);
+    } else if (!nodeIds.has(edge.source)) {
+      errors.push(`Edge ${edge.id || index} references non-existent source node: ${edge.source}`);
+    }
+
+    if (!edge.target || typeof edge.target !== 'string') {
+      errors.push(`Edge ${edge.id || index} missing or invalid target`);
+    } else if (!nodeIds.has(edge.target)) {
+      errors.push(`Edge ${edge.id || index} references non-existent target node: ${edge.target}`);
+    }
+
+    if (!edge.data || typeof edge.data !== 'object') {
+      warnings.push(`Edge ${edge.id || index} missing or invalid data object`);
+    }
+  });
+
+  console.log('[validateGraphData] Validation complete:', {
+    isValid: errors.length === 0,
+    errorCount: errors.length,
+    warningCount: warnings.length,
+    nodeCount: graphData.nodes.length,
+    edgeCount: graphData.edges.length
+  });
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings
+  };
 };

@@ -1,9 +1,9 @@
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
-import { transformToGraphData, getNodeColor, getNodeSize } from '@/utils/graphDataTransform';
+import { transformToGraphData, getNodeColor, getNodeSize, validateGraphData } from '@/utils/graphDataTransform';
 import { GraphCanvas, GraphEdge as ReaGraphEdge, GraphNode as ReaGraphNode } from 'reagraph';
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { GraphControls } from './GraphControls';
 
 interface EntityGraphProps {
@@ -14,8 +14,6 @@ interface EntityGraphProps {
 
 export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) => {
   const graphRef = useRef<any>(null);
-  const [visibleNodeCount, setVisibleNodeCount] = useState(0);
-  const [error, setError] = useState<string | null>(null);
 
   console.log('[EntityGraph] Rendering with:', {
     campaign: campaign?.name,
@@ -24,28 +22,32 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     thoughtsCount: thoughts.length
   });
 
+  // Transform and validate data
   let graphData;
   try {
     graphData = transformToGraphData(campaign, entities, thoughts);
-    console.log('[EntityGraph] Graph data transformed successfully:', {
+    
+    // Validate the transformed data
+    const validation = validateGraphData(graphData);
+    if (!validation.isValid) {
+      console.error('[EntityGraph] Graph data validation failed:', validation.errors);
+      throw new Error(`Invalid graph data: ${validation.errors.join(', ')}`);
+    }
+    
+    console.log('[EntityGraph] Graph data transformed and validated:', {
       nodesCount: graphData.nodes.length,
       edgesCount: graphData.edges.length,
-      usingLayout: 'default (reagraph auto)',
-      usingEdges: 'default interpolation'
+      warnings: validation.warnings.length > 0 ? validation.warnings : 'none'
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : 'Unknown error transforming graph data';
     console.error('[EntityGraph] Error transforming graph data:', err);
-    setError(errorMsg);
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-4 max-w-lg">
           <h3 className="text-lg font-semibold text-destructive">Graph Transformation Error</h3>
           <p className="text-sm text-muted-foreground">
             Failed to transform data into graph format: {errorMsg}
-          </p>
-          <p className="text-xs text-muted-foreground italic">
-            If this persists, layout or interpolation props may be incompatible with reagraph version.
           </p>
           <pre className="text-xs bg-muted p-4 rounded-lg text-left overflow-auto max-h-40">
             {JSON.stringify({ campaign, entities: entities.length, thoughts: thoughts.length }, null, 2)}
@@ -55,118 +57,58 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     );
   }
 
-  // Transform to reagraph format
-  let allNodes: ReaGraphNode[];
-  let allEdges: ReaGraphEdge[];
-  
-  try {
-    allNodes = graphData.nodes.map(node => {
-      if (!node.id) {
-        throw new Error(`Node missing ID: ${JSON.stringify(node)}`);
-      }
-      return {
-        id: node.id,
-        label: node.label,
-        fill: getNodeColor(node),
-        size: getNodeSize(node),
-        data: node.data
-      };
-    });
+  // Transform to reagraph format - render all nodes immediately (no progressive loading)
+  const nodes: ReaGraphNode[] = graphData.nodes.map(node => ({
+    id: node.id,
+    label: node.label,
+    fill: getNodeColor(node),
+    size: getNodeSize(node),
+    data: node.data
+  }));
 
-    allEdges = graphData.edges.map(edge => {
-      if (!edge.id || !edge.source || !edge.target) {
-        throw new Error(`Edge missing required fields: ${JSON.stringify(edge)}`);
-      }
-      return {
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        label: edge.label,
-        data: edge.data
-      };
-    });
+  const edges: ReaGraphEdge[] = graphData.edges.map(edge => ({
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    label: edge.label,
+    data: edge.data
+  }));
 
-    console.log('[EntityGraph] Nodes and edges mapped successfully:', {
-      nodesCount: allNodes.length,
-      edgesCount: allEdges.length,
-      sampleNode: allNodes[0],
-      sampleEdge: allEdges[0]
-    });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown error mapping nodes/edges';
-    console.error('[EntityGraph] Error mapping graph data:', err);
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-4 max-w-lg">
-          <h3 className="text-lg font-semibold text-destructive">Graph Mapping Error</h3>
-          <p className="text-sm text-muted-foreground">
-            Failed to map graph nodes and edges: {errorMsg}
-          </p>
-          <p className="text-xs text-muted-foreground italic">
-            If this persists, layout or interpolation props may be incompatible with reagraph version.
-          </p>
-          <div className="text-left text-xs bg-muted p-4 rounded-lg overflow-auto max-h-40">
-            <div className="font-semibold mb-2">Sample Data Preview:</div>
-            <div>Nodes: {graphData.nodes.slice(0, 3).map(n => n.label).join(', ')}</div>
-            <div>Edges: {graphData.edges.slice(0, 3).map(e => `${e.source}→${e.target}`).join(', ')}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  console.log('[EntityGraph] Reagraph data prepared:', {
+    nodesCount: nodes.length,
+    edgesCount: edges.length,
+    sampleNode: nodes[0] ? { id: nodes[0].id, label: nodes[0].label, fill: nodes[0].fill, size: nodes[0].size } : null,
+    sampleEdge: edges[0] ? { id: edges[0].id, source: edges[0].source, target: edges[0].target } : null
+  });
 
-  // Progressive rendering: show nodes one at a time with delay
-  useEffect(() => {
-    setVisibleNodeCount(0);
-    
-    if (allNodes.length === 0) return;
-
-    // Stagger node appearance - Obsidian style
-    const interval = setInterval(() => {
-      setVisibleNodeCount(prev => {
-        if (prev >= allNodes.length) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 50); // 50ms delay between each node pop-in
-
-    return () => clearInterval(interval);
-  }, [allNodes.length, campaign?.id, entities.length, thoughts.length]);
-
-  // Only show nodes/edges that should be visible
-  const nodes = allNodes.slice(0, visibleNodeCount);
-  const visibleNodeIds = new Set(nodes.map(n => n.id));
-  const edges = allEdges.filter(edge => 
-    visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
-  );
+  // Validate reagraph ref methods exist
+  const isGraphReady = graphRef.current !== null;
 
   const handleZoomIn = () => {
-    if (graphRef.current) {
+    if (graphRef.current && typeof graphRef.current.zoomIn === 'function') {
       graphRef.current.zoomIn();
     }
   };
 
   const handleZoomOut = () => {
-    if (graphRef.current) {
+    if (graphRef.current && typeof graphRef.current.zoomOut === 'function') {
       graphRef.current.zoomOut();
     }
   };
 
   const handleFitView = () => {
-    if (graphRef.current) {
+    if (graphRef.current && typeof graphRef.current.fitNodesInView === 'function') {
       graphRef.current.fitNodesInView();
     }
   };
 
   const handleReset = () => {
-    if (graphRef.current) {
+    if (graphRef.current && typeof graphRef.current.centerGraph === 'function') {
       graphRef.current.centerGraph();
     }
   };
 
-  if (allNodes.length === 0) {
+  if (nodes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-2">
@@ -179,54 +121,34 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     );
   }
 
-  console.log('[EntityGraph] Rendering graph with:', {
-    visibleNodes: nodes.length,
-    visibleEdges: edges.length,
-    totalNodes: allNodes.length,
-    totalEdges: allEdges.length
+  console.log('[EntityGraph] Rendering GraphCanvas with:', {
+    nodes: nodes.length,
+    edges: edges.length
   });
 
   return (
     <div className="relative w-full h-full">
-      {nodes.length > 0 ? (
-        <>
-          <GraphCanvas
-            ref={graphRef}
-            nodes={nodes}
-            edges={edges}
-            labelType="all"
-            draggable
-            animated={true}
-            onNodeClick={(node) => {
-              console.log('[EntityGraph] Node clicked:', node);
-            }}
-            onEdgeClick={(edge) => {
-              console.log('[EntityGraph] Edge clicked:', edge);
-            }}
-          />
-          <GraphControls
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            onFitView={handleFitView}
-            onReset={handleReset}
-          />
-          {visibleNodeCount < allNodes.length && (
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full border border-border shadow-lg">
-              <p className="text-sm text-muted-foreground">
-                Loading nodes: {visibleNodeCount} / {allNodes.length}
-              </p>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Preparing graph... ({visibleNodeCount}/{allNodes.length} nodes)
-            </p>
-          </div>
-        </div>
-      )}
+      <GraphCanvas
+        ref={graphRef}
+        nodes={nodes}
+        edges={edges}
+        labelType="all"
+        draggable
+        animated={true}
+        onNodeClick={(node) => {
+          console.log('[EntityGraph] Node clicked:', node);
+        }}
+        onEdgeClick={(edge) => {
+          console.log('[EntityGraph] Edge clicked:', edge);
+        }}
+      />
+      <GraphControls
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onFitView={handleFitView}
+        onReset={handleReset}
+        disabled={!isGraphReady}
+      />
     </div>
   );
 };

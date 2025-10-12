@@ -22,11 +22,19 @@ export default function GraphViewPage() {
       <div className="h-screen flex items-center justify-center">
         <div className="animate-pulse text-center space-y-4">
           <Network className="h-16 w-16 text-muted-foreground mx-auto" />
-          <p className="text-muted-foreground">Loading graph data...</p>
+          <p className="text-muted-foreground">Loading data...</p>
+          <p className="text-xs text-muted-foreground/60">Fetching entities and thoughts</p>
         </div>
       </div>
     );
   }
+
+  // Show data counts before rendering
+  console.log('[GraphViewPage] Data loaded:', {
+    campaign: currentCampaign?.name,
+    entities: entities.length,
+    thoughts: thoughts.length
+  });
 
   if (!currentCampaign) {
     return (
@@ -51,7 +59,10 @@ export default function GraphViewPage() {
           <div className="h-full flex items-center justify-center">
             <div className="animate-pulse text-center space-y-4">
               <Network className="h-16 w-16 text-muted-foreground mx-auto" />
-              <p className="text-muted-foreground">Loading graph...</p>
+              <p className="text-muted-foreground">Rendering graph...</p>
+              <p className="text-xs text-muted-foreground/60">
+                Preparing {entities.length} entities and {thoughts.length} thoughts
+              </p>
             </div>
           </div>
         }>

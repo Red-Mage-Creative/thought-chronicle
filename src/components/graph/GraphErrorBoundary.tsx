@@ -1,7 +1,8 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Copy, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 
 interface Props {
   children: ReactNode;
@@ -28,9 +29,31 @@ export class GraphErrorBoundary extends Component<Props, State> {
     console.error('[GraphErrorBoundary] Error details:', {
       message: error.message,
       stack: error.stack,
-      name: error.name
+      name: error.name,
+      reagraphVersion: '4.30.5',
+      browser: navigator.userAgent
     });
   }
+
+  handleCopyDebugInfo = () => {
+    const debugInfo = {
+      error: this.state.error?.message,
+      stack: this.state.error?.stack,
+      reagraphVersion: '4.30.5',
+      browser: navigator.userAgent,
+      timestamp: new Date().toISOString()
+    };
+    
+    navigator.clipboard.writeText(JSON.stringify(debugInfo, null, 2));
+    toast({
+      title: 'Debug info copied',
+      description: 'Error details copied to clipboard'
+    });
+  };
+
+  handleTryAgain = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
 
   render() {
     if (this.state.hasError) {
@@ -44,7 +67,7 @@ export class GraphErrorBoundary extends Component<Props, State> {
                 Unable to render the graph visualization. Check the console for detailed error information.
               </p>
               {this.state.error && (
-                <div className="w-full max-w-2xl">
+                <div className="w-full max-w-2xl space-y-2">
                   <details className="bg-muted p-4 rounded-lg">
                     <summary className="cursor-pointer text-sm font-medium mb-2">Error Details</summary>
                     <pre className="text-xs overflow-auto max-h-60 whitespace-pre-wrap">
@@ -53,11 +76,25 @@ export class GraphErrorBoundary extends Component<Props, State> {
                       {this.state.error.stack}
                     </pre>
                   </details>
+                  <div className="text-xs text-muted-foreground">
+                    <div>reagraph v4.30.5</div>
+                    <div>Browser: {navigator.userAgent.substring(0, 50)}...</div>
+                  </div>
                 </div>
               )}
-              <Button onClick={() => window.location.reload()}>
-                Reload Page
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={this.handleTryAgain} variant="outline">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+                <Button onClick={this.handleCopyDebugInfo} variant="outline">
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Debug Info
+                </Button>
+                <Button onClick={() => window.location.reload()}>
+                  Reload Page
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

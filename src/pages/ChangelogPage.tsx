@@ -18,6 +18,33 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.5.0",
+  date: "2025-10-12",
+  features: [
+    "Comprehensive graph data validation before rendering",
+    "Enhanced error boundary with debug info export and retry functionality"
+  ],
+  improvements: [
+    "Removed progressive node rendering for stable reagraph initialization",
+    "All nodes now render immediately to prevent WebGL state corruption",
+    "Better loading states distinguishing data fetch vs graph render",
+    "Graph controls gracefully disable when graph not ready",
+    "Detailed validation logging for debugging graph issues"
+  ],
+  fixes: [
+    "Fixed 'Cannot read properties of undefined' reagraph crash",
+    "Fixed graph controls calling methods on null ref",
+    "Fixed missing data validation causing corrupt data to reach GraphCanvas"
+  ],
+  docs: [],
+  refactor: [
+    "Simplified EntityGraph component by removing progressive rendering logic",
+    "Added validateGraphData utility for pre-render validation"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.4.3",
   date: "2025-10-12",
   features: [],

@@ -8,47 +8,56 @@ interface GraphControlsProps {
   onZoomOut: () => void;
   onFitView: () => void;
   onReset: () => void;
+  disabled?: boolean;
 }
 
-export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset }: GraphControlsProps) => {
+export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, disabled = false }: GraphControlsProps) => {
   return (
     <TooltipProvider>
       <Card className="absolute bottom-4 right-4 p-2 bg-background/95 backdrop-blur z-10">
         <div className="flex flex-col gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onZoomIn}>
+              <Button variant="ghost" size="icon" onClick={onZoomIn} disabled={disabled}>
                 <ZoomIn className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">Zoom In</TooltipContent>
+            <TooltipContent side="left">
+              {disabled ? 'Graph loading...' : 'Zoom In'}
+            </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onZoomOut}>
+              <Button variant="ghost" size="icon" onClick={onZoomOut} disabled={disabled}>
                 <ZoomOut className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">Zoom Out</TooltipContent>
+            <TooltipContent side="left">
+              {disabled ? 'Graph loading...' : 'Zoom Out'}
+            </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onFitView}>
+              <Button variant="ghost" size="icon" onClick={onFitView} disabled={disabled}>
                 <Maximize className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">Fit View</TooltipContent>
+            <TooltipContent side="left">
+              {disabled ? 'Graph loading...' : 'Fit View'}
+            </TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onReset}>
+              <Button variant="ghost" size="icon" onClick={onReset} disabled={disabled}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">Reset View</TooltipContent>
+            <TooltipContent side="left">
+              {disabled ? 'Graph loading...' : 'Reset View'}
+            </TooltipContent>
           </Tooltip>
         </div>
       </Card>
