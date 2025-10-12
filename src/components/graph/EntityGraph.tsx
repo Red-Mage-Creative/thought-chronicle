@@ -29,7 +29,9 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     graphData = transformToGraphData(campaign, entities, thoughts);
     console.log('[EntityGraph] Graph data transformed successfully:', {
       nodesCount: graphData.nodes.length,
-      edgesCount: graphData.edges.length
+      edgesCount: graphData.edges.length,
+      usingLayout: 'default (reagraph auto)',
+      usingEdges: 'default interpolation'
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : 'Unknown error transforming graph data';
@@ -41,6 +43,9 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
           <h3 className="text-lg font-semibold text-destructive">Graph Transformation Error</h3>
           <p className="text-sm text-muted-foreground">
             Failed to transform data into graph format: {errorMsg}
+          </p>
+          <p className="text-xs text-muted-foreground italic">
+            If this persists, layout or interpolation props may be incompatible with reagraph version.
           </p>
           <pre className="text-xs bg-muted p-4 rounded-lg text-left overflow-auto max-h-40">
             {JSON.stringify({ campaign, entities: entities.length, thoughts: thoughts.length }, null, 2)}
@@ -97,6 +102,14 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
           <p className="text-sm text-muted-foreground">
             Failed to map graph nodes and edges: {errorMsg}
           </p>
+          <p className="text-xs text-muted-foreground italic">
+            If this persists, layout or interpolation props may be incompatible with reagraph version.
+          </p>
+          <div className="text-left text-xs bg-muted p-4 rounded-lg overflow-auto max-h-40">
+            <div className="font-semibold mb-2">Sample Data Preview:</div>
+            <div>Nodes: {graphData.nodes.slice(0, 3).map(n => n.label).join(', ')}</div>
+            <div>Edges: {graphData.edges.slice(0, 3).map(e => `${e.source}→${e.target}`).join(', ')}</div>
+          </div>
         </div>
       </div>
     );
@@ -182,10 +195,8 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
             nodes={nodes}
             edges={edges}
             labelType="all"
-            layoutType="forceDirected2d"
             draggable
             animated={true}
-            edgeInterpolation="curved"
             onNodeClick={(node) => {
               console.log('[EntityGraph] Node clicked:', node);
             }}

@@ -18,6 +18,23 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.4.3",
+  date: "2025-10-12",
+  features: [],
+  improvements: [
+    "Retained progressive node pop-in animation for graph view (Obsidian-style)",
+    "Enhanced graph diagnostics with layout and interpolation logging"
+  ],
+  fixes: [
+    "Fixed reagraph crash by removing unsupported edgeInterpolation and layoutType props",
+    "Added fallback data preview in error screens for better debugging"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.4.2",
   date: "2025-10-10",
   features: [
