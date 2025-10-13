@@ -10,51 +10,69 @@ interface EntityGraphProps {
   campaign: Campaign | null;
   entities: LocalEntity[];
   thoughts: LocalThought[];
+  safeMode?: boolean;
+  mockData?: boolean;
 }
 
-export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) => {
+export const EntityGraph = ({ campaign, entities, thoughts, safeMode = false, mockData = false }: EntityGraphProps) => {
   const graphRef = useRef<any>(null);
 
   console.log('[EntityGraph] Rendering with:', {
     campaign: campaign?.name,
     campaignId: campaign?.id,
     entitiesCount: entities.length,
-    thoughtsCount: thoughts.length
+    thoughtsCount: thoughts.length,
+    safeMode,
+    mockData
   });
 
-  // Transform and validate data
+  // Mock data mode - use minimal hardcoded graph for testing
   let graphData;
-  try {
-    graphData = transformToGraphData(campaign, entities, thoughts);
-    
-    // Validate the transformed data
-    const validation = validateGraphData(graphData);
-    if (!validation.isValid) {
-      console.error('[EntityGraph] Graph data validation failed:', validation.errors);
-      throw new Error(`Invalid graph data: ${validation.errors.join(', ')}`);
-    }
-    
-    console.log('[EntityGraph] Graph data transformed and validated:', {
-      nodesCount: graphData.nodes.length,
-      edgesCount: graphData.edges.length,
-      warnings: validation.warnings.length > 0 ? validation.warnings : 'none'
-    });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown error transforming graph data';
-    console.error('[EntityGraph] Error transforming graph data:', err);
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-4 max-w-lg">
-          <h3 className="text-lg font-semibold text-destructive">Graph Transformation Error</h3>
-          <p className="text-sm text-muted-foreground">
-            Failed to transform data into graph format: {errorMsg}
-          </p>
-          <pre className="text-xs bg-muted p-4 rounded-lg text-left overflow-auto max-h-40">
-            {JSON.stringify({ campaign, entities: entities.length, thoughts: thoughts.length }, null, 2)}
-          </pre>
+  if (mockData) {
+    console.log('[EntityGraph] Using MOCK DATA for deterministic testing');
+    graphData = {
+      nodes: [
+        { id: 'mock-campaign', label: 'Test Campaign', type: 'campaign' as const, data: { type: 'campaign' } },
+        { id: 'mock-entity-1', label: 'Test Entity 1', type: 'entity' as const, data: { type: 'entity', entityType: 'pc' } }
+      ],
+      edges: [
+        { id: 'mock-edge-1', source: 'mock-campaign', target: 'mock-entity-1', label: 'campaign-entity', data: { type: 'campaign-entity' } }
+      ]
+    };
+  } else {
+    // Transform and validate real data
+    try {
+      graphData = transformToGraphData(campaign, entities, thoughts);
+      
+      // Validate the transformed data
+      const validation = validateGraphData(graphData);
+      if (!validation.isValid) {
+        console.error('[EntityGraph] Graph data validation failed:', validation.errors);
+        throw new Error(`Invalid graph data: ${validation.errors.join(', ')}`);
+      }
+      
+      console.log('[EntityGraph] Graph data transformed and validated:', {
+        nodesCount: graphData.nodes.length,
+        edgesCount: graphData.edges.length,
+        warnings: validation.warnings.length > 0 ? validation.warnings : 'none'
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error transforming graph data';
+      console.error('[EntityGraph] Error transforming graph data:', err);
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center space-y-4 max-w-lg">
+            <h3 className="text-lg font-semibold text-destructive">Graph Transformation Error</h3>
+            <p className="text-sm text-muted-foreground">
+              Failed to transform data into graph format: {errorMsg}
+            </p>
+            <pre className="text-xs bg-muted p-4 rounded-lg text-left overflow-auto max-h-40">
+              {JSON.stringify({ campaign, entities: entities.length, thoughts: thoughts.length }, null, 2)}
+            </pre>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   // Transform to reagraph format - render all nodes immediately (no progressive loading)
@@ -121,20 +139,35 @@ export const EntityGraph = ({ campaign, entities, thoughts }: EntityGraphProps) 
     );
   }
 
+  // Check container size before rendering
+  const containerRef = useRef<HTMLDivElement>(null);
+  
   console.log('[EntityGraph] Rendering GraphCanvas with:', {
     nodes: nodes.length,
-    edges: edges.length
+    edges: edges.length,
+    safeMode,
+    mockData
   });
 
+  // Log container dimensions for debugging zero-size issues
+  if (containerRef.current) {
+    const { clientWidth, clientHeight } = containerRef.current;
+    console.log('[EntityGraph] Container dimensions:', { clientWidth, clientHeight });
+    
+    if (clientWidth === 0 || clientHeight === 0) {
+      console.warn('[EntityGraph] WARNING: Container has zero size, graph may not render');
+    }
+  }
+
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full">
       <GraphCanvas
         ref={graphRef}
         nodes={nodes}
         edges={edges}
-        labelType="all"
+        labelType={safeMode ? "none" : "all"}
         draggable
-        animated={true}
+        animated={!safeMode}
         onNodeClick={(node) => {
           console.log('[EntityGraph] Node clicked:', node);
         }}

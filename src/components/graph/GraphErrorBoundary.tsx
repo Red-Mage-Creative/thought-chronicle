@@ -1,11 +1,13 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Copy, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 
 interface Props {
   children: ReactNode;
+  onFallbackRequested?: () => void;
 }
 
 interface State {
@@ -94,6 +96,12 @@ export class GraphErrorBoundary extends Component<Props, State> {
                 <Button onClick={() => window.location.reload()}>
                   Reload Page
                 </Button>
+              </div>
+              
+              <div className="pt-4 border-t max-w-md">
+                <p className="text-xs text-muted-foreground mb-2">
+                  💡 Try enabling <Badge variant="outline" className="text-xs mx-1">Safe Mode</Badge> in the graph options (top left) to disable labels and animations.
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -18,6 +18,38 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.5.1",
+  date: "2025-10-13",
+  features: [
+    "Safe Mode toggle - disable labels and animations for simpler graph rendering",
+    "Mock Data injector - test with minimal 2-node graph for deterministic debugging",
+    "WebGL detection with automatic fallback to Simple List view when unavailable",
+    "Simple Graph List fallback - non-WebGL view showing all nodes and relationships"
+  ],
+  improvements: [
+    "Container size validation logging to detect zero-size rendering issues",
+    "Graph diagnostics panel showing node counts and WebGL availability",
+    "Enhanced error boundary with Safe Mode suggestion",
+    "Debug controls for graph troubleshooting (top-left of Graph View)"
+  ],
+  fixes: [
+    "Reduced crash surface by making labels and animations optional",
+    "Added WebGL feature detection to prevent crashes on unsupported browsers",
+    "Better error messages directing users to Safe Mode for recovery"
+  ],
+  docs: [],
+  refactor: [
+    "Created webgl.ts utility for feature detection",
+    "Created SimpleGraphList.tsx fallback component",
+    "Enhanced EntityGraph with safeMode and mockData props"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: [
+    "Added container dimension logging for debugging",
+    "Enhanced GraphViewPage with rendering options UI"
+  ]
+}, {
   version: "1.5.0",
   date: "2025-10-12",
   features: [
