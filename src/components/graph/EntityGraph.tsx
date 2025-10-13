@@ -75,22 +75,26 @@ export const EntityGraph = ({ campaign, entities, thoughts, safeMode = false, mo
     }
   }
 
-  // Transform to reagraph format - render all nodes immediately (no progressive loading)
-  const nodes: ReaGraphNode[] = graphData.nodes.map(node => ({
-    id: node.id,
-    label: node.label,
-    fill: getNodeColor(node),
-    size: getNodeSize(node),
-    data: node.data
-  }));
+  // Transform to reagraph format with defensive null checks
+  const nodes: ReaGraphNode[] = graphData.nodes
+    .filter(node => node && node.id && node.label) // Remove any invalid nodes
+    .map(node => ({
+      id: String(node.id), // Ensure string
+      label: String(node.label || 'Unnamed'), // Ensure string with fallback
+      fill: getNodeColor(node) || '#71717a', // Ensure color with fallback
+      size: getNodeSize(node) || 10, // Ensure number with fallback
+      data: node.data || {} // Ensure object
+    }));
 
-  const edges: ReaGraphEdge[] = graphData.edges.map(edge => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    label: edge.label,
-    data: edge.data
-  }));
+  const edges: ReaGraphEdge[] = graphData.edges
+    .filter(edge => edge && edge.id && edge.source && edge.target) // Remove any invalid edges
+    .map(edge => ({
+      id: String(edge.id), // Ensure string
+      source: String(edge.source), // Ensure string
+      target: String(edge.target), // Ensure string
+      label: edge.label ? String(edge.label) : undefined, // Optional but ensure string if present
+      data: edge.data || {} // Ensure object
+    }));
 
   console.log('[EntityGraph] Reagraph data prepared:', {
     nodesCount: nodes.length,
