@@ -10,6 +10,8 @@ export interface GraphNode {
     type: 'campaign' | 'entity' | 'thought';
     entityType?: string;
     thoughtCount?: number;
+    entityId?: string;  // For navigation (added in transformToForceGraphData)
+    thoughtId?: string; // For navigation (added in transformToForceGraphData)
     originalData: Campaign | LocalEntity | LocalThought;
   };
 }
@@ -27,6 +29,20 @@ export interface GraphEdge {
 export interface GraphData {
   nodes: GraphNode[];
   edges: GraphEdge[];
+}
+
+export interface ForceGraphLink {
+  source: string;
+  target: string;
+  label?: string;
+  data: {
+    type: 'campaign-entity' | 'parent' | 'linked' | 'thought';
+  };
+}
+
+export interface ForceGraphData {
+  nodes: GraphNode[];
+  links: ForceGraphLink[];
 }
 
 export interface GraphValidationResult {
@@ -272,6 +288,49 @@ export const transformToGraphData = (
   });
 
   return { nodes, edges };
+};
+
+/**
+ * Transforms campaign, entities, and thoughts into force-graph data structure
+ * Same as transformToGraphData but edges are called 'links' for react-force-graph
+ */
+export const transformToForceGraphData = (
+  campaign: Campaign | null,
+  entities: LocalEntity[],
+  thoughts: LocalThought[]
+): ForceGraphData => {
+  const graphData = transformToGraphData(campaign, entities, thoughts);
+  
+  // Convert edges to links and add entity/thought IDs to node data for navigation
+  const nodes = graphData.nodes.map(node => {
+    const originalData = node.data.originalData;
+    let entityId: string | undefined;
+    let thoughtId: string | undefined;
+    
+    if (node.data.type === 'entity' && 'id' in originalData) {
+      entityId = originalData.id || (originalData as LocalEntity).localId;
+    } else if (node.data.type === 'thought' && 'id' in originalData) {
+      thoughtId = originalData.id || (originalData as LocalThought).localId;
+    }
+    
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        entityId,
+        thoughtId
+      }
+    };
+  });
+  
+  const links: ForceGraphLink[] = graphData.edges.map(edge => ({
+    source: edge.source,
+    target: edge.target,
+    label: edge.label,
+    data: edge.data
+  }));
+  
+  return { nodes, links };
 };
 
 /**

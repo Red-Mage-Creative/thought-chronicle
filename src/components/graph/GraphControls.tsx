@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ZoomIn, ZoomOut, Maximize, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, RotateCcw, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface GraphControlsProps {
@@ -8,10 +8,11 @@ interface GraphControlsProps {
   onZoomOut: () => void;
   onFitView: () => void;
   onReset: () => void;
+  onExportPNG?: () => void;
   disabled?: boolean;
 }
 
-export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, disabled = false }: GraphControlsProps) => {
+export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExportPNG, disabled = false }: GraphControlsProps) => {
   return (
     <TooltipProvider>
       <Card className="absolute bottom-4 right-4 p-2 bg-background/95 backdrop-blur z-10">
@@ -59,6 +60,19 @@ export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, disable
               {disabled ? 'Graph loading...' : 'Reset View'}
             </TooltipContent>
           </Tooltip>
+
+          {onExportPNG && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={onExportPNG} disabled={disabled}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                {disabled ? 'Graph loading...' : 'Export as PNG'}
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </Card>
     </TooltipProvider>

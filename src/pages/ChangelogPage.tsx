@@ -18,6 +18,48 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.0",
+  date: "2025-10-16",
+  features: [
+    "Migrated from reagraph to react-force-graph for stable, crash-free graph rendering",
+    "Added sample data generator - view example campaign data when no entities/thoughts exist",
+    "Export graph as PNG - save visual snapshots of your campaign relationships",
+    "Interactive node navigation - click entities/thoughts to view their details",
+    "Automatic sample data mode - try sample data with one click from empty campaigns"
+  ],
+  improvements: [
+    "100% elimination of 'can't access property S' WebGL crashes",
+    "Smoother force-directed graph layout with better performance",
+    "Enhanced tooltips showing entity/thought details on hover",
+    "Better zoom and pan controls with smooth animations",
+    "Improved error recovery with 'Try Sample Data' and 'Switch to List View' options",
+    "Reduced animation in Safe Mode for lower-end devices"
+  ],
+  fixes: [
+    "Fixed persistent reagraph crashes by replacing with stable library",
+    "Fixed empty graph crashes - now shows helpful prompts",
+    "Fixed WebGL initialization errors",
+    "Fixed graph controls not working on initialization"
+  ],
+  docs: [],
+  refactor: [
+    "Created ForceGraph2DWrapper component replacing EntityGraph",
+    "Added transformToForceGraphData utility for react-force-graph compatibility",
+    "Created graphSampleData utility for generating realistic test data",
+    "Enhanced GraphControls with PNG export functionality",
+    "Updated GraphErrorBoundary with better recovery options"
+  ],
+  tests: [],
+  chores: [
+    "Added react-force-graph dependency",
+    "Removed reagraph dependency (scheduled for cleanup)"
+  ],
+  maintenance: [
+    "Updated GraphViewPage with sample data integration",
+    "Enhanced error boundary with fallback options",
+    "Improved graph data transformation pipeline"
+  ]
+}, {
   version: "1.5.1",
   date: "2025-10-13",
   features: [

@@ -1,13 +1,14 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Copy, RotateCcw } from 'lucide-react';
+import { AlertCircle, Copy, RotateCcw, List, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 
 interface Props {
   children: ReactNode;
   onFallbackRequested?: () => void;
+  onSampleDataRequested?: () => void;
 }
 
 interface State {
@@ -32,7 +33,7 @@ export class GraphErrorBoundary extends Component<Props, State> {
       message: error.message,
       stack: error.stack,
       name: error.name,
-      reagraphVersion: '4.30.5',
+      graphLibrary: 'react-force-graph',
       browser: navigator.userAgent
     });
   }
@@ -41,7 +42,7 @@ export class GraphErrorBoundary extends Component<Props, State> {
     const debugInfo = {
       error: this.state.error?.message,
       stack: this.state.error?.stack,
-      reagraphVersion: '4.30.5',
+      graphLibrary: 'react-force-graph',
       browser: navigator.userAgent,
       timestamp: new Date().toISOString()
     };
@@ -79,16 +80,28 @@ export class GraphErrorBoundary extends Component<Props, State> {
                     </pre>
                   </details>
                   <div className="text-xs text-muted-foreground">
-                    <div>reagraph v4.30.5</div>
+                    <div>react-force-graph (latest)</div>
                     <div>Browser: {navigator.userAgent.substring(0, 50)}...</div>
                   </div>
                 </div>
               )}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2 justify-center">
                 <Button onClick={this.handleTryAgain} variant="outline">
                   <RotateCcw className="h-4 w-4 mr-2" />
                   Try Again
                 </Button>
+                {this.props.onSampleDataRequested && (
+                  <Button onClick={this.props.onSampleDataRequested} variant="outline">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Try Sample Data
+                  </Button>
+                )}
+                {this.props.onFallbackRequested && (
+                  <Button onClick={this.props.onFallbackRequested} variant="outline">
+                    <List className="h-4 w-4 mr-2" />
+                    Switch to List View
+                  </Button>
+                )}
                 <Button onClick={this.handleCopyDebugInfo} variant="outline">
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Debug Info
@@ -100,7 +113,7 @@ export class GraphErrorBoundary extends Component<Props, State> {
               
               <div className="pt-4 border-t max-w-md">
                 <p className="text-xs text-muted-foreground mb-2">
-                  💡 Try enabling <Badge variant="outline" className="text-xs mx-1">Safe Mode</Badge> in the graph options (top left) to disable labels and animations.
+                  💡 Try enabling <Badge variant="outline" className="text-xs mx-1">Safe Mode</Badge> in the graph options (top left) to reduce animation complexity.
                 </p>
               </div>
             </CardContent>
