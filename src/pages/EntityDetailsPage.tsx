@@ -4,7 +4,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, Clock, Network, GitBranch, Link2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, Clock, Network, GitBranch, Link2, Activity } from 'lucide-react';
+import { lazy, Suspense } from 'react';
+
+const ForceGraph2DWrapper = lazy(() => import('@/components/graph/ForceGraph2DWrapper').then(m => ({ default: m.ForceGraph2DWrapper })));
 import { LocalEntity, EntityWithMetrics, EntityType } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { entityService } from '@/services/entityService';
@@ -376,6 +379,39 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
             </div>
           </div>
         </div>
+      </Card>
+
+      {/* Entity Relationship Graph */}
+      <Card className="p-6">
+        <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+          <Activity className="h-5 w-5" />
+          Relationship Graph
+        </h3>
+        
+        <div className="h-[500px] border rounded bg-muted/30">
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-pulse text-center space-y-2">
+                <Network className="h-12 w-12 text-muted-foreground mx-auto" />
+                <p className="text-sm text-muted-foreground">Loading graph...</p>
+              </div>
+            </div>
+          }>
+            <ForceGraph2DWrapper
+              campaign={null}
+              entities={entityService.getAllEntities()}
+              thoughts={thoughtService.getAllThoughts()}
+              safeMode={false}
+              centerEntityId={entity.localId || entity.id!}
+              mode="entity"
+            />
+          </Suspense>
+        </div>
+        
+        <p className="text-xs text-muted-foreground mt-3">
+          Showing <span className="font-medium">{entity.name}</span> and its immediate connections. 
+          Visit the <a href="/graph" className="text-primary hover:underline">Graph View</a> for the full campaign network.
+        </p>
       </Card>
 
       {/* Related Thoughts */}

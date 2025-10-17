@@ -3,7 +3,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
-import { transformToGraphData, getNodeColor, validateGraphData } from '@/utils/graphDataTransform';
+import { transformToGraphData, transformToEntityCenteredGraph, getNodeColor, getIconGlyph, validateGraphData } from '@/utils/graphDataTransform';
 import { generateSampleCampaignData } from '@/utils/graphSampleData';
 import { GraphControls } from './GraphControls';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,8 @@ interface ForceGraph2DWrapperProps {
   thoughts: LocalThought[];
   safeMode?: boolean;
   useSampleData?: boolean;
+  centerEntityId?: string;
+  mode?: 'campaign' | 'entity';
 }
 
 export const ForceGraph2DWrapper = ({ 
@@ -22,7 +24,9 @@ export const ForceGraph2DWrapper = ({
   entities, 
   thoughts, 
   safeMode = false,
-  useSampleData = false
+  useSampleData = false,
+  centerEntityId,
+  mode = 'campaign'
 }: ForceGraph2DWrapperProps) => {
   const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,8 +70,21 @@ export const ForceGraph2DWrapper = ({
   // Transform data in three steps: GraphData -> validate -> ForceGraphData
   let graphData;
   try {
-    // Step 1: Transform to GraphData (with edges)
-    const intermediateData = transformToGraphData(actualData.campaign, actualData.entities, actualData.thoughts);
+    // Step 1: Transform to GraphData (with edges) based on mode
+    let intermediateData;
+    if (mode === 'entity' && centerEntityId) {
+      intermediateData = transformToEntityCenteredGraph(
+        centerEntityId,
+        actualData.entities,
+        actualData.thoughts
+      );
+    } else {
+      intermediateData = transformToGraphData(
+        actualData.campaign, 
+        actualData.entities, 
+        actualData.thoughts
+      );
+    }
     
     // Step 2: Validate the GraphData structure
     const validation = validateGraphData(intermediateData);
@@ -207,13 +224,67 @@ export const ForceGraph2DWrapper = ({
         height={dimensions.height}
         graphData={graphData}
         nodeLabel={(node: any) => node.label}
-        nodeColor={(node: any) => getNodeColor(node)}
-        nodeRelSize={6}
-        nodeVal={(node: any) => node.size || 1}
-        linkDirectionalParticles={safeMode ? 0 : 2}
-        linkDirectionalParticleSpeed={0.002}
-        linkColor={() => 'hsl(var(--muted-foreground) / 0.3)'}
-        linkWidth={1.5}
+        nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+          const size = mode === 'entity' && node.id === `entity:${centerEntityId}` 
+            ? 12 // Center entity larger
+            : node.data?.type === 'campaign' ? 10
+            : node.data?.type === 'thought' ? 4
+            : 6;
+          
+          // Draw colored circle
+          ctx.fillStyle = getNodeColor(node);
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
+          ctx.fill();
+          
+          // Draw icon emoji
+          ctx.font = `${size * 1.2}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(getIconGlyph(node), node.x, node.y);
+          
+          // Draw label below if zoomed in enough
+          if (globalScale > 0.8) {
+            ctx.fillStyle = getNodeColor(node);
+            ctx.font = `${Math.max(10, 10 / globalScale)}px Sans-Serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(node.label, node.x, node.y + size + 8);
+          }
+        }}
+        nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
+          const size = mode === 'entity' && node.id === `entity:${centerEntityId}` 
+            ? 12 : node.data?.type === 'campaign' ? 10
+            : node.data?.type === 'thought' ? 4 : 6;
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, size + 2, 0, 2 * Math.PI);
+          ctx.fill();
+        }}
+        linkColor={(link: any) => {
+          const type = link.data?.relationshipType;
+          if (type === 'parent') return '#8b5cf6'; // Violet - hierarchical
+          if (type === 'linked') return '#06b6d4'; // Cyan - associative
+          if (type === 'mention') return '#94a3b8'; // Slate - thought connection
+          return '#94a3b8';
+        }}
+        linkWidth={(link: any) => {
+          const type = link.data?.relationshipType;
+          if (type === 'parent') return 3;
+          if (type === 'linked') return 2;
+          return 1;
+        }}
+        linkLineDash={(link: any) => {
+          const type = link.data?.relationshipType;
+          if (type === 'linked') return [5, 5]; // Dashed for peer relationships
+          return null;
+        }}
+        linkDirectionalArrowLength={(link: any) => {
+          const type = link.data?.relationshipType;
+          if (type === 'parent') return 6; // Arrow to show hierarchy
+          return 0;
+        }}
+        linkDirectionalArrowRelPos={1}
+        linkDirectionalParticles={0}
         onNodeClick={handleNodeClick}
         onNodeHover={(node) => {
           if (node) {

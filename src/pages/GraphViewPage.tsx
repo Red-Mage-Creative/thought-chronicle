@@ -168,6 +168,7 @@ export default function GraphViewPage() {
             thoughts={thoughts}
             safeMode={safeMode}
             useSampleData={useSampleData}
+            mode="campaign"
           />
         </Suspense>
       </GraphErrorBoundary>

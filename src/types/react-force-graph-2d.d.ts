@@ -12,10 +12,15 @@ declare module 'react-force-graph-2d' {
     nodeColor?: string | ((node: any) => string);
     nodeRelSize?: number;
     nodeVal?: number | ((node: any) => number);
+    nodeCanvasObject?: (node: any, ctx: CanvasRenderingContext2D, globalScale: number) => void;
+    nodePointerAreaPaint?: (node: any, color: string, ctx: CanvasRenderingContext2D) => void;
     linkDirectionalParticles?: number | ((link: any) => number);
     linkDirectionalParticleSpeed?: number | ((link: any) => number);
     linkColor?: string | ((link: any) => string);
     linkWidth?: number | ((link: any) => number);
+    linkLineDash?: number[] | ((link: any) => number[] | null) | null;
+    linkDirectionalArrowLength?: number | ((link: any) => number);
+    linkDirectionalArrowRelPos?: number;
     onNodeClick?: (node: any, event: MouseEvent) => void;
     onNodeHover?: (node: any | null, previousNode: any | null) => void;
     onLinkClick?: (link: any, event: MouseEvent) => void;

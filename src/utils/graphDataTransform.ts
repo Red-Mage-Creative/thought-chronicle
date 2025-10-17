@@ -23,6 +23,7 @@ export interface GraphEdge {
   label?: string;
   data: {
     type: 'campaign-entity' | 'parent' | 'linked' | 'thought';
+    relationshipType?: 'parent' | 'linked' | 'mention';
   };
 }
 
@@ -37,6 +38,7 @@ export interface ForceGraphLink {
   label?: string;
   data: {
     type: 'campaign-entity' | 'parent' | 'linked' | 'thought';
+    relationshipType?: 'parent' | 'linked' | 'mention';
   };
 }
 
@@ -183,7 +185,7 @@ export const transformToGraphData = (
               source: namespacedParentId,
               target: namespacedEntityId,
               label: 'parent',
-              data: { type: 'parent' }
+              data: { type: 'parent', relationshipType: 'parent' }
             });
             visitedEdges.add(edgeId);
           }
@@ -207,7 +209,7 @@ export const transformToGraphData = (
               source: namespacedEntityId,
               target: namespacedLinkedId,
               label: 'linked',
-              data: { type: 'linked' }
+              data: { type: 'linked', relationshipType: 'linked' }
             });
             visitedEdges.add(edgeId);
           }
@@ -233,7 +235,7 @@ export const transformToGraphData = (
               id: edgeId,
               source: namespacedEntityId,
               target: namespacedThoughtId,
-              data: { type: 'thought' }
+              data: { type: 'thought', relationshipType: 'mention' }
             });
             visitedEdges.add(edgeId);
 
@@ -262,7 +264,7 @@ export const transformToGraphData = (
                 id: edgeId,
                 source: namespacedEntityId,
                 target: namespacedThoughtId,
-                data: { type: 'thought' }
+                data: { type: 'thought', relationshipType: 'mention' }
               });
               visitedEdges.add(edgeId);
 
@@ -335,7 +337,7 @@ export const transformToForceGraphData = (
 
 /**
  * Gets color for a node based on its type
- * Uses concrete hex colors instead of CSS variables for reagraph WebGL compatibility
+ * Uses design system colors matching entity badges in index.css
  */
 export const getNodeColor = (node: GraphNode): string => {
   if (node.data.type === 'campaign') {
@@ -346,24 +348,52 @@ export const getNodeColor = (node: GraphNode): string => {
     return '#9ca3af'; // Gray for thoughts
   }
 
-  // Entity - use concrete hex colors per entity type
+  // Entity - use design system colors from index.css
   if (node.data.type === 'entity' && node.data.entityType) {
     const colorMap: Record<string, string> = {
-      'pc': '#3b82f6',        // Blue
-      'npc': '#a855f7',       // Purple
-      'race': '#f97316',      // Orange
-      'religion': '#ec4899',  // Pink
-      'quest': '#10b981',     // Green
-      'enemy': '#ef4444',     // Red
-      'location': '#06b6d4',  // Cyan
-      'organization': '#6366f1', // Indigo
-      'item': '#eab308',      // Yellow
-      'plot-thread': '#d946ef' // Fuchsia
+      'pc': '#059669',        // Green - matches .entity-pc
+      'npc': '#3b82f6',       // Blue - matches .entity-npc
+      'race': '#0d9488',      // Teal - matches .entity-race
+      'religion': '#d97706',  // Amber - matches .entity-religion
+      'quest': '#4f46e5',     // Indigo - matches .entity-quest
+      'enemy': '#dc2626',     // Red - matches .entity-enemy
+      'location': '#7c3aed',  // Purple - matches .entity-location
+      'organization': '#e11d48', // Rose - matches .entity-organization
+      'item': '#eab308',      // Yellow - matches .entity-item
+      'plot-thread': '#8b5cf6', // Violet - matches .entity-plot-thread
+      'uncategorized': '#ea580c' // Orange - matches .entity-uncategorized
     };
-    return colorMap[node.data.entityType] || '#8b5cf6'; // Default purple
+    return colorMap[node.data.entityType] || colorMap['uncategorized'];
   }
 
   return '#71717a'; // Neutral gray fallback
+};
+
+/**
+ * Gets icon glyph for a node based on its type
+ * Uses emoji for broad compatibility
+ */
+export const getIconGlyph = (node: GraphNode): string => {
+  if (node.data.type === 'campaign') return '⭐';
+  if (node.data.type === 'thought') return '💭';
+  
+  if (node.data.type === 'entity' && node.data.entityType) {
+    const glyphMap: Record<string, string> = {
+      'pc': '🧙',
+      'npc': '👤',
+      'race': '🏛️',
+      'religion': '⛪',
+      'quest': '📜',
+      'enemy': '💀',
+      'location': '📍',
+      'organization': '🏰',
+      'item': '📦',
+      'plot-thread': '🔗'
+    };
+    return glyphMap[node.data.entityType] || '❓';
+  }
+  
+  return '⚪';
 };
 
 /**
@@ -462,4 +492,178 @@ export const validateGraphData = (graphData: GraphData): GraphValidationResult =
     errors,
     warnings
   };
+};
+
+/**
+ * Transforms data for entity-centered graph view
+ * Shows only the specified entity and its immediate connections
+ */
+export const transformToEntityCenteredGraph = (
+  centerEntityId: string,
+  allEntities: LocalEntity[],
+  allThoughts: LocalThought[]
+): GraphData => {
+  const nodes: GraphNode[] = [];
+  const edges: GraphEdge[] = [];
+  const validNodeIds = new Set<string>();
+  
+  // Find the center entity
+  const centerEntity = allEntities.find(
+    e => (e.localId || e.id) === centerEntityId
+  );
+  
+  if (!centerEntity) {
+    console.warn('[transformToEntityCenteredGraph] Center entity not found:', centerEntityId);
+    return { nodes: [], edges: [] };
+  }
+  
+  const centerNodeId = makeId('entity', centerEntityId);
+  
+  // Add center entity as primary node
+  nodes.push({
+    id: centerNodeId,
+    label: centerEntity.name,
+    data: {
+      type: 'entity',
+      entityType: centerEntity.type,
+      thoughtCount: 0,
+      originalData: centerEntity
+    }
+  });
+  validNodeIds.add(centerNodeId);
+  
+  // Add parent entities (one level up)
+  const parentIds = centerEntity.parentEntityIds || [];
+  parentIds.forEach(parentId => {
+    const parent = allEntities.find(e => (e.localId || e.id) === parentId);
+    if (parent) {
+      const nodeId = makeId('entity', parentId);
+      nodes.push({
+        id: nodeId,
+        label: parent.name,
+        data: {
+          type: 'entity',
+          entityType: parent.type,
+          thoughtCount: 0,
+          originalData: parent
+        }
+      });
+      validNodeIds.add(nodeId);
+      
+      edges.push({
+        id: `${nodeId}-parent-${centerNodeId}`,
+        source: nodeId,
+        target: centerNodeId,
+        label: 'Parent',
+        data: { type: 'parent', relationshipType: 'parent' }
+      });
+    }
+  });
+  
+  // Add child entities (one level down)
+  const children = allEntities.filter(e => 
+    (e.parentEntityIds || []).includes(centerEntityId)
+  );
+  children.forEach(child => {
+    const childId = child.localId || child.id!;
+    const nodeId = makeId('entity', childId);
+    nodes.push({
+      id: nodeId,
+      label: child.name,
+      data: {
+        type: 'entity',
+        entityType: child.type,
+        thoughtCount: 0,
+        originalData: child
+      }
+    });
+    validNodeIds.add(nodeId);
+    
+    edges.push({
+      id: `${nodeId}-parent-${centerNodeId}`,
+      source: centerNodeId,
+      target: nodeId,
+      label: 'Parent',
+      data: { type: 'parent', relationshipType: 'parent' }
+    });
+  });
+  
+  // Add linked entities (peers)
+  const linkedIds = centerEntity.linkedEntityIds || [];
+  linkedIds.forEach(linkedId => {
+    const linked = allEntities.find(e => (e.localId || e.id) === linkedId);
+    if (linked) {
+      const nodeId = makeId('entity', linkedId);
+      nodes.push({
+        id: nodeId,
+        label: linked.name,
+        data: {
+          type: 'entity',
+          entityType: linked.type,
+          thoughtCount: 0,
+          originalData: linked
+        }
+      });
+      validNodeIds.add(nodeId);
+      
+      edges.push({
+        id: `${centerNodeId}-linked-${nodeId}`,
+        source: centerNodeId,
+        target: nodeId,
+        label: 'Linked',
+        data: { type: 'linked', relationshipType: 'linked' }
+      });
+    }
+  });
+  
+  // Add thoughts mentioning this entity (limit to 5 most recent)
+  const relatedThoughts = allThoughts
+    .filter(t => {
+      // Check ID-based references
+      if (t.relatedEntityIds && t.relatedEntityIds.includes(centerEntityId)) {
+        return true;
+      }
+      // Fall back to name-based
+      return t.relatedEntities.some(name => 
+        name.toLowerCase() === centerEntity.name.toLowerCase()
+      );
+    })
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    .slice(0, 5);
+  
+  relatedThoughts.forEach(thought => {
+    const thoughtId = thought.localId || thought.id!;
+    const nodeId = makeId('thought', thoughtId);
+    nodes.push({
+      id: nodeId,
+      label: thought.content.substring(0, 30) + '...',
+      data: {
+        type: 'thought',
+        originalData: thought
+      }
+    });
+    validNodeIds.add(nodeId);
+    
+    edges.push({
+      id: `${nodeId}-${centerNodeId}`,
+      source: centerNodeId,
+      target: nodeId,
+      label: 'Mentions',
+      data: { type: 'thought', relationshipType: 'mention' }
+    });
+    
+    // Increment thought count for center entity
+    const centerNode = nodes.find(n => n.id === centerNodeId);
+    if (centerNode && centerNode.data.type === 'entity') {
+      centerNode.data.thoughtCount = (centerNode.data.thoughtCount || 0) + 1;
+    }
+  });
+  
+  console.log('[transformToEntityCenteredGraph] Created entity-centered graph:', {
+    centerEntity: centerEntity.name,
+    nodes: nodes.length,
+    edges: edges.length
+  });
+  
+  return { nodes, edges };
 };

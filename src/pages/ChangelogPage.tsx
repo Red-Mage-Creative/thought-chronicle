@@ -18,6 +18,44 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.2",
+  date: "2025-10-17",
+  features: [
+    "Entity-centered graph view on entity detail pages - see immediate connections",
+    "Custom node rendering with entity type icons and colors",
+    "Visual relationship differentiation - solid violet for parent, dashed cyan for linked, gray for thoughts",
+    "Directional arrows on parent relationships to show hierarchy",
+    "Entity icons rendered as emoji glyphs inside colored circles",
+    "Color-matched nodes using design system colors from entity badges"
+  ],
+  improvements: [
+    "Enhanced graph legend showing relationship types (parent, linked, mention)",
+    "Node sizing: center entity (largest) > related entities > thoughts (smallest)",
+    "Scale-dependent labels - labels appear when zoomed in for clarity",
+    "Improved click-to-navigate - works for both campaign and entity views",
+    "Better visual hierarchy with relationship-specific link styles",
+    "Entity detail page now includes embedded relationship graph"
+  ],
+  fixes: [
+    "Fixed color inconsistency between graph nodes and entity badges",
+    "Fixed relationship visualization - now clearly distinguishable"
+  ],
+  docs: [],
+  refactor: [
+    "Added relationshipType to GraphEdge and ForceGraphLink interfaces",
+    "Created transformToEntityCenteredGraph() for focused entity views",
+    "Created getIconGlyph() utility for node icon mapping",
+    "Updated getNodeColor() to use design system colors",
+    "Enhanced ForceGraph2DWrapper with mode prop (campaign|entity)",
+    "Added nodeCanvasObject for custom node rendering with icons"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: [
+    "Updated GraphLegend with relationship type documentation",
+    "Added lazy-loaded ForceGraph2DWrapper to EntityDetailsPage"
+  ]
+}, {
   version: "1.6.0",
   date: "2025-10-16",
   features: [

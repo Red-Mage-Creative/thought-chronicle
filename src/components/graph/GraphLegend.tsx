@@ -68,16 +68,16 @@ export const GraphLegend = () => {
               <h4 className="text-xs font-medium text-muted-foreground mb-2">Relationships</h4>
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-0.5 bg-primary" />
-                  <span className="text-xs">Campaign → Entity</span>
+                  <div className="w-8 h-0.5" style={{ backgroundColor: '#8b5cf6' }} />
+                  <span className="text-xs">Parent (Hierarchical)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-0.5 bg-accent" />
-                  <span className="text-xs">Parent/Linked</span>
+                  <div className="w-8 h-0.5 border-t-2 border-dashed" style={{ borderColor: '#06b6d4' }} />
+                  <span className="text-xs">Linked (Associative)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-0.5 bg-muted" />
-                  <span className="text-xs">Entity → Thought</span>
+                  <div className="w-8 h-0.5" style={{ backgroundColor: '#94a3b8' }} />
+                  <span className="text-xs">Thought Mention</span>
                 </div>
               </div>
             </div>
