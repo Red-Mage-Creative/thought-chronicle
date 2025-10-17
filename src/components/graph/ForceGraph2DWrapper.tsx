@@ -3,7 +3,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
-import { transformToForceGraphData, getNodeColor, validateGraphData } from '@/utils/graphDataTransform';
+import { transformToGraphData, getNodeColor, validateGraphData } from '@/utils/graphDataTransform';
 import { generateSampleCampaignData } from '@/utils/graphSampleData';
 import { GraphControls } from './GraphControls';
 import { useNavigate } from 'react-router-dom';
@@ -63,16 +63,48 @@ export const ForceGraph2DWrapper = ({
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Transform data for force graph
+  // Transform data in three steps: GraphData -> validate -> ForceGraphData
   let graphData;
   try {
-    graphData = transformToForceGraphData(actualData.campaign, actualData.entities, actualData.thoughts);
+    // Step 1: Transform to GraphData (with edges)
+    const intermediateData = transformToGraphData(actualData.campaign, actualData.entities, actualData.thoughts);
     
-    const validation = validateGraphData(graphData);
+    // Step 2: Validate the GraphData structure
+    const validation = validateGraphData(intermediateData);
     if (!validation.isValid) {
       console.error('[ForceGraph2DWrapper] Validation failed:', validation.errors);
       throw new Error(`Invalid graph data: ${validation.errors.join(', ')}`);
     }
+    
+    // Step 3: Convert edges to links for react-force-graph
+    graphData = {
+      nodes: intermediateData.nodes.map(node => {
+        const originalData = node.data.originalData;
+        let entityId: string | undefined;
+        let thoughtId: string | undefined;
+        
+        if (node.data.type === 'entity' && 'id' in originalData) {
+          entityId = originalData.id || (originalData as LocalEntity).localId;
+        } else if (node.data.type === 'thought' && 'id' in originalData) {
+          thoughtId = originalData.id || (originalData as LocalThought).localId;
+        }
+        
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            entityId,
+            thoughtId
+          }
+        };
+      }),
+      links: intermediateData.edges.map(edge => ({
+        source: edge.source,
+        target: edge.target,
+        label: edge.label,
+        data: edge.data
+      }))
+    };
 
     console.log('[ForceGraph2DWrapper] Graph data validated:', {
       nodesCount: graphData.nodes.length,
