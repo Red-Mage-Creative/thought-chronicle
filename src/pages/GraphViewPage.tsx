@@ -101,9 +101,11 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="h-screen w-full relative bg-background" style={{ minHeight: '600px' }}>
-      {/* Graph Controls */}
-      <div className="absolute top-4 left-4 z-10 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-7xl mx-auto p-6">
+        <div className="relative w-full h-[calc(100vh-8rem)] bg-card border rounded">
+          {/* Graph Controls */}
+          <div className="absolute top-6 left-6 z-10 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
         <div className="flex items-center gap-2">
           <Settings className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium">Graph Options</span>
@@ -172,6 +174,8 @@ export default function GraphViewPage() {
           />
         </Suspense>
       </GraphErrorBoundary>
+        </div>
+      </div>
     </div>
   );
 }

@@ -30,12 +30,12 @@ export const AppFooter = () => {
                 <div className="italic mt-1 text-[10px] sm:text-xs">"Every adventure begins with a single thought"</div>
               </div>
               <div className="font-medium">
-                    <a 
+                  <a 
                     href="/changelog" 
                     className="flex items-center gap-1 text-primary/70 hover:text-primary transition-colors underline-offset-2 hover:underline"
                   >
                     <FileText className="h-3 w-3" />
-                    Alpha - Version 1.6.2
+                    Alpha - Version 1.6.3
                   </a>
               </div>
               <div className="text-[10px] sm:text-xs text-muted-foreground/70">Built with Lovable</div>

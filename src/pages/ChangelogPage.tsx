@@ -18,6 +18,43 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.3",
+  date: "2025-10-18",
+  features: [
+    "Hover-to-view text labels - node labels only appear on hover for cleaner graph view",
+    "Full entity names displayed without truncation when hovering",
+    "Thought nodes show creation date (MMM d, yyyy) instead of content preview",
+    "Collapsible legend - starts collapsed by default, expands on click with chevron indicator",
+    "Lucide React icons in legend for all entity types"
+  ],
+  improvements: [
+    "Design system conformance - all spacing uses 6-unit (1.5rem) increments",
+    "Graph controls positioned at bottom-6 right-6 to respect design margins",
+    "Legend positioned at top-6 left-6 with proper z-index to prevent overlap",
+    "Graph View page uses proper container structure (max-w-7xl mx-auto p-6)",
+    "Entity Details graph section adjusted to h-[400px] with muted background",
+    "Enhanced hover states with clear visual feedback",
+    "Better visual hierarchy with consistent spacing across all graph elements"
+  ],
+  fixes: [
+    "Fixed legend blocking graph controls - proper positioning and z-index",
+    "Fixed text truncation - full names now visible on hover",
+    "Fixed thought preview showing content instead of useful date information"
+  ],
+  docs: [],
+  refactor: [
+    "Added hoveredNode state to ForceGraph2DWrapper for hover tracking",
+    "Enhanced nodeCanvasObject to conditionally render text only on hover",
+    "Updated GraphLegend with Collapsible component and defaultOpen={false}",
+    "Improved graph container structure with proper card and border styling"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: [
+    "Imported date-fns format function for thought date formatting",
+    "Updated all graph component positioning to use design system spacing"
+  ]
+}, {
   version: "1.6.2",
   date: "2025-10-17",
   features: [

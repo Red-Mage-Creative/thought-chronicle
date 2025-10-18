@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 export const GraphLegend = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const colorMap: Record<string, string> = {
     'pc': '#3b82f6',
@@ -21,7 +21,7 @@ export const GraphLegend = () => {
   };
 
   return (
-    <Card className="absolute top-4 left-4 w-64 z-10 bg-background/95 backdrop-blur">
+    <Card className="absolute top-6 left-6 w-64 z-10 bg-background/95 backdrop-blur">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader className="p-4 pb-2">
           <CollapsibleTrigger className="flex items-center justify-between w-full">

@@ -8,6 +8,7 @@ import { generateSampleCampaignData } from '@/utils/graphSampleData';
 import { GraphControls } from './GraphControls';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 interface ForceGraph2DWrapperProps {
   campaign: Campaign | null;
@@ -32,6 +33,7 @@ export const ForceGraph2DWrapper = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [hoveredNode, setHoveredNode] = useState<any>(null);
 
   // Use sample data if requested or if no real data exists
   const actualData = useSampleData || (!campaign && entities.length === 0) 
@@ -243,12 +245,22 @@ export const ForceGraph2DWrapper = ({
           ctx.textBaseline = 'middle';
           ctx.fillText(getIconGlyph(node), node.x, node.y);
           
-          // Draw label below if zoomed in enough
-          if (globalScale > 0.8) {
+          // Draw label ONLY on hover
+          if (hoveredNode && hoveredNode.id === node.id) {
             ctx.fillStyle = getNodeColor(node);
-            ctx.font = `${Math.max(10, 10 / globalScale)}px Sans-Serif`;
+            ctx.font = `${Math.max(12, 12 / globalScale)}px Sans-Serif`;
             ctx.textAlign = 'center';
-            ctx.fillText(node.label, node.x, node.y + size + 8);
+            
+            let labelText = node.label;
+            
+            // For thought nodes, show creation date instead of content
+            if (node.data?.type === 'thought' && node.data?.originalData?.timestamp) {
+              const thought = node.data.originalData as LocalThought;
+              labelText = format(thought.timestamp, 'MMM d, yyyy');
+            }
+            
+            // Full text, no truncation
+            ctx.fillText(labelText, node.x, node.y + size + 10);
           }
         }}
         nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
@@ -287,6 +299,7 @@ export const ForceGraph2DWrapper = ({
         linkDirectionalParticles={0}
         onNodeClick={handleNodeClick}
         onNodeHover={(node) => {
+          setHoveredNode(node);
           if (node) {
             document.body.style.cursor = 'pointer';
           } else {
