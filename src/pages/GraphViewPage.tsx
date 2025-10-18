@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react';
 import { useEntities } from '@/hooks/useEntities';
 import { useThoughts } from '@/hooks/useThoughts';
 import { campaignService } from '@/services/campaignService';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -88,94 +89,94 @@ export default function GraphViewPage() {
     const graphData = transformToGraphData(currentCampaign, entities, thoughts);
     
     return (
-      <div className="h-screen w-full relative bg-background">
-        <div className="absolute top-4 left-4 z-10">
-          <Button onClick={() => setShowSimpleList(false)} variant="outline" size="sm">
-            <Network className="h-4 w-4 mr-2" />
-            Back to Graph View
-          </Button>
+      <AppLayout variant="wide">
+        <div className="relative w-full h-[calc(100vh-16rem)]">
+          <div className="absolute top-4 left-4 z-10">
+            <Button onClick={() => setShowSimpleList(false)} variant="outline" size="sm">
+              <Network className="h-4 w-4 mr-2" />
+              Back to Graph View
+            </Button>
+          </div>
+          <SimpleGraphList nodes={graphData.nodes} edges={graphData.edges} />
         </div>
-        <SimpleGraphList nodes={graphData.nodes} edges={graphData.edges} />
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-7xl mx-auto p-6">
-        <div className="relative w-full h-[calc(100vh-8rem)] bg-card border rounded">
-          {/* Graph Controls */}
-          <div className="absolute top-6 left-6 z-10 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
-        <div className="flex items-center gap-2">
-          <Settings className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Graph Options</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Switch id="safe-mode" checked={safeMode} onCheckedChange={setSafeMode} />
-          <Label htmlFor="safe-mode" className="text-xs cursor-pointer">
-            Safe Mode (reduce animation)
-          </Label>
-        </div>
-        
-        {!hasData && (
+    <AppLayout variant="wide">
+      <div className="relative w-full h-[calc(100vh-16rem)] bg-card border rounded">
+        {/* Graph Settings Panel */}
+        <div className="absolute bottom-6 left-6 z-20 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <div className="flex items-center gap-2">
-            <Switch id="sample-data" checked={useSampleData} onCheckedChange={setUseSampleData} />
-            <Label htmlFor="sample-data" className="text-xs cursor-pointer flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              Sample Data
+            <Settings className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Graph Options</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Switch id="safe-mode" checked={safeMode} onCheckedChange={setSafeMode} />
+            <Label htmlFor="safe-mode" className="text-xs cursor-pointer">
+              Safe Mode (reduce animation)
             </Label>
           </div>
-        )}
-        
-        {useSampleData && (
-          <Badge variant="secondary" className="text-xs gap-1">
-            <Sparkles className="h-3 w-3" />
-            Viewing Sample Data
-          </Badge>
-        )}
-        
-        <div className="pt-2 border-t">
-          <Button 
-            onClick={() => setShowSimpleList(true)} 
-            variant="ghost" 
-            size="sm"
-            className="w-full justify-start text-xs"
-          >
-            <List className="h-3 w-3 mr-2" />
-            Switch to List View
-          </Button>
-        </div>
-      </div>
-
-      <GraphErrorBoundary 
-        onFallbackRequested={() => setShowSimpleList(true)}
-        onSampleDataRequested={() => setUseSampleData(true)}
-      >
-        <Suspense fallback={
-          <div className="h-full flex items-center justify-center">
-            <div className="animate-pulse text-center space-y-4">
-              <Network className="h-16 w-16 text-muted-foreground mx-auto" />
-              <p className="text-muted-foreground">Rendering graph...</p>
-              <p className="text-xs text-muted-foreground/60">
-                {useSampleData ? 'Loading sample data' : `Preparing ${entities.length} entities and ${thoughts.length} thoughts`}
-              </p>
+          
+          {!hasData && (
+            <div className="flex items-center gap-2">
+              <Switch id="sample-data" checked={useSampleData} onCheckedChange={setUseSampleData} />
+              <Label htmlFor="sample-data" className="text-xs cursor-pointer flex items-center gap-1">
+                <Sparkles className="h-3 w-3" />
+                Sample Data
+              </Label>
             </div>
+          )}
+          
+          {useSampleData && (
+            <Badge variant="secondary" className="text-xs gap-1">
+              <Sparkles className="h-3 w-3" />
+              Viewing Sample Data
+            </Badge>
+          )}
+          
+          <div className="pt-2 border-t">
+            <Button 
+              onClick={() => setShowSimpleList(true)} 
+              variant="ghost" 
+              size="sm"
+              className="w-full justify-start text-xs"
+            >
+              <List className="h-3 w-3 mr-2" />
+              Switch to List View
+            </Button>
           </div>
-        }>
-          <GraphLegend />
-          <ForceGraph2DWrapper 
-            campaign={currentCampaign} 
-            entities={entities} 
-            thoughts={thoughts}
-            safeMode={safeMode}
-            useSampleData={useSampleData}
-            mode="campaign"
-          />
-        </Suspense>
-      </GraphErrorBoundary>
         </div>
+
+        <GraphErrorBoundary 
+          onFallbackRequested={() => setShowSimpleList(true)}
+          onSampleDataRequested={() => setUseSampleData(true)}
+        >
+          <Suspense fallback={
+            <div className="h-full flex items-center justify-center">
+              <div className="animate-pulse text-center space-y-4">
+                <Network className="h-16 w-16 text-muted-foreground mx-auto" />
+                <p className="text-muted-foreground">Rendering graph...</p>
+                <p className="text-xs text-muted-foreground/60">
+                  {useSampleData ? 'Loading sample data' : `Preparing ${entities.length} entities and ${thoughts.length} thoughts`}
+                </p>
+              </div>
+            </div>
+          }>
+            <GraphLegend />
+            <ForceGraph2DWrapper 
+              campaign={currentCampaign} 
+              entities={entities} 
+              thoughts={thoughts}
+              safeMode={safeMode}
+              useSampleData={useSampleData}
+              mode="campaign"
+            />
+          </Suspense>
+        </GraphErrorBoundary>
       </div>
-    </div>
+    </AppLayout>
   );
 }

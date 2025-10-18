@@ -18,6 +18,32 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.4",
+  date: "2025-01-18",
+  features: [
+    "Design system Lucide icons render in graph nodes using HTML overlay",
+    "Thought nodes display creation date instead of truncated content"
+  ],
+  improvements: [
+    "Graph page margins align with header and footer using AppLayout",
+    "Legend and controls positioned to prevent overlap (both on right side)",
+    "Settings panel moved to bottom-left for better layout balance"
+  ],
+  fixes: [
+    "Eliminated graph re-rendering jitter on hover using ref-based state",
+    "Graph settings and legend no longer overlap each other",
+    "Proper z-indexing for all graph overlay elements"
+  ],
+  docs: [],
+  refactor: [
+    "Removed emoji icon rendering in favor of React component icons",
+    "Replaced useState with useRef for hover tracking to prevent re-renders",
+    "Created GraphNodeOverlay component for icon positioning",
+    "GraphViewPage now uses AppLayout for consistent margins"
+  ],
+  tests: [],
+  chores: []
+}, {
   version: "1.6.3",
   date: "2025-10-18",
   features: [

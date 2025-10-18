@@ -3,9 +3,10 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
-import { transformToGraphData, transformToEntityCenteredGraph, getNodeColor, getIconGlyph, validateGraphData } from '@/utils/graphDataTransform';
+import { transformToGraphData, transformToEntityCenteredGraph, getNodeColor, validateGraphData } from '@/utils/graphDataTransform';
 import { generateSampleCampaignData } from '@/utils/graphSampleData';
 import { GraphControls } from './GraphControls';
+import { GraphNodeOverlay } from './GraphNodeOverlay';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -31,9 +32,9 @@ export const ForceGraph2DWrapper = ({
 }: ForceGraph2DWrapperProps) => {
   const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const hoveredNodeRef = useRef<any>(null);
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
-  const [hoveredNode, setHoveredNode] = useState<any>(null);
 
   // Use sample data if requested or if no real data exists
   const actualData = useSampleData || (!campaign && entities.length === 0) 
@@ -220,6 +221,7 @@ export const ForceGraph2DWrapper = ({
 
   return (
     <div ref={containerRef} className="relative w-full h-full bg-background">
+      <GraphNodeOverlay graphRef={graphRef} nodes={graphData.nodes} />
       <ForceGraph2D
         ref={graphRef}
         width={dimensions.width}
@@ -239,14 +241,8 @@ export const ForceGraph2DWrapper = ({
           ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
           ctx.fill();
           
-          // Draw icon emoji
-          ctx.font = `${size * 1.2}px Arial`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(getIconGlyph(node), node.x, node.y);
-          
           // Draw label ONLY on hover
-          if (hoveredNode && hoveredNode.id === node.id) {
+          if (hoveredNodeRef.current && hoveredNodeRef.current.id === node.id) {
             ctx.fillStyle = getNodeColor(node);
             ctx.font = `${Math.max(12, 12 / globalScale)}px Sans-Serif`;
             ctx.textAlign = 'center';
@@ -299,11 +295,15 @@ export const ForceGraph2DWrapper = ({
         linkDirectionalParticles={0}
         onNodeClick={handleNodeClick}
         onNodeHover={(node) => {
-          setHoveredNode(node);
+          hoveredNodeRef.current = node;
           if (node) {
             document.body.style.cursor = 'pointer';
           } else {
             document.body.style.cursor = 'default';
+          }
+          // Force canvas redraw without React re-render
+          if (graphRef.current) {
+            graphRef.current.refresh();
           }
         }}
         cooldownTicks={safeMode ? 0 : 100}
