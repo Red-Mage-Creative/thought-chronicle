@@ -18,6 +18,58 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.5",
+  date: "2025-01-19",
+  features: [
+    "Canvas-native icon rendering - Lucide React icons rendered directly in canvas for perfect synchronization",
+    "Full-viewport graph mode - immersive graph experience without duplicate header/footer",
+    "Interactive hover tooltips - rich entity and thought details appear on hover",
+    "Advanced filtering system - filter by entity types, relationship types, and search",
+    "Node selection panel - detailed information slides in when clicking nodes",
+    "Right-click context menu - quick actions on entities and thoughts",
+    "Connected node highlighting - hover over nodes to see their relationships glow",
+    "Dynamic node sizing - node sizes reflect connection importance automatically",
+    "Animated link particles - thought-entity connections show flowing particles"
+  ],
+  improvements: [
+    "Eliminated icon/node sync lag by rendering icons directly in canvas",
+    "Full-screen graph layout with minimal header for immersive experience",
+    "Smart tooltip positioning to avoid screen edges",
+    "Collapsible filter panel with entity type counts",
+    "Selection panel shows attributes, description, and connected entities",
+    "Graph controls positioned for optimal ergonomics",
+    "Performance optimized with icon caching and memoization",
+    "Node sizes dynamically calculated based on connection count",
+    "Relationship type filtering (parent, linked, mention)"
+  ],
+  fixes: [
+    "Fixed icon synchronization - icons move as one unified layer with nodes",
+    "Fixed layout duplication - graph view now has dedicated full-viewport mode",
+    "Fixed React rendering in icon cache using proper DOM API",
+    "Fixed entity description field usage in selection panel"
+  ],
+  docs: [],
+  refactor: [
+    "Created graphIconCache utility for converting React icons to canvas images",
+    "Created GraphHeader component for minimal graph-specific header",
+    "Created GraphTooltip component for rich hover information",
+    "Created GraphFilterPanel component with comprehensive filtering",
+    "Created GraphSelectionPanel component for node details",
+    "Created GraphContextMenu component for right-click actions",
+    "Removed GraphNodeOverlay (replaced by canvas-native icons)",
+    "Added calculateNodeMetrics utility for dynamic sizing",
+    "Added getConnectedNodes utility for relationship highlighting",
+    "Refactored ForceGraph2DWrapper with full interactivity system",
+    "Refactored GraphViewPage to full-viewport layout without AppLayout"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: [
+    "Updated graph type definitions with enhanced interactivity support",
+    "Improved graph data transformation pipeline with filtering",
+    "Enhanced error handling in icon cache creation"
+  ]
+}, {
   version: "1.6.4",
   date: "2025-01-18",
   features: [

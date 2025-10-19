@@ -2,16 +2,14 @@ import { lazy, Suspense, useState } from 'react';
 import { useEntities } from '@/hooks/useEntities';
 import { useThoughts } from '@/hooks/useThoughts';
 import { campaignService } from '@/services/campaignService';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Network, Settings, Sparkles, List } from 'lucide-react';
+import { Network, Settings, Sparkles } from 'lucide-react';
 import { GraphErrorBoundary } from '@/components/graph/GraphErrorBoundary';
-import { SimpleGraphList } from '@/components/graph/SimpleGraphList';
-import { transformToGraphData } from '@/utils/graphDataTransform';
+import { GraphHeader } from '@/components/graph/GraphHeader';
 
 const ForceGraph2DWrapper = lazy(() => import('@/components/graph/ForceGraph2DWrapper').then(m => ({ default: m.ForceGraph2DWrapper })));
 const GraphLegend = lazy(() => import('@/components/graph/GraphLegend').then(m => ({ default: m.GraphLegend })));
@@ -27,13 +25,12 @@ export default function GraphViewPage() {
   // Graph rendering options
   const [safeMode, setSafeMode] = useState(false);
   const [useSampleData, setUseSampleData] = useState(false);
-  const [showSimpleList, setShowSimpleList] = useState(false);
   
   const hasData = currentCampaign && (entities.length > 0 || thoughts.length > 0);
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-center space-y-4">
           <Network className="h-16 w-16 text-muted-foreground mx-auto" />
           <p className="text-muted-foreground">Loading campaign data...</p>
@@ -44,7 +41,7 @@ export default function GraphViewPage() {
 
   if (!currentCampaign) {
     return (
-      <div className="h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen flex items-center justify-center p-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
             <Network className="h-16 w-16 text-muted-foreground" />
@@ -59,9 +56,9 @@ export default function GraphViewPage() {
   }
 
   // Show sample data prompt if no entities/thoughts
-  if (!hasData && !useSampleData && !showSimpleList) {
+  if (!hasData && !useSampleData) {
     return (
-      <div className="h-screen flex items-center justify-center p-6">
+      <div className="min-h-screen flex items-center justify-center p-6">
         <Card className="max-w-lg">
           <CardContent className="flex flex-col items-center justify-center py-12 space-y-4">
             <Network className="h-16 w-16 text-muted-foreground" />
@@ -84,39 +81,22 @@ export default function GraphViewPage() {
     );
   }
 
-  // Simple list fallback view
-  if (showSimpleList) {
-    const graphData = transformToGraphData(currentCampaign, entities, thoughts);
-    
-    return (
-      <AppLayout variant="wide">
-        <div className="relative w-full h-[calc(100vh-16rem)]">
-          <div className="absolute top-4 left-4 z-10">
-            <Button onClick={() => setShowSimpleList(false)} variant="outline" size="sm">
-              <Network className="h-4 w-4 mr-2" />
-              Back to Graph View
-            </Button>
-          </div>
-          <SimpleGraphList nodes={graphData.nodes} edges={graphData.edges} />
-        </div>
-      </AppLayout>
-    );
-  }
-
   return (
-    <AppLayout variant="wide">
-      <div className="relative w-full h-[calc(100vh-16rem)] bg-card border rounded">
+    <div className="min-h-screen bg-background">
+      <GraphHeader campaign={currentCampaign} />
+      
+      <div className="pt-14 h-screen">
         {/* Graph Settings Panel */}
         <div className="absolute bottom-6 left-6 z-20 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Graph Options</span>
+            <span className="text-sm font-medium">Options</span>
           </div>
           
           <div className="flex items-center gap-2">
             <Switch id="safe-mode" checked={safeMode} onCheckedChange={setSafeMode} />
             <Label htmlFor="safe-mode" className="text-xs cursor-pointer">
-              Safe Mode (reduce animation)
+              Safe Mode
             </Label>
           </div>
           
@@ -133,25 +113,13 @@ export default function GraphViewPage() {
           {useSampleData && (
             <Badge variant="secondary" className="text-xs gap-1">
               <Sparkles className="h-3 w-3" />
-              Viewing Sample Data
+              Sample Data
             </Badge>
           )}
-          
-          <div className="pt-2 border-t">
-            <Button 
-              onClick={() => setShowSimpleList(true)} 
-              variant="ghost" 
-              size="sm"
-              className="w-full justify-start text-xs"
-            >
-              <List className="h-3 w-3 mr-2" />
-              Switch to List View
-            </Button>
-          </div>
         </div>
 
         <GraphErrorBoundary 
-          onFallbackRequested={() => setShowSimpleList(true)}
+          onFallbackRequested={() => window.location.href = '/entities'}
           onSampleDataRequested={() => setUseSampleData(true)}
         >
           <Suspense fallback={
@@ -177,6 +145,6 @@ export default function GraphViewPage() {
           </Suspense>
         </GraphErrorBoundary>
       </div>
-    </AppLayout>
+    </div>
   );
 }

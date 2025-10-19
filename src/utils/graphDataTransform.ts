@@ -667,3 +667,61 @@ export const transformToEntityCenteredGraph = (
   
   return { nodes, edges };
 };
+
+/**
+ * Calculate node metrics for dynamic sizing and importance
+ * Returns connection counts and suggested node sizes
+ */
+export const calculateNodeMetrics = (
+  nodes: GraphNode[],
+  edges: GraphEdge[]
+): Map<string, { connectionCount: number; size: number }> => {
+  const metrics = new Map<string, { connectionCount: number; size: number }>();
+
+  // Count connections for each node
+  nodes.forEach(node => {
+    let connectionCount = 0;
+    
+    // Count edges where this node is source or target
+    edges.forEach(edge => {
+      if (edge.source === node.id || edge.target === node.id) {
+        connectionCount++;
+      }
+    });
+
+    // Calculate size based on node type and connections
+    let baseSize = 6; // Default entity size
+    if (node.data.type === 'campaign') {
+      baseSize = 10;
+    } else if (node.data.type === 'thought') {
+      baseSize = 4;
+    }
+
+    // Add size based on connections (max 10 additional)
+    const size = Math.min(baseSize + (connectionCount * 0.5), baseSize + 10);
+
+    metrics.set(node.id, { connectionCount, size });
+  });
+
+  return metrics;
+};
+
+/**
+ * Get all nodes connected to a given node
+ */
+export const getConnectedNodes = (
+  nodeId: string,
+  edges: GraphEdge[]
+): Set<string> => {
+  const connected = new Set<string>();
+
+  edges.forEach(edge => {
+    if (edge.source === nodeId) {
+      connected.add(edge.target);
+    } else if (edge.target === nodeId) {
+      connected.add(edge.source);
+    }
+  });
+
+  return connected;
+};

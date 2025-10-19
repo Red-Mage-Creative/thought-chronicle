@@ -1,15 +1,29 @@
-import { useRef, useCallback, useEffect, useState } from 'react';
+import { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { LocalEntity } from '@/types/entities';
 import { LocalThought } from '@/types/thoughts';
 import { Campaign } from '@/types/campaigns';
-import { transformToGraphData, transformToEntityCenteredGraph, getNodeColor, validateGraphData } from '@/utils/graphDataTransform';
+import { 
+  transformToGraphData, 
+  transformToEntityCenteredGraph, 
+  getNodeColor, 
+  validateGraphData,
+  calculateNodeMetrics,
+  getConnectedNodes,
+  GraphNode,
+  GraphEdge
+} from '@/utils/graphDataTransform';
 import { generateSampleCampaignData } from '@/utils/graphSampleData';
 import { GraphControls } from './GraphControls';
-import { GraphNodeOverlay } from './GraphNodeOverlay';
+import { GraphTooltip } from './GraphTooltip';
+import { GraphFilterPanel, GraphFilters } from './GraphFilterPanel';
+import { GraphSelectionPanel } from './GraphSelectionPanel';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { createIconCache, drawIcon } from '@/utils/graphIconCache';
+import { EntityType } from '@/types/entities';
+import { getAllEntityTypeValues } from '@/config/entityTypeConfig';
 
 interface ForceGraph2DWrapperProps {
   campaign: Campaign | null;
@@ -35,19 +49,31 @@ export const ForceGraph2DWrapper = ({
   const hoveredNodeRef = useRef<any>(null);
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [iconCache, setIconCache] = useState<Map<EntityType, HTMLImageElement>>(new Map());
+  
+  // Interactivity state
+  const [tooltipData, setTooltipData] = useState<{node: GraphNode, x: number, y: number} | null>(null);
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [highlightedNodes, setHighlightedNodes] = useState<Set<string>>(new Set());
+  const [filters, setFilters] = useState<GraphFilters>({
+    entityTypes: new Set(getAllEntityTypeValues()),
+    relationshipTypes: new Set(['parent', 'linked', 'mention']),
+    searchQuery: '',
+    showThoughts: true
+  });
 
   // Use sample data if requested or if no real data exists
   const actualData = useSampleData || (!campaign && entities.length === 0) 
     ? generateSampleCampaignData()
     : { campaign, entities, thoughts };
 
-  console.log('[ForceGraph2DWrapper] Rendering with:', {
-    campaign: actualData.campaign?.name,
-    entitiesCount: actualData.entities.length,
-    thoughtsCount: actualData.thoughts.length,
-    safeMode,
-    useSampleData: useSampleData || (!campaign && entities.length === 0)
-  });
+  // Create icon cache on mount
+  useEffect(() => {
+    createIconCache().then(cache => {
+      setIconCache(cache);
+      console.log('[ForceGraph2DWrapper] Icon cache ready');
+    });
+  }, []);
 
   // Update dimensions when container size changes
   useEffect(() => {
@@ -70,79 +96,127 @@ export const ForceGraph2DWrapper = ({
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Transform data in three steps: GraphData -> validate -> ForceGraphData
-  let graphData;
-  try {
-    // Step 1: Transform to GraphData (with edges) based on mode
+  // Transform and filter data
+  const { graphData, nodeMetrics, entityCounts } = useMemo(() => {
     let intermediateData;
-    if (mode === 'entity' && centerEntityId) {
-      intermediateData = transformToEntityCenteredGraph(
-        centerEntityId,
-        actualData.entities,
-        actualData.thoughts
-      );
-    } else {
-      intermediateData = transformToGraphData(
-        actualData.campaign, 
-        actualData.entities, 
-        actualData.thoughts
-      );
-    }
     
-    // Step 2: Validate the GraphData structure
-    const validation = validateGraphData(intermediateData);
-    if (!validation.isValid) {
-      console.error('[ForceGraph2DWrapper] Validation failed:', validation.errors);
-      throw new Error(`Invalid graph data: ${validation.errors.join(', ')}`);
-    }
-    
-    // Step 3: Convert edges to links for react-force-graph
-    graphData = {
-      nodes: intermediateData.nodes.map(node => {
-        const originalData = node.data.originalData;
-        let entityId: string | undefined;
-        let thoughtId: string | undefined;
-        
-        if (node.data.type === 'entity' && 'id' in originalData) {
-          entityId = originalData.id || (originalData as LocalEntity).localId;
-        } else if (node.data.type === 'thought' && 'id' in originalData) {
-          thoughtId = originalData.id || (originalData as LocalThought).localId;
-        }
-        
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            entityId,
-            thoughtId
-          }
-        };
-      }),
-      links: intermediateData.edges.map(edge => ({
-        source: edge.source,
-        target: edge.target,
-        label: edge.label,
-        data: edge.data
-      }))
-    };
+    try {
+      // Step 1: Transform to GraphData based on mode
+      if (mode === 'entity' && centerEntityId) {
+        intermediateData = transformToEntityCenteredGraph(
+          centerEntityId,
+          actualData.entities,
+          actualData.thoughts
+        );
+      } else {
+        intermediateData = transformToGraphData(
+          actualData.campaign, 
+          actualData.entities, 
+          actualData.thoughts
+        );
+      }
 
-    console.log('[ForceGraph2DWrapper] Graph data validated:', {
-      nodesCount: graphData.nodes.length,
-      linksCount: graphData.links.length,
-      warnings: validation.warnings
-    });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[ForceGraph2DWrapper] Error transforming data:', err);
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-4 max-w-lg">
-          <h3 className="text-lg font-semibold text-destructive">Graph Transformation Error</h3>
-          <p className="text-sm text-muted-foreground">{errorMsg}</p>
-        </div>
-      </div>
-    );
-  }
+      // Step 2: Apply filters
+      let filteredNodes = intermediateData.nodes.filter(node => {
+        // Filter by entity type
+        if (node.data.type === 'entity' && node.data.entityType) {
+          if (!filters.entityTypes.has(node.data.entityType as EntityType)) {
+            return false;
+          }
+        }
+
+        // Filter thoughts visibility
+        if (node.data.type === 'thought' && !filters.showThoughts) {
+          return false;
+        }
+
+        // Filter by search query
+        if (filters.searchQuery) {
+          const query = filters.searchQuery.toLowerCase();
+          if (!node.label.toLowerCase().includes(query)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Get valid node IDs after filtering
+      const validNodeIds = new Set(filteredNodes.map(n => n.id));
+
+      // Filter edges based on filtered nodes and relationship types
+      let filteredEdges = intermediateData.edges.filter(edge => {
+        // Only keep edges where both nodes are visible
+        if (!validNodeIds.has(edge.source) || !validNodeIds.has(edge.target)) {
+          return false;
+        }
+
+        // Filter by relationship type
+        if (edge.data.relationshipType) {
+          if (!filters.relationshipTypes.has(edge.data.relationshipType)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Step 3: Validate
+      const validation = validateGraphData({ nodes: filteredNodes, edges: filteredEdges });
+      if (!validation.isValid) {
+        console.error('[ForceGraph2DWrapper] Validation failed:', validation.errors);
+        throw new Error(`Invalid graph data: ${validation.errors.join(', ')}`);
+      }
+
+      // Step 4: Calculate metrics
+      const metrics = calculateNodeMetrics(filteredNodes, filteredEdges);
+
+      // Step 5: Count entities by type for filter UI
+      const counts = new Map<EntityType, number>();
+      actualData.entities.forEach(entity => {
+        counts.set(entity.type as EntityType, (counts.get(entity.type as EntityType) || 0) + 1);
+      });
+
+      // Step 6: Convert to force graph format
+      const forceData = {
+        nodes: filteredNodes.map(node => {
+          const originalData = node.data.originalData;
+          let entityId: string | undefined;
+          let thoughtId: string | undefined;
+          
+          if (node.data.type === 'entity' && 'id' in originalData) {
+            entityId = originalData.id || (originalData as LocalEntity).localId;
+          } else if (node.data.type === 'thought' && 'id' in originalData) {
+            thoughtId = originalData.id || (originalData as LocalThought).localId;
+          }
+          
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              entityId,
+              thoughtId
+            }
+          };
+        }),
+        links: filteredEdges.map(edge => ({
+          source: edge.source,
+          target: edge.target,
+          label: edge.label,
+          data: edge.data
+        }))
+      };
+
+      return { graphData: forceData, nodeMetrics: metrics, entityCounts: counts };
+    } catch (err) {
+      console.error('[ForceGraph2DWrapper] Error:', err);
+      return { 
+        graphData: { nodes: [], links: [] }, 
+        nodeMetrics: new Map(), 
+        entityCounts: new Map() 
+      };
+    }
+  }, [actualData, filters, mode, centerEntityId]);
 
   if (graphData.nodes.length === 0) {
     return (
@@ -150,7 +224,9 @@ export const ForceGraph2DWrapper = ({
         <div className="text-center space-y-2">
           <h3 className="text-lg font-semibold">No Data to Display</h3>
           <p className="text-sm text-muted-foreground">
-            Create entities and thoughts to see them in the graph view.
+            {filters.searchQuery || filters.entityTypes.size < getAllEntityTypeValues().length
+              ? 'Try adjusting your filters'
+              : 'Create entities and thoughts to see them in the graph view'}
           </p>
         </div>
       </div>
@@ -158,8 +234,6 @@ export const ForceGraph2DWrapper = ({
   }
 
   const handleNodeClick = useCallback((node: any) => {
-    console.log('[ForceGraph2DWrapper] Node clicked:', node);
-    
     if (useSampleData || (!campaign && entities.length === 0)) {
       toast({
         title: "Sample Data",
@@ -168,13 +242,41 @@ export const ForceGraph2DWrapper = ({
       return;
     }
 
-    // Navigate to entity or thought detail page
-    if (node.data?.type === 'entity' && node.data?.entityId) {
-      navigate(`/entities/${node.data.entityId}`);
-    } else if (node.data?.type === 'thought' && node.data?.thoughtId) {
-      navigate(`/thoughts/${node.data.thoughtId}/edit`);
+    setSelectedNode(node);
+    setTooltipData(null);
+  }, [useSampleData, campaign, entities.length]);
+
+  const handleNodeHover = useCallback((node: any) => {
+    hoveredNodeRef.current = node;
+    
+    if (node) {
+      document.body.style.cursor = 'pointer';
+      
+      // Calculate screen position for tooltip
+      if (graphRef.current) {
+        const coords = graphRef.current.graph2ScreenCoords(node.x, node.y);
+        setTooltipData({ node, x: coords.x, y: coords.y });
+      }
+
+      // Highlight connected nodes
+      const edges = graphData.links.map(l => ({
+        id: `${l.source}-${l.target}`,
+        source: typeof l.source === 'object' ? (l.source as any).id : l.source,
+        target: typeof l.target === 'object' ? (l.target as any).id : l.target,
+        data: l.data
+      }));
+      const connected = getConnectedNodes(node.id, edges);
+      setHighlightedNodes(connected);
+    } else {
+      document.body.style.cursor = 'default';
+      setTooltipData(null);
+      setHighlightedNodes(new Set());
     }
-  }, [useSampleData, campaign, entities.length, navigate]);
+
+    if (graphRef.current) {
+      graphRef.current.refresh();
+    }
+  }, [graphData.links]);
 
   const handleZoomIn = useCallback(() => {
     if (graphRef.current) {
@@ -219,9 +321,23 @@ export const ForceGraph2DWrapper = ({
     }
   }, [actualData.campaign?.name]);
 
+  // Get connected nodes for selection panel
+  const connectedNodes = useMemo(() => {
+    if (!selectedNode) return [];
+    
+    const edges = graphData.links.map(l => ({
+      id: `${l.source}-${l.target}`,
+      source: typeof l.source === 'object' ? (l.source as any).id : l.source,
+      target: typeof l.target === 'object' ? (l.target as any).id : l.target,
+      data: l.data
+    }));
+    
+    const connectedIds = getConnectedNodes(selectedNode.id, edges);
+    return graphData.nodes.filter(n => connectedIds.has(n.id));
+  }, [selectedNode, graphData]);
+
   return (
     <div ref={containerRef} className="relative w-full h-full bg-background">
-      <GraphNodeOverlay graphRef={graphRef} nodes={graphData.nodes} />
       <ForceGraph2D
         ref={graphRef}
         width={dimensions.width}
@@ -229,11 +345,22 @@ export const ForceGraph2DWrapper = ({
         graphData={graphData}
         nodeLabel={(node: any) => node.label}
         nodeCanvasObject={(node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
-          const size = mode === 'entity' && node.id === `entity:${centerEntityId}` 
-            ? 12 // Center entity larger
+          const metrics = nodeMetrics.get(node.id);
+          const size = metrics?.size || (
+            mode === 'entity' && node.id === `entity:${centerEntityId}` ? 12
             : node.data?.type === 'campaign' ? 10
             : node.data?.type === 'thought' ? 4
-            : 6;
+            : 6
+          );
+          
+          // Add glow for selected/highlighted nodes
+          if (selectedNode?.id === node.id) {
+            ctx.shadowColor = '#3b82f6';
+            ctx.shadowBlur = 20;
+          } else if (highlightedNodes.has(node.id)) {
+            ctx.shadowColor = getNodeColor(node);
+            ctx.shadowBlur = 15;
+          }
           
           // Draw colored circle
           ctx.fillStyle = getNodeColor(node);
@@ -241,7 +368,20 @@ export const ForceGraph2DWrapper = ({
           ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
           ctx.fill();
           
-          // Draw label ONLY on hover
+          // Reset shadow
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+          
+          // Draw icon if cached and entity type
+          if (node.data?.type === 'entity' && node.data?.entityType) {
+            const iconImage = iconCache.get(node.data.entityType as EntityType);
+            if (iconImage) {
+              const iconSize = Math.max(size * 1.2, 12);
+              drawIcon(ctx, iconImage, node.x, node.y, iconSize);
+            }
+          }
+          
+          // Draw label on hover
           if (hoveredNodeRef.current && hoveredNodeRef.current.id === node.id) {
             ctx.fillStyle = getNodeColor(node);
             ctx.font = `${Math.max(12, 12 / globalScale)}px Sans-Serif`;
@@ -249,20 +389,17 @@ export const ForceGraph2DWrapper = ({
             
             let labelText = node.label;
             
-            // For thought nodes, show creation date instead of content
             if (node.data?.type === 'thought' && node.data?.originalData?.timestamp) {
               const thought = node.data.originalData as LocalThought;
               labelText = format(thought.timestamp, 'MMM d, yyyy');
             }
             
-            // Full text, no truncation
             ctx.fillText(labelText, node.x, node.y + size + 10);
           }
         }}
         nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
-          const size = mode === 'entity' && node.id === `entity:${centerEntityId}` 
-            ? 12 : node.data?.type === 'campaign' ? 10
-            : node.data?.type === 'thought' ? 4 : 6;
+          const metrics = nodeMetrics.get(node.id);
+          const size = metrics?.size || 6;
           ctx.fillStyle = color;
           ctx.beginPath();
           ctx.arc(node.x, node.y, size + 2, 0, 2 * Math.PI);
@@ -270,9 +407,9 @@ export const ForceGraph2DWrapper = ({
         }}
         linkColor={(link: any) => {
           const type = link.data?.relationshipType;
-          if (type === 'parent') return '#8b5cf6'; // Violet - hierarchical
-          if (type === 'linked') return '#06b6d4'; // Cyan - associative
-          if (type === 'mention') return '#94a3b8'; // Slate - thought connection
+          if (type === 'parent') return '#8b5cf6';
+          if (type === 'linked') return '#06b6d4';
+          if (type === 'mention') return '#94a3b8';
           return '#94a3b8';
         }}
         linkWidth={(link: any) => {
@@ -283,29 +420,23 @@ export const ForceGraph2DWrapper = ({
         }}
         linkLineDash={(link: any) => {
           const type = link.data?.relationshipType;
-          if (type === 'linked') return [5, 5]; // Dashed for peer relationships
+          if (type === 'linked') return [5, 5];
           return null;
         }}
         linkDirectionalArrowLength={(link: any) => {
           const type = link.data?.relationshipType;
-          if (type === 'parent') return 6; // Arrow to show hierarchy
+          if (type === 'parent') return 6;
           return 0;
         }}
         linkDirectionalArrowRelPos={1}
-        linkDirectionalParticles={0}
-        onNodeClick={handleNodeClick}
-        onNodeHover={(node) => {
-          hoveredNodeRef.current = node;
-          if (node) {
-            document.body.style.cursor = 'pointer';
-          } else {
-            document.body.style.cursor = 'default';
-          }
-          // Force canvas redraw without React re-render
-          if (graphRef.current) {
-            graphRef.current.refresh();
-          }
+        linkDirectionalParticles={(link: any) => {
+          const type = link.data?.relationshipType;
+          if (type === 'mention') return 2;
+          return 0;
         }}
+        linkDirectionalParticleSpeed={0.005}
+        onNodeClick={handleNodeClick}
+        onNodeHover={handleNodeHover}
         cooldownTicks={safeMode ? 0 : 100}
         d3AlphaDecay={safeMode ? 1 : 0.0228}
         d3VelocityDecay={safeMode ? 1 : 0.4}
@@ -313,6 +444,7 @@ export const ForceGraph2DWrapper = ({
         enableZoomInteraction
         enablePanInteraction
       />
+      
       <GraphControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
@@ -320,6 +452,20 @@ export const ForceGraph2DWrapper = ({
         onReset={handleReset}
         onExportPNG={handleExportPNG}
         disabled={false}
+      />
+      
+      <GraphTooltip node={tooltipData?.node || null} position={tooltipData} />
+      
+      <GraphFilterPanel
+        filters={filters}
+        onFiltersChange={setFilters}
+        entityCounts={entityCounts}
+      />
+      
+      <GraphSelectionPanel
+        selectedNode={selectedNode}
+        onClose={() => setSelectedNode(null)}
+        connectedNodes={connectedNodes}
       />
     </div>
   );
