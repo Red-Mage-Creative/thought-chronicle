@@ -1,31 +1,33 @@
-import { lazy, Suspense, useState } from 'react';
-import { useEntities } from '@/hooks/useEntities';
-import { useThoughts } from '@/hooks/useThoughts';
-import { campaignService } from '@/services/campaignService';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Network, Settings, Sparkles } from 'lucide-react';
-import { GraphErrorBoundary } from '@/components/graph/GraphErrorBoundary';
-import { GraphHeader } from '@/components/graph/GraphHeader';
+import { lazy, Suspense, useState } from "react";
+import { useEntities } from "@/hooks/useEntities";
+import { useThoughts } from "@/hooks/useThoughts";
+import { campaignService } from "@/services/campaignService";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Network, Settings, Sparkles } from "lucide-react";
+import { GraphErrorBoundary } from "@/components/graph/GraphErrorBoundary";
+import { GraphHeader } from "@/components/graph/GraphHeader";
 
-const ForceGraph2DWrapper = lazy(() => import('@/components/graph/ForceGraph2DWrapper').then(m => ({ default: m.ForceGraph2DWrapper })));
-const GraphLegend = lazy(() => import('@/components/graph/GraphLegend').then(m => ({ default: m.GraphLegend })));
+const ForceGraph2DWrapper = lazy(() =>
+  import("@/components/graph/ForceGraph2DWrapper").then((m) => ({ default: m.ForceGraph2DWrapper })),
+);
+const GraphLegend = lazy(() => import("@/components/graph/GraphLegend").then((m) => ({ default: m.GraphLegend })));
 
 export default function GraphViewPage() {
   const { entities, isLoading: entitiesLoading } = useEntities();
   const { thoughts, isLoading: thoughtsLoading } = useThoughts();
-  
+
   const currentCampaign = campaignService.getCurrentCampaign();
 
   const isLoading = entitiesLoading || thoughtsLoading;
-  
+
   // Graph rendering options
   const [safeMode, setSafeMode] = useState(false);
   const [useSampleData, setUseSampleData] = useState(false);
-  
+
   const hasData = currentCampaign && (entities.length > 0 || thoughts.length > 0);
 
   if (isLoading) {
@@ -64,14 +66,15 @@ export default function GraphViewPage() {
             <Network className="h-16 w-16 text-muted-foreground" />
             <h3 className="text-lg font-semibold">No Data Yet</h3>
             <p className="text-sm text-muted-foreground text-center">
-              Your campaign doesn't have any entities or thoughts yet. Try viewing sample data to see how the graph works.
+              Your campaign doesn't have any entities or thoughts yet. Try viewing sample data to see how the graph
+              works.
             </p>
             <div className="flex gap-2">
               <Button onClick={() => setUseSampleData(true)} variant="default">
                 <Sparkles className="h-4 w-4 mr-2" />
                 Try Sample Data
               </Button>
-              <Button onClick={() => window.location.href = '/entities/create'} variant="outline">
+              <Button onClick={() => (window.location.href = "/entities/create")} variant="outline">
                 Create First Entity
               </Button>
             </div>
@@ -83,8 +86,9 @@ export default function GraphViewPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <GraphHeader campaign={currentCampaign} />
-      
+      {/* Graph Settings Panel 
+      <GraphHeader campaign={currentCampaign} /> */}
+
       <div className="pt-14 h-screen">
         {/* Graph Settings Panel */}
         <div className="absolute bottom-6 left-6 z-20 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
@@ -92,14 +96,14 @@ export default function GraphViewPage() {
             <Settings className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Options</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Switch id="safe-mode" checked={safeMode} onCheckedChange={setSafeMode} />
             <Label htmlFor="safe-mode" className="text-xs cursor-pointer">
               Safe Mode
             </Label>
           </div>
-          
+
           {!hasData && (
             <div className="flex items-center gap-2">
               <Switch id="sample-data" checked={useSampleData} onCheckedChange={setUseSampleData} />
@@ -109,7 +113,7 @@ export default function GraphViewPage() {
               </Label>
             </div>
           )}
-          
+
           {useSampleData && (
             <Badge variant="secondary" className="text-xs gap-1">
               <Sparkles className="h-3 w-3" />
@@ -118,25 +122,29 @@ export default function GraphViewPage() {
           )}
         </div>
 
-        <GraphErrorBoundary 
-          onFallbackRequested={() => window.location.href = '/entities'}
+        <GraphErrorBoundary
+          onFallbackRequested={() => (window.location.href = "/entities")}
           onSampleDataRequested={() => setUseSampleData(true)}
         >
-          <Suspense fallback={
-            <div className="h-full flex items-center justify-center">
-              <div className="animate-pulse text-center space-y-4">
-                <Network className="h-16 w-16 text-muted-foreground mx-auto" />
-                <p className="text-muted-foreground">Rendering graph...</p>
-                <p className="text-xs text-muted-foreground/60">
-                  {useSampleData ? 'Loading sample data' : `Preparing ${entities.length} entities and ${thoughts.length} thoughts`}
-                </p>
+          <Suspense
+            fallback={
+              <div className="h-full flex items-center justify-center">
+                <div className="animate-pulse text-center space-y-4">
+                  <Network className="h-16 w-16 text-muted-foreground mx-auto" />
+                  <p className="text-muted-foreground">Rendering graph...</p>
+                  <p className="text-xs text-muted-foreground/60">
+                    {useSampleData
+                      ? "Loading sample data"
+                      : `Preparing ${entities.length} entities and ${thoughts.length} thoughts`}
+                  </p>
+                </div>
               </div>
-            </div>
-          }>
+            }
+          >
             <GraphLegend />
-            <ForceGraph2DWrapper 
-              campaign={currentCampaign} 
-              entities={entities} 
+            <ForceGraph2DWrapper
+              campaign={currentCampaign}
+              entities={entities}
               thoughts={thoughts}
               safeMode={safeMode}
               useSampleData={useSampleData}
