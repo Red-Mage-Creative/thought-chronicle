@@ -32,7 +32,7 @@ export default function GraphViewPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[120vh] flex items-center justify-center">
         <div className="animate-pulse text-center space-y-4">
           <Network className="h-16 w-16 text-muted-foreground mx-auto" />
           <p className="text-muted-foreground">Loading campaign data...</p>
