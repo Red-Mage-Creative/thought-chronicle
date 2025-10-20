@@ -18,6 +18,21 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.16",
+  date: "2025-10-20",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Restored graph control panel display (was created but not rendered)",
+    "Control panel now positioned on left side with all accordion sections",
+    "All three sections (Filters, Legend, Options) default to collapsed"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.15",
   date: "2025-10-20",
   features: [],

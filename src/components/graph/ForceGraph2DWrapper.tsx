@@ -27,6 +27,8 @@ interface ForceGraph2DWrapperProps {
   campaign: Campaign | null;
   entities: LocalEntity[];
   thoughts: LocalThought[];
+  filters: GraphFilters;
+  onFiltersChange: (filters: GraphFilters) => void;
   safeMode?: boolean;
   useSampleData?: boolean;
   onSafeModeChange?: (enabled: boolean) => void;
@@ -38,7 +40,9 @@ interface ForceGraph2DWrapperProps {
 export const ForceGraph2DWrapper = ({ 
   campaign, 
   entities, 
-  thoughts, 
+  thoughts,
+  filters,
+  onFiltersChange,
   safeMode = false,
   useSampleData = false,
   onSafeModeChange,
@@ -59,12 +63,6 @@ export const ForceGraph2DWrapper = ({
   // Interactivity state
   const [tooltipData, setTooltipData] = useState<{node: GraphNode, x: number, y: number} | null>(null);
   const [highlightedNodes, setHighlightedNodes] = useState<Set<string>>(new Set());
-  const [filters, setFilters] = useState<GraphFilters>({
-    entityTypes: new Set(getAllEntityTypeValues()),
-    relationshipTypes: new Set(['parent', 'linked', 'mention']),
-    searchQuery: '',
-    showThoughts: true
-  });
 
   // Use sample data if requested or if no real data exists
   const actualData = useMemo(() => {
@@ -455,22 +453,24 @@ export const ForceGraph2DWrapper = ({
       />
       
       {mode === 'campaign' && onSafeModeChange && onUseSampleDataChange && (
-        <GraphControlPanel
-          filters={filters}
-          onFiltersChange={setFilters}
-          entityCounts={entityCounts}
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onFitView={handleFitView}
-          onReset={handleReset}
-          onExportPNG={handleExportPNG}
-          disabled={false}
-          safeMode={safeMode}
-          onSafeModeChange={onSafeModeChange}
-          useSampleData={useSampleData}
-          onUseSampleDataChange={onUseSampleDataChange}
-          hasRealData={hasRealData}
-        />
+        <div className="absolute top-4 left-4 z-20">
+          <GraphControlPanel
+            filters={filters}
+            onFiltersChange={onFiltersChange}
+            entityCounts={entityCounts}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onFitView={handleFitView}
+            onReset={handleReset}
+            onExportPNG={handleExportPNG}
+            disabled={false}
+            safeMode={safeMode}
+            onSafeModeChange={onSafeModeChange}
+            useSampleData={useSampleData}
+            onUseSampleDataChange={onUseSampleDataChange}
+            hasRealData={hasRealData}
+          />
+        </div>
       )}
       
       <GraphTooltip node={tooltipData?.node || null} position={tooltipData} />

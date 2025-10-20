@@ -106,7 +106,7 @@ export const GraphControlPanel = ({
   };
 
   return (
-    <Card className="sticky top-4 right-4 z-20 w-72 md:w-80 max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col bg-card/95 backdrop-blur-sm shadow-lg">
+    <Card className="w-72 md:w-80 max-h-[calc(100vh-8rem)] overflow-hidden flex flex-col bg-card/95 backdrop-blur-sm shadow-lg">
       {/* Filters Section */}
       <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen}>
         <CollapsibleTrigger asChild>

@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Network, Sparkles } from "lucide-react";
 import { GraphErrorBoundary } from "@/components/graph/GraphErrorBoundary";
+import { GraphFilters } from "@/components/graph/GraphControlPanel";
+import { getAllEntityTypeValues } from "@/config/entityTypeConfig";
 
 const ForceGraph2DWrapper = lazy(() =>
   import("@/components/graph/ForceGraph2DWrapper").then((m) => ({ default: m.ForceGraph2DWrapper })),
@@ -24,6 +26,14 @@ export default function GraphViewPage() {
   // Graph rendering options
   const [safeMode, setSafeMode] = useState(false);
   const [useSampleData, setUseSampleData] = useState(false);
+  
+  // Graph filters
+  const [filters, setFilters] = useState<GraphFilters>({
+    entityTypes: new Set(getAllEntityTypeValues()),
+    relationshipTypes: new Set(['parent', 'linked', 'mention']),
+    searchQuery: '',
+    showThoughts: true,
+  });
 
   const hasData = currentCampaign && (entities.length > 0 || thoughts.length > 0);
 
@@ -109,6 +119,8 @@ export default function GraphViewPage() {
               campaign={currentCampaign}
               entities={entities}
               thoughts={thoughts}
+              filters={filters}
+              onFiltersChange={setFilters}
               safeMode={safeMode}
               useSampleData={useSampleData}
               onSafeModeChange={setSafeMode}

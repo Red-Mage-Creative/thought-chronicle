@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Trash2, MessageSquare, Calendar, Clock, Network, GitBranch, Link2, Activity } from 'lucide-react';
 import { lazy, Suspense } from 'react';
+import { GraphFilters } from '@/components/graph/GraphControlPanel';
+import { getAllEntityTypeValues } from '@/config/entityTypeConfig';
 
 const ForceGraph2DWrapper = lazy(() => import('@/components/graph/ForceGraph2DWrapper').then(m => ({ default: m.ForceGraph2DWrapper })));
 import { LocalEntity, EntityWithMetrics, EntityType } from '@/types/entities';
@@ -37,6 +39,14 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
   const [orphanedParentIds, setOrphanedParentIds] = useState<string[]>([]);
   const [orphanedLinkedIds, setOrphanedLinkedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Graph filters for entity-centered view
+  const [filters, setFilters] = useState<GraphFilters>({
+    entityTypes: new Set(getAllEntityTypeValues()),
+    relationshipTypes: new Set(['parent', 'linked', 'mention']),
+    searchQuery: '',
+    showThoughts: true,
+  });
 
   useEffect(() => {
     if (!entityName) {
@@ -401,6 +411,8 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
               campaign={null}
               entities={entityService.getAllEntities()}
               thoughts={thoughtService.getAllThoughts()}
+              filters={filters}
+              onFiltersChange={setFilters}
               safeMode={false}
               centerEntityId={entity.localId || entity.id!}
               mode="entity"
