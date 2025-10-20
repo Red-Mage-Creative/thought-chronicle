@@ -4,17 +4,13 @@ import { useEntities } from "@/hooks/useEntities";
 import { useThoughts } from "@/hooks/useThoughts";
 import { campaignService } from "@/services/campaignService";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Network, Settings, Sparkles } from "lucide-react";
+import { Network, Sparkles } from "lucide-react";
 import { GraphErrorBoundary } from "@/components/graph/GraphErrorBoundary";
 
 const ForceGraph2DWrapper = lazy(() =>
   import("@/components/graph/ForceGraph2DWrapper").then((m) => ({ default: m.ForceGraph2DWrapper })),
 );
-const GraphLegend = lazy(() => import("@/components/graph/GraphLegend").then((m) => ({ default: m.GraphLegend })));
 
 export default function GraphViewPage() {
   const navigate = useNavigate();
@@ -89,37 +85,6 @@ export default function GraphViewPage() {
     <div className="relative w-full min-h-[100vh]">
       {/* Graph fills container */}
       <div className="w-full min-h-screen">
-        {/* Graph Settings Panel - Sticky */}
-        <div className="sticky bottom-6 md:left-6 left-4 z-20 md:w-auto w-[calc(100vw-2rem)] space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
-          <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Options</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Switch id="safe-mode" checked={safeMode} onCheckedChange={setSafeMode} />
-            <Label htmlFor="safe-mode" className="text-xs cursor-pointer">
-              Safe Mode
-            </Label>
-          </div>
-
-          {!hasData && (
-            <div className="flex items-center gap-2">
-              <Switch id="sample-data" checked={useSampleData} onCheckedChange={setUseSampleData} />
-              <Label htmlFor="sample-data" className="text-xs cursor-pointer flex items-center gap-1">
-                <Sparkles className="h-3 w-3" />
-                Sample Data
-              </Label>
-            </div>
-          )}
-
-          {useSampleData && (
-            <Badge variant="secondary" className="text-xs gap-1">
-              <Sparkles className="h-3 w-3" />
-              Sample Data
-            </Badge>
-          )}
-        </div>
 
         <GraphErrorBoundary
           onFallbackRequested={() => navigate('/entities')}
@@ -140,13 +105,14 @@ export default function GraphViewPage() {
               </div>
             }
           >
-            <GraphLegend />
             <ForceGraph2DWrapper
               campaign={currentCampaign}
               entities={entities}
               thoughts={thoughts}
               safeMode={safeMode}
               useSampleData={useSampleData}
+              onSafeModeChange={setSafeMode}
+              onUseSampleDataChange={setUseSampleData}
               mode="campaign"
             />
           </Suspense>

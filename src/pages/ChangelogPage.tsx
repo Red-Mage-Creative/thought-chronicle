@@ -18,6 +18,28 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.14",
+  date: "2025-10-20",
+  features: [
+    "Clicking graph nodes now navigates directly to entity/thought detail pages"
+  ],
+  improvements: [
+    "Unified graph controls into single collapsible panel with Filters, Legend, and Options sections",
+    "All control sections default to collapsed for cleaner UI",
+    "Legend now integrated into main control panel"
+  ],
+  fixes: [],
+  docs: [],
+  refactor: [
+    "Consolidated GraphFilterPanel, GraphLegend, GraphControls into single GraphControlPanel",
+    "Removed GraphSelectionPanel in favor of direct navigation on click"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: [
+    "Deleted redundant graph UI components (GraphSelectionPanel, GraphFilterPanel, GraphControls, GraphLegend)"
+  ]
+}, {
   version: "1.6.13",
   date: "2025-10-20",
   features: [],

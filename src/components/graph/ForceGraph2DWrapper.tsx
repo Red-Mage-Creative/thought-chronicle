@@ -14,10 +14,8 @@ import {
   GraphEdge
 } from '@/utils/graphDataTransform';
 import { generateSampleCampaignData } from '@/utils/graphSampleData';
-import { GraphControls } from './GraphControls';
+import { GraphControlPanel, GraphFilters } from './GraphControlPanel';
 import { GraphTooltip } from './GraphTooltip';
-import { GraphFilterPanel, GraphFilters } from './GraphFilterPanel';
-import { GraphSelectionPanel } from './GraphSelectionPanel';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -31,6 +29,8 @@ interface ForceGraph2DWrapperProps {
   thoughts: LocalThought[];
   safeMode?: boolean;
   useSampleData?: boolean;
+  onSafeModeChange?: (enabled: boolean) => void;
+  onUseSampleDataChange?: (enabled: boolean) => void;
   centerEntityId?: string;
   mode?: 'campaign' | 'entity';
 }
@@ -41,6 +41,8 @@ export const ForceGraph2DWrapper = ({
   thoughts, 
   safeMode = false,
   useSampleData = false,
+  onSafeModeChange,
+  onUseSampleDataChange,
   centerEntityId,
   mode = 'campaign'
 }: ForceGraph2DWrapperProps) => {
@@ -56,7 +58,6 @@ export const ForceGraph2DWrapper = ({
   
   // Interactivity state
   const [tooltipData, setTooltipData] = useState<{node: GraphNode, x: number, y: number} | null>(null);
-  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [highlightedNodes, setHighlightedNodes] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<GraphFilters>({
     entityTypes: new Set(getAllEntityTypeValues()),
@@ -272,9 +273,13 @@ export const ForceGraph2DWrapper = ({
       return;
     }
 
-    setSelectedNode(node);
-    setTooltipData(null);
-  }, [useSampleData, campaign, entities.length]);
+    // Navigate directly to entity or thought detail page
+    if (node.data?.type === 'entity' && node.data.entityId) {
+      navigate(`/entities/${node.data.entityId}`);
+    } else if (node.data?.type === 'thought' && node.data.thoughtId) {
+      navigate(`/thoughts/${node.data.thoughtId}/edit`);
+    }
+  }, [useSampleData, campaign, entities.length, navigate]);
 
   const handleNodeHover = useCallback((node: any) => {
     hoveredNodeRef.current = node;
@@ -357,19 +362,7 @@ export const ForceGraph2DWrapper = ({
   }, [actualData.campaign?.name]);
 
   // Get connected nodes for selection panel
-  const connectedNodes = useMemo(() => {
-    if (!selectedNode) return [];
-    
-    const edges = graphData.links.map(l => ({
-      id: `${l.source}-${l.target}`,
-      source: typeof l.source === 'object' ? (l.source as any).id : l.source,
-      target: typeof l.target === 'object' ? (l.target as any).id : l.target,
-      data: l.data
-    }));
-    
-    const connectedIds = getConnectedNodes(selectedNode.id, edges);
-    return graphData.nodes.filter(n => connectedIds.has(n.id));
-  }, [selectedNode, graphData]);
+  const hasRealData = !!campaign && (entities.length > 0 || thoughts.length > 0);
 
   return (
     <div ref={containerRef} className="relative w-full h-full bg-background">
@@ -388,11 +381,8 @@ export const ForceGraph2DWrapper = ({
             : 6
           );
           
-          // Add glow for selected/highlighted nodes
-          if (selectedNode?.id === node.id) {
-            ctx.shadowColor = '#3b82f6';
-            ctx.shadowBlur = 20;
-          } else if (highlightedNodes.has(node.id)) {
+          // Add glow for highlighted nodes
+          if (highlightedNodes.has(node.id)) {
             ctx.shadowColor = getNodeColor(node);
             ctx.shadowBlur = 15;
           }
@@ -464,29 +454,23 @@ export const ForceGraph2DWrapper = ({
         enablePanInteraction
       />
       
-      {mode === 'campaign' && (
-        <>
-          <GraphControls
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            onFitView={handleFitView}
-            onReset={handleReset}
-            onExportPNG={handleExportPNG}
-            disabled={false}
-          />
-          
-          <GraphFilterPanel
-            filters={filters}
-            onFiltersChange={setFilters}
-            entityCounts={entityCounts}
-          />
-          
-          <GraphSelectionPanel
-            selectedNode={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            connectedNodes={connectedNodes}
-          />
-        </>
+      {mode === 'campaign' && onSafeModeChange && onUseSampleDataChange && (
+        <GraphControlPanel
+          filters={filters}
+          onFiltersChange={setFilters}
+          entityCounts={entityCounts}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onFitView={handleFitView}
+          onReset={handleReset}
+          onExportPNG={handleExportPNG}
+          disabled={false}
+          safeMode={safeMode}
+          onSafeModeChange={onSafeModeChange}
+          useSampleData={useSampleData}
+          onUseSampleDataChange={onUseSampleDataChange}
+          hasRealData={hasRealData}
+        />
       )}
       
       <GraphTooltip node={tooltipData?.node || null} position={tooltipData} />
