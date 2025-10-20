@@ -70,7 +70,7 @@ export const GraphControlPanel = ({
 }: GraphControlPanelProps) => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [legendOpen, setLegendOpen] = useState(false);
-  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(true);
 
   const toggleEntityType = (type: EntityType) => {
     const newTypes = new Set(filters.entityTypes);

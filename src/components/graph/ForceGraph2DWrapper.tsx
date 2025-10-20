@@ -453,7 +453,7 @@ export const ForceGraph2DWrapper = ({
       />
       
       {mode === 'campaign' && onSafeModeChange && onUseSampleDataChange && (
-        <div className="absolute top-4 left-4 z-20">
+        <div className="absolute top-4 left-4 md:left-6 z-20">
           <GraphControlPanel
             filters={filters}
             onFiltersChange={onFiltersChange}

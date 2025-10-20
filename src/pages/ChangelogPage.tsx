@@ -18,6 +18,21 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.17",
+  date: "2025-10-20",
+  features: [
+    "Options section now opens by default for better discoverability"
+  ],
+  improvements: [],
+  fixes: [
+    "Aligned graph control panel left margin with header content"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.16",
   date: "2025-10-20",
   features: [],
