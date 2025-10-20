@@ -18,6 +18,20 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.15",
+  date: "2025-10-20",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Resolved infinite graph expansion by using fixed height container",
+    "Added safety constraints to prevent canvas from exceeding max size (4096px)"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.14",
   date: "2025-10-20",
   features: [

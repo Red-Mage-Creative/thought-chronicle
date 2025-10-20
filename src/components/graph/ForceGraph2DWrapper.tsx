@@ -91,8 +91,8 @@ export const ForceGraph2DWrapper = ({
       if (containerRef.current) {
         const { clientWidth, clientHeight } = containerRef.current;
         setDimensions({
-          width: Math.max(clientWidth, 400),
-          height: Math.max(clientHeight, 400)
+          width: Math.max(Math.min(clientWidth, 4096), 400),
+          height: Math.max(Math.min(clientHeight, 4096), 400)
         });
       }
     };

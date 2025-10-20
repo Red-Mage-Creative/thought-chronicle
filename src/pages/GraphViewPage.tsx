@@ -82,9 +82,9 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="relative w-full min-h-[100vh]">
+    <div className="relative w-full h-[calc(100vh-var(--header-height,80px))]">
       {/* Graph fills container */}
-      <div className="w-full min-h-screen">
+      <div className="w-full h-full">
 
         <GraphErrorBoundary
           onFallbackRequested={() => navigate('/entities')}
