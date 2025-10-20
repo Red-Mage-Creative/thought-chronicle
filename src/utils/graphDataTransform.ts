@@ -6,6 +6,8 @@ import { getEntityTypeConfig } from '@/config/entityTypeConfig';
 export interface GraphNode {
   id: string;
   label: string;
+  fx?: number;  // Fixed X position for pinning nodes
+  fy?: number;  // Fixed Y position for pinning nodes
   data: {
     type: 'campaign' | 'entity' | 'thought';
     entityType?: string;
@@ -97,12 +99,14 @@ export const transformToGraphData = (
     return true;
   });
 
-  // Add campaign as center node
+  // Add campaign as center node - pinned to center
   if (campaign && campaign.id) {
     const campaignId = makeId('campaign', campaign.id);
     nodes.push({
       id: campaignId,
       label: campaign.name,
+      fx: 0,  // Pin X position to center
+      fy: 0,  // Pin Y position to center
       data: {
         type: 'campaign',
         originalData: campaign
@@ -519,10 +523,12 @@ export const transformToEntityCenteredGraph = (
   
   const centerNodeId = makeId('entity', centerEntityId);
   
-  // Add center entity as primary node
+  // Add center entity as primary node - pinned to center
   nodes.push({
     id: centerNodeId,
     label: centerEntity.name,
+    fx: 0,  // Pin X position to center
+    fy: 0,  // Pin Y position to center
     data: {
       type: 'entity',
       entityType: centerEntity.type,

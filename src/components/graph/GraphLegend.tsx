@@ -21,7 +21,7 @@ export const GraphLegend = () => {
   };
 
   return (
-    <Card className="absolute top-6 right-6 w-64 max-h-[400px] overflow-y-auto z-20 bg-background/95 backdrop-blur">
+    <Card className="absolute md:top-20 top-6 right-6 w-64 max-h-[400px] overflow-y-auto z-20 bg-background/95 backdrop-blur">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CardHeader className="p-4 pb-2">
           <CollapsibleTrigger className="flex items-center justify-between w-full">

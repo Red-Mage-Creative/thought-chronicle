@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useEntities } from "@/hooks/useEntities";
 import { useThoughts } from "@/hooks/useThoughts";
 import { campaignService } from "@/services/campaignService";
@@ -7,9 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Network, Settings, Sparkles } from "lucide-react";
+import { Network, Settings, Sparkles, ArrowLeft } from "lucide-react";
 import { GraphErrorBoundary } from "@/components/graph/GraphErrorBoundary";
-import { GraphHeader } from "@/components/graph/GraphHeader";
 
 const ForceGraph2DWrapper = lazy(() =>
   import("@/components/graph/ForceGraph2DWrapper").then((m) => ({ default: m.ForceGraph2DWrapper })),
@@ -17,6 +17,7 @@ const ForceGraph2DWrapper = lazy(() =>
 const GraphLegend = lazy(() => import("@/components/graph/GraphLegend").then((m) => ({ default: m.GraphLegend })));
 
 export default function GraphViewPage() {
+  const navigate = useNavigate();
   const { entities, isLoading: entitiesLoading } = useEntities();
   const { thoughts, isLoading: thoughtsLoading } = useThoughts();
 
@@ -85,13 +86,34 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Graph Settings Panel 
-      <GraphHeader campaign={currentCampaign} /> */}
+    <div className="fixed inset-0 bg-background flex flex-col">
+      {/* Minimal header - desktop only */}
+      <div className="hidden md:flex h-14 items-center justify-between px-4 border-b bg-background/95 backdrop-blur z-50">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/entities')} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Exit Graph View
+          </Button>
+          {currentCampaign && (
+            <span className="text-sm font-medium">{currentCampaign.name}</span>
+          )}
+        </div>
+      </div>
 
-      <div className="pt-14 h-screen">
+      {/* Mobile exit button */}
+      <Button 
+        variant="ghost" 
+        size="sm"
+        className="md:hidden fixed top-4 left-4 z-50 bg-background/95 backdrop-blur shadow-lg"
+        onClick={() => navigate('/entities')}
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+
+      {/* Graph container - fills remaining space */}
+      <div className="flex-1 relative">
         {/* Graph Settings Panel */}
-        <div className="absolute bottom-6 left-6 z-20 space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
+        <div className="absolute bottom-6 md:left-6 left-4 z-20 md:w-auto w-[calc(100vw-2rem)] space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Options</span>

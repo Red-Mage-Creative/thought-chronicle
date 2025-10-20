@@ -218,6 +218,17 @@ export const ForceGraph2DWrapper = ({
     }
   }, [actualData, filters, mode, centerEntityId]);
 
+  // Center camera on pinned node after graph loads
+  useEffect(() => {
+    if (graphRef.current && graphData.nodes.length > 0) {
+      const timer = setTimeout(() => {
+        graphRef.current.centerAt(0, 0, 1000);
+        graphRef.current.zoom(1.5, 1000);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [graphData]);
+
   if (graphData.nodes.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -252,10 +263,15 @@ export const ForceGraph2DWrapper = ({
     if (node) {
       document.body.style.cursor = 'pointer';
       
-      // Calculate screen position for tooltip
+      // Calculate screen position for tooltip with error handling
       if (graphRef.current) {
-        const coords = graphRef.current.graph2ScreenCoords(node.x, node.y);
-        setTooltipData({ node, x: coords.x, y: coords.y });
+        try {
+          const coords = graphRef.current.graph2ScreenCoords(node.x, node.y);
+          setTooltipData({ node, x: coords.x, y: coords.y });
+        } catch (err) {
+          console.error('Tooltip positioning error:', err);
+          setTooltipData(null);
+        }
       }
 
       // Highlight connected nodes

@@ -18,6 +18,32 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.6",
+  date: "2025-01-19",
+  features: [],
+  improvements: [
+    "Full-viewport graph layout - graph now fills entire screen cleanly on all devices",
+    "Campaign/entity-centered graphs - pinned center nodes with radial layout",
+    "Improved mobile responsiveness - touch-friendly controls and adaptive layout",
+    "Auto-centering camera - graph automatically centers on main node on load"
+  ],
+  fixes: [
+    "Fixed graph crash when hovering entities with missing attributes",
+    "Fixed tooltip coordinate system causing positioning errors",
+    "Fixed graph elements being cut off by header/screen edges",
+    "Fixed viewport overflow issues with proper flexbox layout"
+  ],
+  docs: [],
+  refactor: [
+    "Simplified GraphViewPage layout using fixed inset-0 and flexbox",
+    "Added fx/fy properties to GraphNode for node pinning",
+    "Enhanced tooltip error handling with try-catch blocks",
+    "Updated graph controls with responsive sizing"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.5",
   date: "2025-01-19",
   features: [

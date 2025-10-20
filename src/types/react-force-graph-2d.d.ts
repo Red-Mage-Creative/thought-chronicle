@@ -2,7 +2,12 @@ declare module 'react-force-graph-2d' {
   import { FC, MutableRefObject } from 'react';
 
   export interface GraphData {
-    nodes: any[];
+    nodes: Array<{
+      id: string;
+      fx?: number;
+      fy?: number;
+      [key: string]: any;
+    }>;
     links: any[];
   }
 

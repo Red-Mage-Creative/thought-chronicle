@@ -52,17 +52,22 @@ export const GraphTooltip = ({ node, position }: GraphTooltipProps) => {
           )}
         </div>
 
-        {/* Entity Details */}
-        {data.type === 'entity' && 'attributes' in data.originalData && (
+        {/* Entity Details - with defensive checks */}
+        {data.type === 'entity' && 
+         'attributes' in data.originalData && 
+         Array.isArray((data.originalData as LocalEntity).attributes) &&
+         (data.originalData as LocalEntity).attributes.length > 0 && (
           <div className="text-xs text-muted-foreground space-y-1">
             {(data.originalData as LocalEntity).attributes
-              ?.slice(0, 3)
-              .map((attr, i) => (
-                <div key={i} className="flex gap-2">
-                  <span className="font-medium">{attr.key}:</span>
-                  <span className="truncate">{attr.value}</span>
-                </div>
-              ))}
+              .slice(0, 3)
+              .map((attr, i) => 
+                attr?.key && attr?.value ? (
+                  <div key={i} className="flex gap-2">
+                    <span className="font-medium">{attr.key}:</span>
+                    <span className="truncate">{attr.value}</span>
+                  </div>
+                ) : null
+              )}
           </div>
         )}
 

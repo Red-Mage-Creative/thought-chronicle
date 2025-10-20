@@ -47,7 +47,7 @@ export const GraphFilterPanel = ({ filters, onFiltersChange, entityCounts }: Gra
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="fixed top-20 left-6 z-20 w-72 max-h-[calc(100vh-120px)] overflow-hidden flex flex-col">
+      <Card className="fixed md:top-20 md:left-6 bottom-20 left-4 right-4 md:bottom-auto md:right-auto z-20 md:w-72 w-auto max-h-[calc(100vh-120px)] overflow-hidden flex flex-col">
         <CollapsibleTrigger asChild>
           <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
             <CardTitle className="text-sm flex items-center justify-between">

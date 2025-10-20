@@ -19,7 +19,7 @@ export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExpor
         <div className="flex flex-col gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onZoomIn} disabled={disabled}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={onZoomIn} disabled={disabled}>
                 <ZoomIn className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -30,7 +30,7 @@ export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExpor
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onZoomOut} disabled={disabled}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={onZoomOut} disabled={disabled}>
                 <ZoomOut className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -41,7 +41,7 @@ export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExpor
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onFitView} disabled={disabled}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={onFitView} disabled={disabled}>
                 <Maximize className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -52,7 +52,7 @@ export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExpor
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={onReset} disabled={disabled}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={onReset} disabled={disabled}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -64,7 +64,7 @@ export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExpor
           {onExportPNG && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={onExportPNG} disabled={disabled}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={onExportPNG} disabled={disabled}>
                   <Download className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
