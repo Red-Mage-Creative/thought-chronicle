@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signUp: (email: string, password: string, username: string, displayName: string, accessCode: string) => Promise<{ error: any }>;
-  signIn: (emailOrUsername: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -115,31 +115,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signIn = async (emailOrUsername: string, password: string) => {
+  const signIn = async (email: string, password: string) => {
     try {
-      // Check if input is email or username
-      const isEmail = emailOrUsername.includes('@');
-      
-      if (!isEmail) {
-        // Get email from username using secure function
-        const { data: email, error: emailError } = await supabase.rpc('get_email_by_username', {
-          lookup_username: emailOrUsername
-        });
-
-        if (emailError) {
-          console.error('Email lookup error:', emailError);
-          return { error: { message: 'Error looking up username. Please try again.' } };
-        }
-
-        if (!email) {
-          return { error: { message: 'Username not found. Please check and try again.' } };
-        }
-
-        emailOrUsername = email;
-      }
-
       const { error } = await supabase.auth.signInWithPassword({
-        email: emailOrUsername,
+        email,
         password
       });
       return { error };

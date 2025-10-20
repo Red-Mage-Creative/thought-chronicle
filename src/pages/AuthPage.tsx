@@ -23,7 +23,7 @@ export const AuthPage = () => {
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   
   // Sign in form state
-  const [emailOrUsername, setEmailOrUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [signInErrors, setSignInErrors] = useState<Partial<SignInFormData>>({});
   
@@ -73,7 +73,7 @@ export const AuthPage = () => {
     setSignInErrors({});
 
     // Validate form
-    const result = signInSchema.safeParse({ emailOrUsername, password });
+    const result = signInSchema.safeParse({ email, password });
     if (!result.success) {
       const errors: Partial<SignInFormData> = {};
       result.error.issues.forEach((err) => {
@@ -86,7 +86,7 @@ export const AuthPage = () => {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(emailOrUsername, password);
+    const { error } = await signIn(email, password);
     
     if (error) {
       setError(error.message || 'Failed to sign in');
@@ -137,7 +137,7 @@ export const AuthPage = () => {
   };
 
   const resetForm = () => {
-    setEmailOrUsername('');
+    setEmail('');
     setPassword('');
     setSignUpEmail('');
     setSignUpPassword('');
@@ -179,17 +179,17 @@ export const AuthPage = () => {
                 <TabsContent value="signin" className="space-y-4 mt-6">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="emailOrUsername">Email or Username</Label>
+                      <Label htmlFor="email">Email</Label>
                       <Input
-                        id="emailOrUsername"
-                        type="text"
-                        placeholder="Enter your email or username"
-                        value={emailOrUsername}
-                        onChange={(e) => setEmailOrUsername(e.target.value)}
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
-                      {signInErrors.emailOrUsername && (
-                        <p className="text-sm text-destructive">{signInErrors.emailOrUsername}</p>
+                      {signInErrors.email && (
+                        <p className="text-sm text-destructive">{signInErrors.email}</p>
                       )}
                     </div>
                     <div className="space-y-2">
