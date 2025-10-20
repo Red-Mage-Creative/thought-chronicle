@@ -7,7 +7,7 @@ import { PageTransition } from '@/components/PageTransition';
 
 interface AppLayoutProps {
   children: ReactNode;
-  variant?: 'narrow' | 'wide' | 'full';
+  variant?: 'narrow' | 'wide' | 'full' | 'graph';
   defaultTags?: string[];
   onDefaultTagsChange?: (tags: string[]) => void;
   showHeaderWhenUnauthenticated?: boolean;
@@ -23,6 +23,8 @@ export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefault
         return 'max-w-7xl mx-auto px-4 py-6 space-y-6';
       case 'full':
         return 'w-full px-4 py-6 space-y-6';
+      case 'graph':
+        return 'w-full h-full p-0';
       default:
         return 'max-w-2xl mx-auto px-4 py-6 space-y-6';
     }
@@ -33,16 +35,20 @@ export const AppLayout = ({ children, variant = 'narrow', defaultTags, onDefault
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {shouldShowHeader && <AppHeader />}
-      <main className="flex-1">
+      <main className={cn("flex-1", variant === 'graph' && 'relative overflow-hidden')}>
         <PageTransition>
-          <div className="container">
-            <div className={getContainerClasses()}>
-              {defaultTags && onDefaultTagsChange ? 
-                cloneElement(children as ReactElement, { defaultTags, onDefaultTagsChange }) : 
-                children
-              }
+          {variant === 'graph' ? (
+            children
+          ) : (
+            <div className="container">
+              <div className={getContainerClasses()}>
+                {defaultTags && onDefaultTagsChange ? 
+                  cloneElement(children as ReactElement, { defaultTags, onDefaultTagsChange }) : 
+                  children
+                }
+              </div>
             </div>
-          </div>
+          )}
         </PageTransition>
       </main>
       <AppFooter />

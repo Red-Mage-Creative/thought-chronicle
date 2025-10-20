@@ -75,7 +75,7 @@ export default function GraphViewPage() {
                 <Sparkles className="h-4 w-4 mr-2" />
                 Try Sample Data
               </Button>
-              <Button onClick={() => (window.location.href = "/entities/create")} variant="outline">
+              <Button onClick={() => navigate('/entities/create')} variant="outline">
                 Create First Entity
               </Button>
             </div>
@@ -86,12 +86,12 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-background">
+    <div className="relative w-full" style={{ height: 'calc(100vh - 80px - 200px)' }}>
       {/* Floating exit button - all screen sizes */}
       <Button 
         variant="ghost" 
         size="sm"
-        className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur shadow-lg"
+        className="absolute top-4 left-4 z-50 bg-background/95 backdrop-blur shadow-lg"
         onClick={() => navigate('/entities')}
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -100,14 +100,14 @@ export default function GraphViewPage() {
       
       {/* Campaign name badge - desktop only */}
       {currentCampaign && (
-        <div className="hidden md:block fixed top-4 left-24 z-50">
+        <div className="hidden md:block absolute top-4 left-24 z-50">
           <Badge variant="outline" className="bg-background/95 backdrop-blur">
             {currentCampaign.name}
           </Badge>
         </div>
       )}
       
-      {/* Graph fills entire viewport */}
+      {/* Graph fills container */}
       <div className="w-full h-full">
         {/* Graph Settings Panel */}
         <div className="absolute bottom-6 md:left-6 left-4 z-20 md:w-auto w-[calc(100vw-2rem)] space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
@@ -142,7 +142,7 @@ export default function GraphViewPage() {
         </div>
 
         <GraphErrorBoundary
-          onFallbackRequested={() => (window.location.href = "/entities")}
+          onFallbackRequested={() => navigate('/entities')}
           onSampleDataRequested={() => setUseSampleData(true)}
         >
           <Suspense

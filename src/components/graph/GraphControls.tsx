@@ -15,7 +15,7 @@ interface GraphControlsProps {
 export const GraphControls = ({ onZoomIn, onZoomOut, onFitView, onReset, onExportPNG, disabled = false }: GraphControlsProps) => {
   return (
     <TooltipProvider>
-      <Card className="fixed bottom-6 right-4 z-20 bg-card/95 backdrop-blur-sm shadow-lg">
+      <Card className="absolute bottom-6 right-4 z-20 bg-card/95 backdrop-blur-sm shadow-lg">
         <div className="flex flex-col gap-1 p-2">
           <Tooltip>
             <TooltipTrigger asChild>

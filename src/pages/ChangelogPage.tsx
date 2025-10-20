@@ -18,6 +18,27 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.8",
+  date: "2025-01-20",
+  features: [],
+  improvements: [
+    "Graph view now fits perfectly between header and footer with dynamic height",
+    "All graph controls positioned relative to graph container for better accessibility"
+  ],
+  fixes: [
+    "Graph controls no longer blocked by header or footer elements",
+    "Navigation in graph view now uses React Router (no page reloads)"
+  ],
+  docs: [],
+  refactor: [
+    "Added 'graph' variant to AppLayout for specialized graph rendering",
+    "Changed graph component positioning from fixed to absolute",
+    "Updated GraphViewPage to use dynamic height calculation"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.7",
   date: "2025-01-20",
   features: [],

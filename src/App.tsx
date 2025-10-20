@@ -167,7 +167,7 @@ const App = () => {
                 path="/graph-view" 
                 element={
                   <AuthGuard>
-                    <AppLayout variant="full">
+                    <AppLayout variant="graph">
                       <GraphViewPage />
                     </AppLayout>
                   </AuthGuard>
