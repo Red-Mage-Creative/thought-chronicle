@@ -18,6 +18,24 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.12",
+  date: "2025-10-20",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Prevented graph data recomputation and validation on hover by memoizing actualData",
+    "Prevented camera from recentering on hover using one-time centering guard",
+    "Eliminated repeated connected-node calculations when hovering same node"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: [
+    "Optimized handleNodeHover to only recalculate connections when node changes",
+    "Added hasCenteredRef to control camera centering behavior"
+  ]
+}, {
   version: "1.6.11",
   date: "2025-10-20",
   features: [],

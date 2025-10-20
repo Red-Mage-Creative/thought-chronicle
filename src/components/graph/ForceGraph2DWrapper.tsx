@@ -48,6 +48,8 @@ export const ForceGraph2DWrapper = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const hoveredNodeRef = useRef<any>(null);
   const graphLinksRef = useRef<any[]>([]);
+  const hasCenteredRef = useRef(false);
+  const lastHoverIdRef = useRef<string | null>(null);
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [iconCache, setIconCache] = useState<Map<EntityType, HTMLImageElement>>(new Map());
@@ -64,9 +66,13 @@ export const ForceGraph2DWrapper = ({
   });
 
   // Use sample data if requested or if no real data exists
-  const actualData = useSampleData || (!campaign && entities.length === 0) 
-    ? generateSampleCampaignData()
-    : { campaign, entities, thoughts };
+  const actualData = useMemo(() => {
+    if (useSampleData || (!campaign && entities.length === 0)) {
+      return generateSampleCampaignData();
+    }
+    // Important: returning this object inside useMemo makes its identity stable across renders
+    return { campaign, entities, thoughts };
+  }, [useSampleData, campaign, entities, thoughts]);
 
   // Create icon cache on mount
   useEffect(() => {
@@ -222,16 +228,25 @@ export const ForceGraph2DWrapper = ({
     }
   }, [actualData, filters, mode, centerEntityId]);
 
-  // Center camera on pinned node after graph loads
+  // Reset centering flag when data context changes
   useEffect(() => {
-    if (graphRef.current && graphData.nodes.length > 0) {
-      const timer = setTimeout(() => {
-        graphRef.current.centerAt(0, 0, 1000);
-        graphRef.current.zoom(1.5, 1000);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [graphData]);
+    hasCenteredRef.current = false;
+  }, [mode, centerEntityId, campaign?.id]);
+
+  // Center camera on pinned node after graph loads (only once per dataset)
+  useEffect(() => {
+    if (!graphRef.current) return;
+    if (graphData.nodes.length === 0) return;
+    if (hasCenteredRef.current) return;
+
+    const timer = setTimeout(() => {
+      graphRef.current.centerAt(0, 0, 1000);
+      graphRef.current.zoom(1.5, 1000);
+      hasCenteredRef.current = true;
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [graphData.nodes.length]);
 
   if (graphData.nodes.length === 0) {
     return (
@@ -267,7 +282,7 @@ export const ForceGraph2DWrapper = ({
     if (node) {
       document.body.style.cursor = 'pointer';
       
-      // Calculate screen position for tooltip with error handling
+      // Calculate screen position for tooltip with error handling (always update for smooth tracking)
       if (graphRef.current) {
         try {
           const coords = graphRef.current.graph2ScreenCoords(node.x, node.y);
@@ -278,19 +293,23 @@ export const ForceGraph2DWrapper = ({
         }
       }
 
-      // Highlight connected nodes using stable ref
-      const edges = graphLinksRef.current.map(l => ({
-        id: `${l.source}-${l.target}`,
-        source: typeof l.source === 'object' ? (l.source as any).id : l.source,
-        target: typeof l.target === 'object' ? (l.target as any).id : l.target,
-        data: l.data
-      }));
-      const connected = getConnectedNodes(node.id, edges);
-      setHighlightedNodes(connected);
+      // Only recompute connected nodes when the hovered node actually changes
+      if (node.id !== lastHoverIdRef.current) {
+        lastHoverIdRef.current = node.id;
+        const edges = graphLinksRef.current.map(l => ({
+          id: `${l.source}-${l.target}`,
+          source: typeof l.source === 'object' ? (l.source as any).id : l.source,
+          target: typeof l.target === 'object' ? (l.target as any).id : l.target,
+          data: l.data
+        }));
+        const connected = getConnectedNodes(node.id, edges);
+        setHighlightedNodes(connected);
+      }
     } else {
       document.body.style.cursor = 'default';
       setTooltipData(null);
       setHighlightedNodes(new Set());
+      lastHoverIdRef.current = null;
     }
   }, []);
 
