@@ -31,11 +31,9 @@ export const GraphTooltip = ({ node, position }: GraphTooltipProps) => {
         <>
           <div className="font-semibold text-card-foreground">{campaign.name}</div>
           <Badge variant="secondary" className="mt-1">Campaign</Badge>
-          {campaign.description && (
-            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
-              {campaign.description}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground/70 mt-2">
+            Click to view details
+          </p>
         </>
       );
     }
@@ -48,11 +46,9 @@ export const GraphTooltip = ({ node, position }: GraphTooltipProps) => {
           <Badge variant="outline" className="mt-1">
             {capitalize(entity.type)}
           </Badge>
-          {entity.description && (
-            <p className="text-xs text-muted-foreground mt-2 line-clamp-3">
-              {entity.description}
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground/70 mt-2">
+            Click to view details
+          </p>
         </>
       );
     }
@@ -65,8 +61,8 @@ export const GraphTooltip = ({ node, position }: GraphTooltipProps) => {
           <Badge variant="secondary" className="mt-1">
             {formatDate(new Date(thought.timestamp))}
           </Badge>
-          <p className="text-xs text-muted-foreground mt-2 line-clamp-3">
-            {thought.content}
+          <p className="text-xs text-muted-foreground/70 mt-2">
+            Click to view details
           </p>
         </>
       );

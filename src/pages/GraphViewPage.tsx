@@ -86,11 +86,11 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="relative w-full" style={{ height: 'calc(100vh - var(--header-height, 80px) - var(--footer-height, 200px))' }}>
+    <div className="relative w-full min-h-[100vh]">
       {/* Graph fills container */}
-      <div className="w-full h-full">
-        {/* Graph Settings Panel */}
-        <div className="absolute bottom-6 md:left-6 left-4 z-20 md:w-auto w-[calc(100vw-2rem)] space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
+      <div className="w-full min-h-screen">
+        {/* Graph Settings Panel - Sticky */}
+        <div className="sticky bottom-6 md:left-6 left-4 z-20 md:w-auto w-[calc(100vw-2rem)] space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <div className="flex items-center gap-2">
             <Settings className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Options</span>

@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import { createElement } from 'react';
 import { LucideIcon } from 'lucide-react';
 import { getEntityTypeConfig } from '@/config/entityTypeConfig';
 import { EntityType } from '@/types/entities';
@@ -23,8 +24,9 @@ const createIconImage = async (
     // 2. Render React icon to container using React DOM
     const root = createRoot(container);
     await new Promise<void>((resolve) => {
-      const IconElement = Icon({ color, size, strokeWidth: 2 });
-      root.render(IconElement as any);
+      // Properly create React element from component
+      const IconElement = createElement(Icon, { color, size, strokeWidth: 2 });
+      root.render(IconElement);
       // Wait for React to render
       setTimeout(resolve, 10);
     });

@@ -18,6 +18,22 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.13",
+  date: "2025-10-20",
+  features: [],
+  improvements: [
+    "Simplified graph tooltips to 'Click to view details' instead of showing descriptions",
+    "Graph now has minimum 100vh height with sticky controls for better navigation"
+  ],
+  fixes: [
+    "Fixed icon rendering errors by using React.createElement instead of function calls"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.12",
   date: "2025-10-20",
   features: [],
