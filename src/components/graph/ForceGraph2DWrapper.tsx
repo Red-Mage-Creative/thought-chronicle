@@ -288,10 +288,6 @@ export const ForceGraph2DWrapper = ({
       setTooltipData(null);
       setHighlightedNodes(new Set());
     }
-
-    if (graphRef.current) {
-      graphRef.current.refresh();
-    }
   }, [graphData.links]);
 
   const handleZoomIn = useCallback(() => {

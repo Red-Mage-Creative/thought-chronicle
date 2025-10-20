@@ -18,6 +18,19 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.10",
+  date: "2025-10-20",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Fixed graph hover error by removing invalid refresh() method call that doesn't exist in react-force-graph-2d API"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.9",
   date: "2025-10-20",
   features: [],
