@@ -18,6 +18,22 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.11",
+  date: "2025-10-20",
+  features: [],
+  improvements: [],
+  fixes: [
+    "Fixed graph re-rendering on every hover by using stable ref for graph links",
+    "Restored design-system compliant white tooltip card for graph node hover"
+  ],
+  docs: [],
+  refactor: [
+    "Removed canvas-drawn labels on hover in favor of cleaner DOM-based tooltip"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.10",
   date: "2025-10-20",
   features: [],

@@ -47,6 +47,7 @@ export const ForceGraph2DWrapper = ({
   const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hoveredNodeRef = useRef<any>(null);
+  const graphLinksRef = useRef<any[]>([]);
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [iconCache, setIconCache] = useState<Map<EntityType, HTMLImageElement>>(new Map());
@@ -207,6 +208,9 @@ export const ForceGraph2DWrapper = ({
         }))
       };
 
+      // Store links in ref for stable access
+      graphLinksRef.current = forceData.links;
+      
       return { graphData: forceData, nodeMetrics: metrics, entityCounts: counts };
     } catch (err) {
       console.error('[ForceGraph2DWrapper] Error:', err);
@@ -274,8 +278,8 @@ export const ForceGraph2DWrapper = ({
         }
       }
 
-      // Highlight connected nodes
-      const edges = graphData.links.map(l => ({
+      // Highlight connected nodes using stable ref
+      const edges = graphLinksRef.current.map(l => ({
         id: `${l.source}-${l.target}`,
         source: typeof l.source === 'object' ? (l.source as any).id : l.source,
         target: typeof l.target === 'object' ? (l.target as any).id : l.target,
@@ -288,7 +292,7 @@ export const ForceGraph2DWrapper = ({
       setTooltipData(null);
       setHighlightedNodes(new Set());
     }
-  }, [graphData.links]);
+  }, []);
 
   const handleZoomIn = useCallback(() => {
     if (graphRef.current) {
@@ -390,72 +394,6 @@ export const ForceGraph2DWrapper = ({
             if (iconImage) {
               const iconSize = Math.max(size * 1.2, 12);
               drawIcon(ctx, iconImage, node.x, node.y, iconSize);
-            }
-          }
-          
-          // Draw enhanced label on hover
-          if (hoveredNodeRef.current && hoveredNodeRef.current.id === node.id) {
-            const fontSize = Math.max(12, 12 / globalScale);
-            ctx.font = `${fontSize}px Sans-Serif`;
-            ctx.textAlign = 'center';
-            
-            let labelText = node.label;
-            let sublabelText = '';
-            
-            // Add type badge
-            if (node.data?.type === 'entity' && node.data?.entityType) {
-              sublabelText = node.data.entityType;
-            } else if (node.data?.type === 'thought' && node.data?.originalData) {
-              try {
-                const thought = node.data.originalData as LocalThought;
-                const timestamp = thought.timestamp;
-                
-                // Validate timestamp exists and is a valid date
-                if (timestamp) {
-                  const dateObj = new Date(timestamp);
-                  if (!isNaN(dateObj.getTime())) {
-                    labelText = format(dateObj, 'MMM d, yyyy');
-                    sublabelText = 'Thought';
-                  } else {
-                    // Invalid date string
-                    labelText = node.label || 'Thought';
-                    sublabelText = 'Invalid Date';
-                  }
-                } else {
-                  // No timestamp
-                  labelText = node.label || 'Thought';
-                  sublabelText = 'No Date';
-                }
-              } catch (err) {
-                // Format error or other unexpected issue
-                console.error('Error formatting thought timestamp:', err, node);
-                labelText = node.label || 'Thought';
-                sublabelText = 'Format Error';
-              }
-            }
-            
-            // Draw background for readability
-            const textWidth = ctx.measureText(labelText).width;
-            const padding = 8;
-            const bgHeight = sublabelText ? fontSize * 2 + padding * 2 : fontSize + padding * 2;
-            
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-            ctx.fillRect(
-              node.x - textWidth/2 - padding,
-              node.y + size + 8,
-              textWidth + padding * 2,
-              bgHeight
-            );
-            
-            // Draw main label
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(labelText, node.x, node.y + size + 8 + fontSize);
-            
-            // Draw sublabel if exists
-            if (sublabelText) {
-              ctx.font = `${fontSize * 0.8}px Sans-Serif`;
-              ctx.fillStyle = '#aaaaaa';
-              ctx.fillText(sublabelText, node.x, node.y + size + 8 + fontSize * 2);
             }
           }
         }}
