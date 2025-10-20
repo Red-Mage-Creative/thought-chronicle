@@ -33,6 +33,7 @@ declare module 'react-force-graph-2d' {
     cooldownTicks?: number;
     d3AlphaDecay?: number;
     d3VelocityDecay?: number;
+    d3Force?: (forceName: string, force: any) => void;
     enableNodeDrag?: boolean;
     enableZoomInteraction?: boolean;
     enablePanInteraction?: boolean;

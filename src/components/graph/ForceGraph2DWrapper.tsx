@@ -481,6 +481,29 @@ export const ForceGraph2DWrapper = ({
         cooldownTicks={safeMode ? 0 : 100}
         d3AlphaDecay={safeMode ? 1 : 0.0228}
         d3VelocityDecay={safeMode ? 1 : 0.4}
+        d3Force={(forceName: string, force: any) => {
+          // Increase charge force (repulsion) to prevent node overlap
+          if (forceName === 'charge') {
+            force.strength(-300).distanceMax(400);
+          }
+          // Increase link distance to give nodes more space
+          if (forceName === 'link') {
+            force.distance((link: any) => {
+              const type = link.data?.relationshipType;
+              if (type === 'parent') return 80;
+              if (type === 'linked') return 100;
+              return 60;
+            });
+          }
+          // Add collision detection to prevent nodes from overlapping
+          if (forceName === 'collision') {
+            force.radius((node: any) => {
+              const metrics = nodeMetrics.get(node.id);
+              const baseSize = metrics?.size || 6;
+              return baseSize + 8; // Add padding around nodes
+            }).strength(1);
+          }
+        }}
         enableNodeDrag={!safeMode}
         enableZoomInteraction
         enablePanInteraction
