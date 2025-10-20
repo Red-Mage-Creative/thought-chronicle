@@ -26,7 +26,7 @@ export const GraphSelectionPanel = ({ selectedNode, onClose, connectedNodes }: G
   const isThought = data.type === 'thought';
 
   return (
-    <div className={`fixed left-0 md:top-14 top-0 bottom-0 md:w-80 w-full bg-card border-r border-border z-40 transform transition-transform duration-300 ${
+    <div className={`fixed left-0 top-0 bottom-0 md:w-80 w-full bg-card border-r z-40 transition-transform duration-300 ${
       selectedNode ? 'translate-x-0' : '-translate-x-full'
     } overflow-y-auto`}>
       <Card className="h-full rounded-none border-0">

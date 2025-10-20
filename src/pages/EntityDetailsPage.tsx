@@ -414,37 +414,6 @@ const EntityDetailsPage = ({ onEntityClick }: EntityDetailsPageProps) => {
         </p>
       </Card>
 
-      {/* Relationship Graph */}
-      <Card className="p-6">
-        <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-          <Activity className="h-5 w-5" />
-          Relationship Graph
-        </h3>
-        
-        <div className="h-[400px] border rounded bg-muted/10">
-          <Suspense fallback={
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-pulse text-center space-y-4">
-                <Activity className="h-12 w-12 text-muted-foreground mx-auto" />
-                <p className="text-sm text-muted-foreground">Loading graph...</p>
-              </div>
-            </div>
-          }>
-            <ForceGraph2DWrapper
-              campaign={null}
-              entities={entityService.getAllEntities()}
-              thoughts={thoughtService.getAllThoughts()}
-              safeMode={false}
-              centerEntityId={entity.localId || entity.id!}
-              mode="entity"
-            />
-          </Suspense>
-        </div>
-        
-        <p className="text-xs text-muted-foreground mt-3">
-          Hover over nodes to see details. Visit Graph View for the full campaign network.
-        </p>
-      </Card>
 
       {/* Related Thoughts */}
       <Card className="p-6">

@@ -397,20 +397,47 @@ export const ForceGraph2DWrapper = ({
             }
           }
           
-          // Draw label on hover
+          // Draw enhanced label on hover
           if (hoveredNodeRef.current && hoveredNodeRef.current.id === node.id) {
-            ctx.fillStyle = getNodeColor(node);
-            ctx.font = `${Math.max(12, 12 / globalScale)}px Sans-Serif`;
+            const fontSize = Math.max(12, 12 / globalScale);
+            ctx.font = `${fontSize}px Sans-Serif`;
             ctx.textAlign = 'center';
             
             let labelText = node.label;
+            let sublabelText = '';
             
-            if (node.data?.type === 'thought' && node.data?.originalData?.timestamp) {
+            // Add type badge
+            if (node.data?.type === 'entity' && node.data?.entityType) {
+              sublabelText = node.data.entityType;
+            } else if (node.data?.type === 'thought' && node.data?.originalData?.timestamp) {
               const thought = node.data.originalData as LocalThought;
               labelText = format(thought.timestamp, 'MMM d, yyyy');
+              sublabelText = 'Thought';
             }
             
-            ctx.fillText(labelText, node.x, node.y + size + 10);
+            // Draw background for readability
+            const textWidth = ctx.measureText(labelText).width;
+            const padding = 8;
+            const bgHeight = sublabelText ? fontSize * 2 + padding * 2 : fontSize + padding * 2;
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(
+              node.x - textWidth/2 - padding,
+              node.y + size + 8,
+              textWidth + padding * 2,
+              bgHeight
+            );
+            
+            // Draw main label
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(labelText, node.x, node.y + size + 8 + fontSize);
+            
+            // Draw sublabel if exists
+            if (sublabelText) {
+              ctx.font = `${fontSize * 0.8}px Sans-Serif`;
+              ctx.fillStyle = '#aaaaaa';
+              ctx.fillText(sublabelText, node.x, node.y + size + 8 + fontSize * 2);
+            }
           }
         }}
         nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
@@ -461,28 +488,32 @@ export const ForceGraph2DWrapper = ({
         enablePanInteraction
       />
       
-      <GraphControls
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFitView={handleFitView}
-        onReset={handleReset}
-        onExportPNG={handleExportPNG}
-        disabled={false}
-      />
+      {mode === 'campaign' && (
+        <>
+          <GraphControls
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onFitView={handleFitView}
+            onReset={handleReset}
+            onExportPNG={handleExportPNG}
+            disabled={false}
+          />
+          
+          <GraphFilterPanel
+            filters={filters}
+            onFiltersChange={setFilters}
+            entityCounts={entityCounts}
+          />
+          
+          <GraphSelectionPanel
+            selectedNode={selectedNode}
+            onClose={() => setSelectedNode(null)}
+            connectedNodes={connectedNodes}
+          />
+        </>
+      )}
       
       <GraphTooltip node={tooltipData?.node || null} position={tooltipData} />
-      
-      <GraphFilterPanel
-        filters={filters}
-        onFiltersChange={setFilters}
-        entityCounts={entityCounts}
-      />
-      
-      <GraphSelectionPanel
-        selectedNode={selectedNode}
-        onClose={() => setSelectedNode(null)}
-        connectedNodes={connectedNodes}
-      />
     </div>
   );
 };

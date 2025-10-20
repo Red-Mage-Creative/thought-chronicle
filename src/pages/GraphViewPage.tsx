@@ -86,32 +86,29 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="fixed inset-0 bg-background flex flex-col">
-      {/* Minimal header - desktop only */}
-      <div className="hidden md:flex h-14 items-center justify-between px-4 border-b bg-background/95 backdrop-blur z-50">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/entities')} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Exit Graph View
-          </Button>
-          {currentCampaign && (
-            <span className="text-sm font-medium">{currentCampaign.name}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile exit button */}
+    <div className="fixed inset-0 bg-background">
+      {/* Floating exit button - all screen sizes */}
       <Button 
         variant="ghost" 
         size="sm"
-        className="md:hidden fixed top-4 left-4 z-50 bg-background/95 backdrop-blur shadow-lg"
+        className="fixed top-4 left-4 z-50 bg-background/95 backdrop-blur shadow-lg"
         onClick={() => navigate('/entities')}
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        <span className="hidden sm:inline">Exit</span>
       </Button>
-
-      {/* Graph container - fills remaining space */}
-      <div className="flex-1 relative">
+      
+      {/* Campaign name badge - desktop only */}
+      {currentCampaign && (
+        <div className="hidden md:block fixed top-4 left-24 z-50">
+          <Badge variant="outline" className="bg-background/95 backdrop-blur">
+            {currentCampaign.name}
+          </Badge>
+        </div>
+      )}
+      
+      {/* Graph fills entire viewport */}
+      <div className="w-full h-full">
         {/* Graph Settings Panel */}
         <div className="absolute bottom-6 md:left-6 left-4 z-20 md:w-auto w-[calc(100vw-2rem)] space-y-3 bg-card/95 backdrop-blur-sm p-4 rounded-lg border shadow-lg">
           <div className="flex items-center gap-2">

@@ -18,6 +18,29 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.7",
+  date: "2025-01-20",
+  features: [],
+  improvements: [
+    "Simplified UI with floating controls for cleaner graph view",
+    "Better mobile responsiveness for graph view with optimized layouts"
+  ],
+  fixes: [
+    "Removed graph hover tooltip crashes - now using stable canvas labels",
+    "Removed duplicate graph on entity detail page",
+    "Graph controls now hidden in entity-specific graph view",
+    "Full viewport layout with no header/footer overlap"
+  ],
+  docs: [],
+  refactor: [
+    "Simplified GraphTooltip to return null (canvas-only labels)",
+    "Enhanced canvas label rendering with type badges and backgrounds",
+    "Conditional rendering of graph controls based on mode"
+  ],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.6",
   date: "2025-01-19",
   features: [],
