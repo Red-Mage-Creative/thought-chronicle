@@ -18,6 +18,19 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.19",
+  date: "2025-10-20",
+  features: [],
+  improvements: [
+    "Increased default graph zoom for better node framing (1.5 → 2.0)"
+  ],
+  fixes: [],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.18",
   date: "2025-10-20",
   features: [

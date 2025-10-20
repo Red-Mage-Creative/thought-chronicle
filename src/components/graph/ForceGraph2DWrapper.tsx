@@ -246,7 +246,7 @@ export const ForceGraph2DWrapper = ({
 
     const timer = setTimeout(() => {
       graphRef.current.centerAt(0, 0, 1000);
-      graphRef.current.zoom(1.5, 1000);
+      graphRef.current.zoom(2.0, 1000);
       hasCenteredRef.current = true;
     }, 100);
 
