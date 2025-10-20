@@ -29,6 +29,7 @@ declare module 'react-force-graph-2d' {
     onNodeClick?: (node: any, event: MouseEvent) => void;
     onNodeHover?: (node: any | null, previousNode: any | null) => void;
     onLinkClick?: (link: any, event: MouseEvent) => void;
+    onLinkHover?: (link: any | null, previousLink: any | null) => void;
     cooldownTicks?: number;
     d3AlphaDecay?: number;
     d3VelocityDecay?: number;

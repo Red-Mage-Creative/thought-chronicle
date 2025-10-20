@@ -16,6 +16,7 @@ import {
 import { generateSampleCampaignData } from '@/utils/graphSampleData';
 import { GraphControlPanel, GraphFilters } from './GraphControlPanel';
 import { GraphTooltip } from './GraphTooltip';
+import { GraphLinkTooltip } from './GraphLinkTooltip';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -62,6 +63,11 @@ export const ForceGraph2DWrapper = ({
   
   // Interactivity state
   const [tooltipData, setTooltipData] = useState<{node: GraphNode, x: number, y: number} | null>(null);
+  const [linkTooltipData, setLinkTooltipData] = useState<{
+    link: any;
+    x: number;
+    y: number;
+  } | null>(null);
   const [highlightedNodes, setHighlightedNodes] = useState<Set<string>>(new Set());
 
   // Use sample data if requested or if no real data exists
@@ -316,6 +322,33 @@ export const ForceGraph2DWrapper = ({
     }
   }, []);
 
+  const handleLinkHover = useCallback((link: any) => {
+    if (link) {
+      document.body.style.cursor = 'pointer';
+      
+      // Calculate midpoint of link for tooltip position
+      if (graphRef.current) {
+        try {
+          const sourceNode = graphData.nodes.find(n => n.id === (typeof link.source === 'object' ? link.source.id : link.source));
+          const targetNode = graphData.nodes.find(n => n.id === (typeof link.target === 'object' ? link.target.id : link.target));
+          
+          if (sourceNode && targetNode) {
+            const midX = (sourceNode.x + targetNode.x) / 2;
+            const midY = (sourceNode.y + targetNode.y) / 2;
+            const coords = graphRef.current.graph2ScreenCoords(midX, midY);
+            setLinkTooltipData({ link, x: coords.x, y: coords.y });
+          }
+        } catch (err) {
+          console.error('Link tooltip positioning error:', err);
+          setLinkTooltipData(null);
+        }
+      }
+    } else {
+      document.body.style.cursor = 'default';
+      setLinkTooltipData(null);
+    }
+  }, [graphData.nodes]);
+
   const handleZoomIn = useCallback(() => {
     if (graphRef.current) {
       const currentZoom = graphRef.current.zoom();
@@ -432,7 +465,7 @@ export const ForceGraph2DWrapper = ({
         }}
         linkDirectionalArrowLength={(link: any) => {
           const type = link.data?.relationshipType;
-          if (type === 'parent') return 6;
+          if (type === 'parent') return 10;
           return 0;
         }}
         linkDirectionalArrowRelPos={1}
@@ -444,6 +477,7 @@ export const ForceGraph2DWrapper = ({
         linkDirectionalParticleSpeed={0.005}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}
+        onLinkHover={handleLinkHover}
         cooldownTicks={safeMode ? 0 : 100}
         d3AlphaDecay={safeMode ? 1 : 0.0228}
         d3VelocityDecay={safeMode ? 1 : 0.4}
@@ -474,6 +508,7 @@ export const ForceGraph2DWrapper = ({
       )}
       
       <GraphTooltip node={tooltipData?.node || null} position={tooltipData} />
+      <GraphLinkTooltip link={linkTooltipData?.link || null} position={linkTooltipData} />
     </div>
   );
 };

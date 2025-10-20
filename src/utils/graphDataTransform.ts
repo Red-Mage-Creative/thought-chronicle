@@ -186,8 +186,8 @@ export const transformToGraphData = (
           if (!visitedEdges.has(edgeId)) {
             edges.push({
               id: edgeId,
-              source: namespacedParentId,
-              target: namespacedEntityId,
+              source: namespacedEntityId,
+              target: namespacedParentId,
               label: 'parent',
               data: { type: 'parent', relationshipType: 'parent' }
             });

@@ -18,6 +18,23 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.18",
+  date: "2025-10-20",
+  features: [
+    "Parent-child arrows now point from child to parent (showing dependency)",
+    "Added hover tooltips for relationships to describe connection types"
+  ],
+  improvements: [
+    "Increased arrow size for better visibility (6 → 10)",
+    "Relationship visualization now clearer and more intuitive"
+  ],
+  fixes: [],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.17",
   date: "2025-10-20",
   features: [
