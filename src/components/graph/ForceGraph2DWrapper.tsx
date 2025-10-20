@@ -409,10 +409,33 @@ export const ForceGraph2DWrapper = ({
             // Add type badge
             if (node.data?.type === 'entity' && node.data?.entityType) {
               sublabelText = node.data.entityType;
-            } else if (node.data?.type === 'thought' && node.data?.originalData?.timestamp) {
-              const thought = node.data.originalData as LocalThought;
-              labelText = format(thought.timestamp, 'MMM d, yyyy');
-              sublabelText = 'Thought';
+            } else if (node.data?.type === 'thought' && node.data?.originalData) {
+              try {
+                const thought = node.data.originalData as LocalThought;
+                const timestamp = thought.timestamp;
+                
+                // Validate timestamp exists and is a valid date
+                if (timestamp) {
+                  const dateObj = new Date(timestamp);
+                  if (!isNaN(dateObj.getTime())) {
+                    labelText = format(dateObj, 'MMM d, yyyy');
+                    sublabelText = 'Thought';
+                  } else {
+                    // Invalid date string
+                    labelText = node.label || 'Thought';
+                    sublabelText = 'Invalid Date';
+                  }
+                } else {
+                  // No timestamp
+                  labelText = node.label || 'Thought';
+                  sublabelText = 'No Date';
+                }
+              } catch (err) {
+                // Format error or other unexpected issue
+                console.error('Error formatting thought timestamp:', err, node);
+                labelText = node.label || 'Thought';
+                sublabelText = 'Format Error';
+              }
             }
             
             // Draw background for readability

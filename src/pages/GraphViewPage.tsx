@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Network, Settings, Sparkles, ArrowLeft } from "lucide-react";
+import { Network, Settings, Sparkles } from "lucide-react";
 import { GraphErrorBoundary } from "@/components/graph/GraphErrorBoundary";
 
 const ForceGraph2DWrapper = lazy(() =>
@@ -86,27 +86,7 @@ export default function GraphViewPage() {
   }
 
   return (
-    <div className="relative w-full" style={{ height: 'calc(100vh - 80px - 200px)' }}>
-      {/* Floating exit button - all screen sizes */}
-      <Button 
-        variant="ghost" 
-        size="sm"
-        className="absolute top-4 left-4 z-50 bg-background/95 backdrop-blur shadow-lg"
-        onClick={() => navigate('/entities')}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        <span className="hidden sm:inline">Exit</span>
-      </Button>
-      
-      {/* Campaign name badge - desktop only */}
-      {currentCampaign && (
-        <div className="hidden md:block absolute top-4 left-24 z-50">
-          <Badge variant="outline" className="bg-background/95 backdrop-blur">
-            {currentCampaign.name}
-          </Badge>
-        </div>
-      )}
-      
+    <div className="relative w-full" style={{ height: 'calc(100vh - var(--header-height, 80px) - var(--footer-height, 200px))' }}>
       {/* Graph fills container */}
       <div className="w-full h-full">
         {/* Graph Settings Panel */}

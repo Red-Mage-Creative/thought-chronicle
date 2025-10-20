@@ -18,6 +18,22 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.9",
+  date: "2025-10-20",
+  features: [],
+  improvements: [
+    "Removed redundant exit button and campaign badge from graph view (header provides navigation)",
+    "Added robust error handling for thought timestamp formatting with helpful fallback labels"
+  ],
+  fixes: [
+    "Fixed graph hover crash when thoughts have invalid or missing timestamps"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.8",
   date: "2025-01-20",
   features: [],
