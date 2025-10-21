@@ -18,6 +18,22 @@ interface ChangelogEntry {
 }
 
 const changelog: ChangelogEntry[] = [{
+  version: "1.6.20",
+  date: "2025-10-21",
+  features: [],
+  improvements: [
+    "Simplified thought connection rendering - removed animated particles for cleaner graph visualization"
+  ],
+  fixes: [
+    "Corrected legend colors to match actual graph node colors (11 entity types)",
+    "Fixed color inconsistency between legend, graph nodes, and entity badges"
+  ],
+  docs: [],
+  refactor: [],
+  tests: [],
+  chores: [],
+  maintenance: []
+}, {
   version: "1.6.19",
   date: "2025-10-20",
   features: [],

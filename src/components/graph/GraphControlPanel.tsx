@@ -93,16 +93,17 @@ export const GraphControlPanel = ({
   };
 
   const colorMap: Record<string, string> = {
-    'pc': '#3b82f6',
-    'npc': '#a855f7',
-    'race': '#f97316',
-    'religion': '#ec4899',
-    'quest': '#10b981',
-    'enemy': '#ef4444',
-    'location': '#06b6d4',
-    'organization': '#6366f1',
-    'item': '#eab308',
-    'plot-thread': '#d946ef'
+    'pc': '#059669',        // Green (matches graph nodes)
+    'npc': '#3b82f6',       // Blue (matches graph nodes)
+    'race': '#0d9488',      // Teal (matches graph nodes)
+    'religion': '#d97706',  // Amber (matches graph nodes)
+    'quest': '#4f46e5',     // Indigo (matches graph nodes)
+    'enemy': '#dc2626',     // Red (matches graph nodes)
+    'location': '#7c3aed',  // Purple (matches graph nodes)
+    'organization': '#e11d48', // Rose (matches graph nodes)
+    'item': '#eab308',      // Yellow (matches graph nodes)
+    'plot-thread': '#8b5cf6', // Violet (matches graph nodes)
+    'uncategorized': '#ea580c' // Orange (matches graph nodes)
   };
 
   return (

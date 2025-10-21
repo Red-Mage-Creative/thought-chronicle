@@ -469,12 +469,7 @@ export const ForceGraph2DWrapper = ({
           return 0;
         }}
         linkDirectionalArrowRelPos={1}
-        linkDirectionalParticles={(link: any) => {
-          const type = link.data?.relationshipType;
-          if (type === 'mention') return 2;
-          return 0;
-        }}
-        linkDirectionalParticleSpeed={0.005}
+        linkDirectionalParticles={0}
         onNodeClick={handleNodeClick}
         onNodeHover={handleNodeHover}
         onLinkHover={handleLinkHover}
